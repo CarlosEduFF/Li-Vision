@@ -1,0 +1,24 @@
+# config.yaml
+
+app:
+  camera_index: 0
+  window_name: "Li-Vision"
+
+pipeline:
+  model_path: "hand_landmarker.task"
+  num_hands: 1
+
+detection:
+  mode: "rules"     # rules | ml
+
+rules:
+  enabled:
+    - A
+    - B
+    - C
+    - D
+    - E
+
+ml:
+  model_path: "models/gesture_rf.joblib"
+  confidence_threshold: 0.75
