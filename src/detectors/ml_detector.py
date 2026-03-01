@@ -106,3 +106,23 @@ class MLGestureDetector:
         confidence = probs[idx]
 
         return label, float(confidence)
+    
+# ======================================================
+# ADAPTER PARA ARQUITETURA DO PROJETO
+# ======================================================
+
+class MLDetector(BaseDetector):
+    """
+    Adapter que integra o modelo ML
+    ao sistema de detectors do Li-Vision.
+    """
+
+    def __init__(self, model_path: str):
+        self.model = MLGestureDetector(model_path)
+
+    def detect(self, landmarks):
+        if not landmarks:
+            return None, 0.0
+
+        label, confidence = self.model.predict_with_confidence(landmarks)
+        return label, confidence

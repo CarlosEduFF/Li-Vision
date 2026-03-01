@@ -1,15 +1,13 @@
-# config.yaml
-
 app:
-  camera_index: 0
-  window_name: "Li-Vision"
+  camera_index: 0          # Índice da câmera usada pelo OpenCV
+  window_name: "Li-Vision" # Nome da janela que mostrará a imagem
 
 pipeline:
-  model_path: "hand_landmarker.task"
-  num_hands: 1
+  model_path: "hand_landmarker.task" # Caminho para o modelo de detecção de mãos
+  num_hands: 1                       # Número máximo de mãos a detectar
 
 detection:
-  mode: "rules"     # rules | ml
+  mode: "rules"       # Define o modo de detecção: 'rules' (baseado em regras) ou 'ml' (Machine Learning)
 
 rules:
   enabled:
@@ -17,8 +15,8 @@ rules:
     - B
     - C
     - D
-    - E
+    - E               # Lista de detectores de regras habilitados
 
 ml:
-  model_path: "models/gesture_rf.joblib"
-  confidence_threshold: 0.75
+  model_path: "models/gesture_rf.joblib" # Caminho para o modelo ML, se o modo for 'ml'
+  confidence_threshold: 0.75             # Threshold mínimo de confiança para detecção

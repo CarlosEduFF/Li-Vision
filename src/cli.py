@@ -1,5 +1,5 @@
 """
-Li-Vision CLI (Command Line Interface)
+
 
 Este arquivo é o ponto de entrada da aplicação.
 
@@ -20,17 +20,12 @@ Ele apenas orquestra a inicialização do sistema.
 import argparse
 import cv2
 
-# Pipeline responsável por detectar mãos usando MediaPipe
-from pipeline import HandPipeline
 
-# Loader responsável por ler config.yaml
-from core.config_loader import Config
 
-# Factory que cria detectores com base na configuração
-from recognition.detector_factory import create_detectors
-
-# Manager que executa múltiplos detectores
-from recognition.detector_manager import DetectorManager
+from src.pipeline import HandPipeline
+from src.core.config_loader import Config
+from src.recognition.detector_factory import create_detectors
+from src.recognition.detector_manager import DetectorManager
 
 
 # ==========================================================
