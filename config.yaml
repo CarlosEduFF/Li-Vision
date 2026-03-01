@@ -3,7 +3,7 @@ app:
   window_name: "Li-Vision" # Nome da janela que mostrará a imagem
 
 pipeline:
-  model_path: "hand_landmarker.task" # Caminho para o modelo de detecção de mãos
+  model_path: "src/models/hand_landmarker.task" # Caminho para o modelo de detecção de mãos
   num_hands: 1                       # Número máximo de mãos a detectar
 
 detection:
