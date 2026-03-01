@@ -90,6 +90,7 @@ def run_app(config_path):
 
             # Espelha imagem para experiência natural do usuário
             frame = cv2.flip(frame, 1)
+            h, w, _ = frame.shape
 
             # --------------------------------------------------
             # PROCESSAMENTO DA PIPELINE
@@ -98,6 +99,15 @@ def run_app(config_path):
             hands = pipeline.process_frame(frame, ts)
             ts += 1
 
+            # --------------------------
+            # Desenho dos landmarks verdes
+            # --------------------------
+            for hand in hands:  # hand = lista de 21 landmarks
+                for lm in hand:
+                    # lm.x e lm.y geralmente estão normalizados [0,1], converte para pixels
+                    cx, cy = int(lm.x * w), int(lm.y * h)
+                    cv2.circle(frame, (cx, cy), 4, (0, 255, 0), -1)  # verde
+            
             # --------------------------------------------------
             # RECONHECIMENTO DE GESTO
             # --------------------------------------------------
