@@ -16,6 +16,8 @@ from pathlib import Path
 import numpy as np
 import joblib
 
+from src.detectors.base import BaseDetector
+
 
 class MLGestureDetector:
     """
