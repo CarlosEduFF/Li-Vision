@@ -13,3 +13,8 @@ Extensibilidade — adicionar nova letra = 1) criar detector heurístico ou 2) c
 
 
 
+
+# python -m src.cli
+
+# B não funciona da mão esquerda
+# Modularizar machine learning

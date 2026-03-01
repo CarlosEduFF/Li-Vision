@@ -4,7 +4,7 @@ app:
 
 pipeline:
   model_path: "src/models/hand_landmarker.task" # Caminho para o modelo de detecção de mãos
-  num_hands: 1                       # Número máximo de mãos a detectar
+  num_hands: 2                       # Número máximo de mãos a detectar
 
 detection:
   mode: "rules"       # Define o modo de detecção: 'rules' (baseado em regras) ou 'ml' (Machine Learning)
