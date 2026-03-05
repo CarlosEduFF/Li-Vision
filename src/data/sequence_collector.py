@@ -73,7 +73,7 @@ def main(config):
 
                 if hands:
 
-                    vec = landmarks_to_vector(hands[0])
+                    vec = landmarks_to_vector(hands)
 
                     if recording:
 
