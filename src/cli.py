@@ -36,88 +36,75 @@ def run_app(config_path):
     Inicializa e executa o sistema Li-Vision.
 
     Fluxo geral:
-        Config → Detectores → Pipeline → Loop de vídeo → Reconhecimento
-
-    Parameters
-    ----------
-    config_path : str
-        Caminho do arquivo YAML de configuração.
+        Config → Modo de execução → Pipeline adequado
     """
 
     # ------------------------------------------------------
-    # 1. Carrega configuração da aplicação
+    # 1. Carrega configuração
     # ------------------------------------------------------
-    # A classe Config encapsula leitura YAML e acesso por chave.
     config = Config(config_path)
 
-    # ------------------------------------------------------
-    # 2. Cria detectores dinamicamente
-    # ------------------------------------------------------
-    # DetectorFactory decide quais detectores serão usados
-    # (rule-based ou ML) baseado no config.yaml.
-    detectors = create_detectors(config)
+    run_mode = config["app"]["run_mode"]
 
-    # DetectorManager coordena múltiplos detectores
-    # e decide qual resultado final retornar.
+    # ------------------------------------------------------
+    # 2. MODO COLETA DE DADOS (dataset para ML dinâmico)
+    # ------------------------------------------------------
+    if run_mode == "collect":
+        from src.data.sequence_collector import main as run_collector
+        run_collector(config)
+        return
+
+    # ------------------------------------------------------
+    # 3. MODO TREINAMENTO
+    # ------------------------------------------------------
+    if run_mode == "train":
+        from src.training.sequence_trainer import main as run_trainer
+        run_trainer()
+        return
+
+    # ------------------------------------------------------
+    # 4. MODO INFERÊNCIA (RECONHECIMENTO EM TEMPO REAL)
+    # ------------------------------------------------------
+    detectors = create_detectors(config)
     manager = DetectorManager(detectors)
 
-    # ------------------------------------------------------
-    # 3. Inicializa webcam
-    # ------------------------------------------------------
     cap = cv2.VideoCapture(config["app"]["camera_index"])
 
-    # ------------------------------------------------------
-    # 4. Inicializa pipeline de visão computacional
-    # ------------------------------------------------------
-    # Context manager garante liberação correta dos recursos.
     with HandPipeline(
         model_path=config["pipeline"]["model_path"],
         num_hands=config["pipeline"]["num_hands"],
     ) as pipeline:
 
-        # Timestamp necessário pelo MediaPipe VIDEO mode
         ts = 0
 
-        # ==================================================
-        # LOOP PRINCIPAL (REAL-TIME)
-        # ==================================================
         while True:
 
-            # Captura frame da webcam
             ret, frame = cap.read()
             if not ret:
                 break
 
-            # Espelha imagem para experiência natural do usuário
             frame = cv2.flip(frame, 1)
             h, w, _ = frame.shape
 
-            # --------------------------------------------------
-            # PROCESSAMENTO DA PIPELINE
-            # --------------------------------------------------
-            # Retorna lista de mãos detectadas (landmarks)
+            # --------------------------
+            # Processa MediaPipe
+            # --------------------------
             hands = pipeline.process_frame(frame, ts)
             ts += 1
 
             # --------------------------
-            # Desenho dos landmarks verdes
+            # Desenha landmarks
             # --------------------------
-            for hand in hands:  # hand = lista de 21 landmarks
+            for hand in hands:
                 for lm in hand:
-                    # lm.x e lm.y geralmente estão normalizados [0,1], converte para pixels
                     cx, cy = int(lm.x * w), int(lm.y * h)
-                    cv2.circle(frame, (cx, cy), 4, (0, 255, 0), -1)  # verde
-            
-            # --------------------------------------------------
-            # RECONHECIMENTO DE GESTO
-            # --------------------------------------------------
-            # DetectorManager executa todos detectores
-            # e retorna o melhor resultado encontrado.
+                    cv2.circle(frame, (cx, cy), 4, (0, 255, 0), -1)
+
+            # --------------------------
+            # Reconhecimento
+            # --------------------------
             label, score = manager.detect(hands)
 
-            # --------------------------------------------------
-            # DESENHO DO RESULTADO NA TELA
-            # --------------------------------------------------
             if label:
                 cv2.putText(
                     frame,
@@ -129,20 +116,16 @@ def run_app(config_path):
                     3,
                 )
 
-            # Mostra janela da aplicação
             cv2.imshow(config["app"]["window_name"], frame)
 
-            # ESC encerra aplicação
             if cv2.waitKey(1) & 0xFF == 27:
                 break
 
     # ------------------------------------------------------
     # FINALIZAÇÃO
     # ------------------------------------------------------
-    # Libera câmera e fecha janelas OpenCV
     cap.release()
     cv2.destroyAllWindows()
-
 
 # ==========================================================
 # CLI ENTRYPOINT

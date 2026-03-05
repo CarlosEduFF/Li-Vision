@@ -1,4 +1,6 @@
-# Importa os detectores baseados em regras
+# ==========================================================
+# IMPORTS - Rule Based
+# ==========================================================
 from src.detectors import (
     RuleADetector,
     RuleBDetector,
@@ -7,12 +9,15 @@ from src.detectors import (
     RuleEDetector,
 )
 
-# Importa o detector baseado em Machine Learning
+# ==========================================================
+# IMPORT - ML Estático
+# ==========================================================
 from src.detectors.ml_detector import MLDetector
 
 
-# Mapeia cada letra para a classe de detector correspondente
-# Isso permite criar instâncias dinamicamente usando as letras como chave
+# ==========================================================
+# MAPA DE REGRAS
+# ==========================================================
 RULE_MAP = {
     "A": RuleADetector,
     "B": RuleBDetector,
@@ -22,38 +27,49 @@ RULE_MAP = {
 }
 
 
+# ==========================================================
+# FACTORY PRINCIPAL
+# ==========================================================
 def create_detectors(config):
     """
-    Cria uma lista de detectores de acordo com a configuração fornecida.
-
-    Parameters
-    ----------
-    config : dict
-        Dicionário de configuração contendo:
-        - 'detection': modo de detecção ('rules' ou 'ml')
-        - 'rules': quais detectores baseados em regras estão habilitados
-        - 'ml': caminho do modelo de ML, se o modo for 'ml'
-
-    Returns
-    -------
-    list
-        Lista de instâncias de detectores ativados
+    Cria detectores conforme o modo definido no config.yaml.
     """
 
-    # Lê o modo de detecção da configuração
     mode = config["detection"]["mode"]
 
-    # Modo baseado em regras
+    # ------------------------------------------------------
+    # 1) RULE BASED
+    # ------------------------------------------------------
     if mode == "rules":
-        enabled = config["rules"]["enabled"]  # Lista de letras habilitadas (ex: ["A","C"])
-        # Cria uma instância de cada detector habilitado usando o mapa RULE_MAP
+        enabled = config["rules"]["enabled"]
         return [RULE_MAP[l]() for l in enabled]
 
-    # Modo baseado em Machine Learning
+    # ------------------------------------------------------
+    # 2) ML ESTÁTICO (63 features)
+    # ------------------------------------------------------
     elif mode == "ml":
-        model_path = config["ml"]["model_path"]  # Caminho para o arquivo do modelo ML
-        return [MLDetector(model_path)]  # Retorna uma lista com o detector ML
+        model_path = config["ml"]["model_path"]
+        return [MLDetector(model_path)]
 
-    # Caso o modo seja desconhecido, lança erro
+    # ------------------------------------------------------
+    # 3) ML DINÂMICO (SEQUÊNCIA TEMPORAL)
+    # ------------------------------------------------------
+    elif mode == "dynamic_ml":
+
+        from src.recognition.sequence_gesture_detector import (
+            SequenceGestureDetector,
+        )
+
+        return [
+            SequenceGestureDetector(
+                model_path=config["dynamic_ml"]["model_path"],
+                window_size=config["dynamic_ml"]["window_size"],
+                threshold=config["dynamic_ml"]["confidence_threshold"],
+            )
+        ]
+
+    # ------------------------------------------------------
+    # ERRO
+    # ------------------------------------------------------
     else:
         raise ValueError(f"Modo desconhecido: {mode}")

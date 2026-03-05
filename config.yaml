@@ -1,13 +1,15 @@
 app:
   camera_index: 0          # Índice da câmera usada pelo OpenCV
   window_name: "Li-Vision" # Nome da janela que mostrará a imagem
+  run_mode: "collect"    # collect | train | inference
 
 pipeline:
   model_path: "src/models/hand_landmarker.task" # Caminho para o modelo de detecção de mãos
   num_hands: 2                       # Número máximo de mãos a detectar
 
+# Define o modo de detecção: 'rules' (baseado em regras) ou 'ml' (Machine Learning)
 detection:
-  mode: "rules"       # Define o modo de detecção: 'rules' (baseado em regras) ou 'ml' (Machine Learning)
+  mode: "dynamic_ml"   # rules | ml | dynamic_ml
 
 rules:
   enabled:
@@ -20,3 +22,11 @@ rules:
 ml:
   model_path: "models/gesture_rf.joblib" # Caminho para o modelo ML, se o modo for 'ml'
   confidence_threshold: 0.75             # Threshold mínimo de confiança para detecção
+
+dynamic_ml:
+  model_path: "models/gesture_dynamic.joblib"
+  confidence_threshold: 0.75
+  window_size: 15
+
+
+
