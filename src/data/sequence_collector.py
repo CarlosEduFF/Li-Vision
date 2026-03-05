@@ -12,21 +12,34 @@ OUT_CSV = "src/data/collected/sequences.csv"
 WINDOW_SIZE = 15
 
 
-def landmarks_to_vector(hand):
-    """
-    Converte 21 landmarks em vetor normalizado (63 features).
-    """
-    base_x = hand[0].x
-    base_y = hand[0].y
+def landmarks_to_vector(hands):
 
     vec = []
-    for lm in hand:
-        vec.append(lm.x - base_x)
-        vec.append(lm.y - base_y)
-        vec.append(getattr(lm, "z", 0.0))
+
+    # garante que hands é lista de mãos
+    if len(hands) > 0 and hasattr(hands[0], "__len__") and not hasattr(hands[0], "x"):
+        hands_list = hands
+    else:
+        hands_list = [hands]
+
+    for i in range(2):
+
+        if i < len(hands_list):
+
+            hand = hands_list[i]
+
+            base_x = hand[0].x
+            base_y = hand[0].y
+
+            for lm in hand:
+                vec.append(lm.x - base_x)
+                vec.append(lm.y - base_y)
+                vec.append(getattr(lm, "z", 0.0))
+
+        else:
+            vec.extend([0.0] * 63)
 
     return vec
-
 
 def main(config):
 
@@ -60,11 +73,19 @@ def main(config):
         print("SPACE = iniciar gravação")
         print("ESC = sair")
         try:
+            frame_count = 0
+            FRAME_STEP = 2
+
             while True:
 
                 ret, frame = cap.read()
                 if not ret:
                     break
+
+                frame_count += 1
+
+                if frame_count % FRAME_STEP != 0:
+                    continue
 
                 frame = cv2.flip(frame, 1)
 
