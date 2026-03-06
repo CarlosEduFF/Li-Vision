@@ -1,32 +1,57 @@
 app:
-  camera_index: 0          # Índice da câmera usada pelo OpenCV
-  window_name: "Li-Vision" # Nome da janela que mostrará a imagem
-  run_mode: "collect"    # collect | train | inference
+  camera_index: 0
+  window_name: "Li-Vision"
+  run_mode: "inference"      # collect | train | inference
 
 pipeline:
-  model_path: "src/models/hand_landmarker.task" # Caminho para o modelo de detecção de mãos
-  num_hands: 2                       # Número máximo de mãos a detectar
+  model_path: "src/models/hand_landmarker.task"
+  num_hands: 2
 
-# Define o modo de detecção: 'rules' (baseado em regras) ou 'ml' (Machine Learning)
+# ---------------------------------------------------
+# CONFIGURAÇÃO DE DETECÇÃO
+# ---------------------------------------------------
 detection:
-  mode: "dynamic_ml"   # rules | ml | dynamic_ml
+  mode: "hybrid"             # rules | ml | dynamic_ml | hybrid
 
+  # parâmetros globais do DetectorManager
+  min_score: 0.7
+  stability_frames: 3
+  cooldown_frames: 10
+
+
+# ---------------------------------------------------
+# DETECTORES BASEADOS EM REGRAS
+# ---------------------------------------------------
 rules:
-  enabled:
+  enabled: true
+
+  letters:
     - A
     - B
     - C
     - D
-    - E               # Lista de detectores de regras habilitados
+    - E
 
+
+# ---------------------------------------------------
+# ML ESTÁTICO (gestos sem movimento)
+# ---------------------------------------------------
 ml:
-  model_path: "models/gesture_rf.joblib" # Caminho para o modelo ML, se o modo for 'ml'
-  confidence_threshold: 0.75             # Threshold mínimo de confiança para detecção
+  enabled: true
 
-dynamic_ml:
-  model_path: "models/gesture_dynamic.joblib"
+  model_path: "models/gesture_rf.joblib"
+
   confidence_threshold: 0.75
+
+
+# ---------------------------------------------------
+# ML DINÂMICO (gestos com movimento)
+# ---------------------------------------------------
+dynamic_ml:
+  enabled: true
+
+  model_path: "models/gesture_dynamic.joblib"
+
+  confidence_threshold: 0.75
+
   window_size: 15
-
-
-

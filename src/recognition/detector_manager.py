@@ -1,72 +1,94 @@
+from collections import deque
+
+
 class DetectorManager:
     """
-    Orquestra múltiplos detectores de mãos.
+    Orquestra múltiplos detectores de gestos.
 
-    Responsabilidades:
-    - Receber mãos detectadas pela pipeline
-    - Executar todos detectores registrados
-    - Escolher o resultado com maior confiança
+    Responsabilidades
+    -----------------
+    - Executar detectores registrados
+    - Aplicar threshold de confiança
+    - Estabilizar detecções no tempo
     """
 
-    def __init__(self, detectors, min_score=0.6):
-        """
-        Inicializa o gerenciador de detectores.
+    def __init__(
+        self,
+        detectors,
+        min_score=0.6,
+        stability_frames=3,
+        cooldown_frames=10,
+    ):
 
-        Parameters
-        ----------
-        detectors : list
-            Lista de objetos detectores, cada um com método `detect(landmarks)`
-        min_score : float
-            Score mínimo para considerar uma detecção válida
-        """
-        self.detectors = detectors  # Armazena os detectores passados
-        self.min_score = min_score  # Score mínimo para aceitar a detecção
+        self.detectors = detectors
+        self.min_score = min_score
+
+        # estabilização temporal
+        self.history = deque(maxlen=stability_frames)
+
+        # cooldown
+        self.cooldown_frames = cooldown_frames
+        self.cooldown_counter = 0
 
     def detect(self, hands):
         """
-        Executa todos os detectores em cada mão detectada e retorna
-        o label com maior confiança.
-
-        Parameters
-        ----------
-        hands : list
-            Lista de mãos detectadas, onde cada mão é representada
-            por 21 landmarks (coordenadas de pontos-chave)
-
-        Returns
-        -------
-        (label, score) : tuple
-            label : string ou None -> nome do gesto detectado
-            score : float -> confiança da detecção
+        Executa detectores e retorna gesto estabilizado.
         """
 
-        # Se não houver mãos detectadas, retorna imediatamente
-        if not hands:
+        # -------------------------------------------
+        # Cooldown ativo
+        # -------------------------------------------
+        if self.cooldown_counter > 0:
+            self.cooldown_counter -= 1
             return None, 0.0
 
-        # Inicializa variáveis para armazenar a melhor detecção
+        if not hands:
+            self.history.clear()
+            return None, 0.0
+
         best_label = None
         best_score = 0.0
 
-        # Percorre cada mão detectada
-        for landmarks in hands:
+        # -------------------------------------------
+        # Executa todos detectores
+        # -------------------------------------------
+        for det in self.detectors:
 
-            # Segurança: ignora mãos inválidas ou incompletas (<21 pontos)
-            if not landmarks or len(landmarks) < 21:
-                continue
+            try:
+                # Detectores dinâmicos usam sequência de mãos
+                label, score = det.detect(hands)
 
-            # Para cada mão, roda todos os detectores registrados
-            for det in self.detectors:
-                label, score = det.detect(landmarks)  # Detecta o gesto na mão atual
+            except Exception:
+                # Detectores estáticos usam apenas uma mão
+                label, score = det.detect(hands[0])
 
-                # Atualiza a melhor detecção se a confiança for maior
-                if label and score > best_score:
-                    best_label = label
-                    best_score = score
+            if label and score > best_score:
+                best_label = label
+                best_score = score
 
-        # Aplica o threshold mínimo: só retorna se a detecção for confiável
-        if best_score >= self.min_score:
-            return best_label, best_score
+        # -------------------------------------------
+        # Threshold mínimo
+        # -------------------------------------------
+        if best_score < self.min_score:
+            self.history.clear()
+            return None, 0.0
 
-        # Se nenhuma detecção ultrapassou o threshold, retorna None
+        # -------------------------------------------
+        # Estabilização temporal
+        # -------------------------------------------
+        self.history.append(best_label)
+
+        if len(self.history) < self.history.maxlen:
+            return None, 0.0
+
+        if len(set(self.history)) == 1:
+
+            label = self.history[0]
+
+            # ativa cooldown
+            self.cooldown_counter = self.cooldown_frames
+            self.history.clear()
+
+            return label, best_score
+
         return None, 0.0
