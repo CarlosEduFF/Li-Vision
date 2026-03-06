@@ -1,0 +1,69 @@
+site_name: Li-Vision Docs
+site_description: Documentação oficial do projeto Li Vision
+site_author: Carlos Eduardo
+site_url: https://seusite.com
+
+repo_name: li-vision
+repo_url: https://github.com/user/li-vision
+
+extra_css:
+  - stylesheets/extra.css
+
+theme:
+  name: material
+  language: pt-BR
+  logo: assets/Li-Vision (Logo-BackgroundOff).png
+  favicon: assets/Li-Vision (Logo-BackgroundOff).png
+
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+
+nav:
+  - Início: index.md
+  - Começando:
+      - Instalação: getting-started.md
+
+  - Arquitetura:
+      - Visão Geral: architecture/overview.md
+      - Pipeline: architecture/pipeline.md
+      - Estrutura de Pastas: architecture/folders.md
+
+  - Visão Computacional:
+      - MediaPipe: computer-vision/mediapipe.md
+      - Landmarks: computer-vision/landmarks.md
+      - Hand Landmarker: computer-vision/hand_landmarker.md
+
+  - Detectores:
+      - Introdução: detectors/overview.md
+      - Rule-Based: detectors/rule-based.md
+      - Machine Learning: detectors/ml-detector.md
+
+  - Configuração: configuration.md
+  - CLI: cli.md
+  - Desenvolvimento: development.md
+  - FAQ: faq.md
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - tables
+  - fenced_code
+  - codehilite
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.tabbed
+
+plugins:
+  - search
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/user
+
+copyright: Copyright © 2026 Carlos Eduardo
