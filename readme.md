@@ -448,12 +448,3 @@ Adicionar suporte para uma nova letra pode ser feito de duas formas:
 * Registrar o modelo no `ml_detector`
 
 ```
-
-Se quiser, também posso te passar **mais duas seções que deixam README de projeto de visão computacional muito mais profissional**, por exemplo:
-
-- **Arquitetura do sistema**
-- **Fluxo de dados do pipeline**
-- **Estrutura de diretórios comentada**
-
-Essas três partes deixam o projeto **nível portfólio forte no GitHub**.
-```
