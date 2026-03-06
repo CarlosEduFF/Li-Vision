@@ -41,7 +41,7 @@ ml:
 
   model_path: "models/static"
 
-  confidence_threshold: 0.75
+  confidence_threshold: 0.90
 
 
 # ---------------------------------------------------
@@ -52,6 +52,6 @@ dynamic_ml:
 
   model_path: "models/dynamic"
 
-  confidence_threshold: 0.75
+  confidence_threshold: 0.90
 
   window_size: 15

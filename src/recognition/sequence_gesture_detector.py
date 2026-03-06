@@ -2,13 +2,19 @@ import numpy as np
 import joblib
 from collections import deque
 
+
 class SequenceGestureDetector:
 
     def __init__(self, model_path, window_size, threshold):
+
         self.model = joblib.load(model_path)
-        self.window_size = window_size
+
+        # descobre automaticamente o tamanho esperado
+        expected_features = self.model.n_features_in_
+        self.window_size = expected_features // 63
+
         self.threshold = threshold
-        self.buffer = deque(maxlen=window_size)
+        self.buffer = deque(maxlen=self.window_size)
 
     def landmarks_to_vector(self, hand):
 
@@ -25,6 +31,7 @@ class SequenceGestureDetector:
         return vec
 
     def detect(self, hand):
+
         if not hand:
             self.buffer.clear()
             return None, 0.0
@@ -45,4 +52,5 @@ class SequenceGestureDetector:
             return None, 0.0
 
         label = self.model.classes_[idx]
+
         return label, score

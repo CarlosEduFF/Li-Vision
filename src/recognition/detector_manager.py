@@ -52,11 +52,14 @@ class DetectorManager:
         # -------------------------------------------
         # Executa todos detectores
         # -------------------------------------------
-        for det in self.detectors:
-
+        for hand in hands:
             try:
-                # Detectores dinâmicos usam sequência de mãos
-                label, score = det.detect(hands)
+                for det in self.detectors:
+                    label, score = det.detect(hand)
+
+                    if label and score > best_score:
+                        best_label = label
+                        best_score = score
 
             except Exception:
                 # Detectores estáticos usam apenas uma mão
