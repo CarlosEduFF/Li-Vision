@@ -71,7 +71,7 @@ src
 Clone o projeto:
 
 ```
-git clone https://github.com/seu-repositorio/li-vision
+git clone https://github.com/CarlosEduFF/Li-Vision
 cd li-vision
 ```
 

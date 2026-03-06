@@ -156,26 +156,35 @@ class MLDetector(BaseDetector):
     - Retorna (label, confidence) compatível com DetectorManager
     """
 
-    def __init__(self, model_path: str):
-        # Inicializa detector ML interno
+    def __init__(self, model_path: str, threshold: float = 0.7):
+        """
+        Parameters
+        ----------
+        model_path : str
+            Caminho para o modelo treinado
+        threshold : float
+            Confiança mínima para aceitar a predição
+        """
+
         self.model = MLGestureDetector(model_path)
+        self.threshold = threshold
 
     def detect(self, landmarks):
         """
         Implementa método detect() da interface BaseDetector.
-
-        Parameters
-        ----------
-        landmarks : list
-            Lista de 21 landmarks da mão
-
-        Returns
-        -------
-        tuple
-            (label, confidence)
         """
+
         if not landmarks:
             return None, 0.0
 
         label, confidence = self.model.predict_with_confidence(landmarks)
-        return label, confidence
+
+        # Caso modelo não retorne probabilidade
+        if confidence is None:
+            return label, 1.0 if label else 0.0
+
+        # Aplica threshold
+        if confidence < self.threshold:
+            return None, 0.0
+
+        return label, confidence            

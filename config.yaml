@@ -1,7 +1,7 @@
 app:
   camera_index: 0
   window_name: "Li-Vision"
-  run_mode: "train"      # collect | train | inference
+  run_mode: "inference"      # collect | train | inference
 
 pipeline:
   model_path: "src/models/hand_landmarker.task"
@@ -11,7 +11,7 @@ pipeline:
 # CONFIGURAÇÃO DE DETECÇÃO
 # ---------------------------------------------------
 detection:
-  mode: "dynamic_ml"             # rules | ml | dynamic_ml | hybrid
+  mode: "hybrid"             # rules | ml | dynamic_ml | hybrid
 
   # parâmetros globais do DetectorManager
   min_score: 0.7
@@ -39,6 +39,8 @@ rules:
 ml:
   enabled: true
 
+  model_path: "models/static"
+
   confidence_threshold: 0.75
 
 
@@ -47,6 +49,8 @@ ml:
 # ---------------------------------------------------
 dynamic_ml:
   enabled: true
+
+  model_path: "models/dynamic"
 
   confidence_threshold: 0.75
 

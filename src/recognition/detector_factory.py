@@ -1,6 +1,11 @@
 # ==========================================================
-# IMPORTS - Rule Based
+# IMPORTS
 # ==========================================================
+from pathlib import Path
+
+# ----------------------------------------------------------
+# Rule Based Detectors
+# ----------------------------------------------------------
 from src.detectors import (
     RuleADetector,
     RuleBDetector,
@@ -9,9 +14,9 @@ from src.detectors import (
     RuleEDetector,
 )
 
-# ==========================================================
-# IMPORT - ML Estático
-# ==========================================================
+# ----------------------------------------------------------
+# Static ML
+# ----------------------------------------------------------
 from src.detectors.ml_detector import MLDetector
 
 
@@ -25,6 +30,69 @@ RULE_MAP = {
     "D": RuleDDetector,
     "E": RuleEDetector,
 }
+
+
+# ==========================================================
+# CARREGAR MODELOS ESTÁTICOS
+# ==========================================================
+def load_static_models(config):
+
+    model_dir = Path(config["ml"]["model_path"])
+    threshold = config["ml"]["confidence_threshold"]
+
+    detectors = []
+
+    if not model_dir.exists():
+        print(f"[WARN] Pasta de modelos estáticos não encontrada: {model_dir}")
+        return detectors
+
+    for model_file in model_dir.glob("*.joblib"):
+
+        print(f"[STATIC] carregando modelo: {model_file.name}")
+
+        detectors.append(
+            MLDetector(
+                model_path=str(model_file),
+                threshold=threshold,
+            )
+        )
+
+    return detectors
+
+
+# ==========================================================
+# CARREGAR MODELOS DINÂMICOS
+# ==========================================================
+def load_dynamic_models(config):
+
+    from src.recognition.sequence_gesture_detector import (
+        SequenceGestureDetector,
+    )
+
+    model_dir = Path(config["dynamic_ml"]["model_path"])
+
+    threshold = config["dynamic_ml"]["confidence_threshold"]
+    window_size = config["dynamic_ml"]["window_size"]
+
+    detectors = []
+
+    if not model_dir.exists():
+        print(f"[WARN] Pasta de modelos dinâmicos não encontrada: {model_dir}")
+        return detectors
+
+    for model_file in model_dir.glob("*.joblib"):
+
+        print(f"[DYNAMIC] carregando modelo: {model_file.name}")
+
+        detectors.append(
+            SequenceGestureDetector(
+                model_path=str(model_file),
+                window_size=window_size,
+                threshold=threshold,
+            )
+        )
+
+    return detectors
 
 
 # ==========================================================
@@ -50,35 +118,30 @@ def create_detectors(config):
     # ------------------------------------------------------
     if mode == "hybrid":
 
-        # 1️⃣ Dynamic ML (prioridade maior)
-        from src.recognition.sequence_gesture_detector import (
-            SequenceGestureDetector,
-        )
+        # Dynamic ML
+        if config["dynamic_ml"]["enabled"]:
+            detectors.extend(load_dynamic_models(config))
 
-        detectors.append(
-            SequenceGestureDetector(
-                model_path=config["dynamic_ml"]["model_path"],
-                window_size=config["dynamic_ml"]["window_size"],
-                threshold=config["dynamic_ml"]["confidence_threshold"],
-            )
-        )
+        # Static ML
+        if config["ml"]["enabled"]:
+            detectors.extend(load_static_models(config))
 
-        # 2️⃣ Static ML
-        detectors.append(
-            MLDetector(
-                model_path=config["ml"]["model_path"],
-                threshold=config["ml"]["confidence_threshold"],
-            )
-        )
+        # Rules
+        if config["rules"]["enabled"]:
+            letters = config["rules"]["letters"]
 
-        # 3️⃣ Rule detectors
-        enabled = config["rules"]["enabled"]
+            for letter in letters:
 
-        for letter in enabled:
-            if letter in RULE_MAP:
-                detectors.append(RULE_MAP[letter]())
-            else:
-                print(f"[WARN] Detector para '{letter}' não existe")
+                if letter in RULE_MAP:
+
+                    print(f"[RULE] carregando detector: {letter}")
+
+                    detectors.append(
+                        RULE_MAP[letter]()
+                    )
+
+                else:
+                    print(f"[WARN] Detector para '{letter}' não existe")
 
         return detectors
 
@@ -87,44 +150,41 @@ def create_detectors(config):
     # ------------------------------------------------------
     elif mode == "rules":
 
-        enabled = config["rules"]["enabled"]
+        if config["rules"]["enabled"]:
 
-        for letter in enabled:
-            if letter in RULE_MAP:
-                detectors.append(RULE_MAP[letter]())
+            letters = config["rules"]["letters"]
+
+            for letter in letters:
+
+                if letter in RULE_MAP:
+
+                    detectors.append(
+                        RULE_MAP[letter]()
+                    )
 
         return detectors
 
     # ------------------------------------------------------
-    # ML ESTÁTICO
+    # STATIC ML
     # ------------------------------------------------------
     elif mode == "ml":
 
-        detectors.append(
-            MLDetector(
-                model_path=config["ml"]["model_path"],
-                threshold=config["ml"]["confidence_threshold"],
+        if config["ml"]["enabled"]:
+            detectors.extend(
+                load_static_models(config)
             )
-        )
 
         return detectors
 
     # ------------------------------------------------------
-    # ML DINÂMICO
+    # DYNAMIC ML
     # ------------------------------------------------------
     elif mode == "dynamic_ml":
 
-        from src.recognition.sequence_gesture_detector import (
-            SequenceGestureDetector,
-        )
-
-        detectors.append(
-            SequenceGestureDetector(
-                model_path=config["dynamic_ml"]["model_path"],
-                window_size=config["dynamic_ml"]["window_size"],
-                threshold=config["dynamic_ml"]["confidence_threshold"],
+        if config["dynamic_ml"]["enabled"]:
+            detectors.extend(
+                load_dynamic_models(config)
             )
-        )
 
         return detectors
 
