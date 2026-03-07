@@ -70,3 +70,5 @@ class AppState:
             self.config["detection"].update(detection_subcfg)
             # aplica reconstrução de detectores
             self.build_detectors()
+
+state = AppState("config.yaml")
