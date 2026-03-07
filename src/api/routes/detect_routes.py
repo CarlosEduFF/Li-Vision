@@ -7,14 +7,22 @@ router = APIRouter()
 
 service = DetectionService(pipeline, detector_manager)
 
+import traceback
+
 @router.post("/detect")
 async def detect(file: UploadFile = File(...)):
 
-    contents = await file.read()
+    try:
+        contents = await file.read()
+        label, score = service.detect(contents)
 
-    label, score = service.detect(contents)
+        return {
+            "gesture": label,
+            "confidence": score
+        }
 
-    return {
-        "gesture": label,
-        "confidence": score
-    }
+    except Exception as e:
+        return {
+            "error": str(e),
+            "trace": traceback.format_exc()
+        }
