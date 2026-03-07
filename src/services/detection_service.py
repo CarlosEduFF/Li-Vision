@@ -10,9 +10,11 @@ class DetectionService:
     def detect(self, image_bytes):
 
         npimg = np.frombuffer(image_bytes, np.uint8)
+
+        frame = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+
         if frame is None:
             raise ValueError("Image decode failed")
-        frame = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
 
         hands = self.pipeline.process_frame(frame, 0)
 
