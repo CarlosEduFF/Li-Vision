@@ -9,7 +9,7 @@ service = DetectionService(pipeline, detector_manager)
 
 import traceback
 
-@router.post("/detect")
+@router.post("/")
 async def detect(file: UploadFile = File(...)):
 
     try:
