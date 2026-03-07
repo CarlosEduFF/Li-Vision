@@ -6,6 +6,7 @@ class DetectionService:
     def __init__(self, pipeline, detector_manager):
         self.pipeline = pipeline
         self.manager = detector_manager
+        self.timestamp = 0   # contador para VIDEO mode
 
     def detect(self, image_bytes):
 
@@ -16,7 +17,13 @@ class DetectionService:
         if frame is None:
             raise ValueError("Image decode failed")
 
-        hands = self.pipeline.process_frame(frame, 0)
+        # incrementa timestamp a cada chamada
+        self.timestamp += 1
+
+        hands = self.pipeline.process_frame(
+            frame,
+            self.timestamp
+        )
 
         label, score = self.manager.detect(hands)
 
