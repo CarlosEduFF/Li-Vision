@@ -5,10 +5,11 @@ from collections import deque
 
 class SequenceGestureDetector:
 
-    def __init__(self, model_path, threshold):
+    def __init__(self, model_path, window_size, threshold):
 
         self.model = joblib.load(model_path)
-
+        expected_features = self.model.n_features_in_
+        self.window_size = expected_features // 63
         self.threshold = threshold
         self.buffer = deque(maxlen=self.window_size)
 
@@ -49,4 +50,4 @@ class SequenceGestureDetector:
 
         label = self.model.classes_[idx]
 
-        return label, score
+        return label, score 

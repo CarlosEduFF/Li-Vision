@@ -1,4 +1,4 @@
-from .base_detector import BaseDetector
+from src.detectors.base_detector import BaseDetector
 
 class RuleADetector(BaseDetector):
 

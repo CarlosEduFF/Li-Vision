@@ -26,8 +26,8 @@ from src.vision.pipeline import HandPipeline
 from src.core.config_loader import Config
 from src.recognition.detector_factory import create_detectors
 from src.recognition.detector_manager import DetectorManager
-
-
+from src.data_collection.sequence_collector import main as run_collector
+from src.training.sequence_trainer import main as run_trainer
 # ==========================================================
 # EXECUÇÃO PRINCIPAL DA APLICAÇÃO
 # ==========================================================
@@ -50,7 +50,6 @@ def run_app(config_path):
     # 2. MODO COLETA DE DADOS (dataset para ML dinâmico)
     # ------------------------------------------------------
     if run_mode == "collect":
-        from src.data.sequence_collector import main as run_collector
         run_collector(config)
         return
 
@@ -58,7 +57,6 @@ def run_app(config_path):
     # 3. MODO TREINAMENTO
     # ------------------------------------------------------
     if run_mode == "train":
-        from src.training.sequence_trainer import main as run_trainer
         run_trainer()
         return
 

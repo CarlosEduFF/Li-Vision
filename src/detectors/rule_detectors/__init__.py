@@ -1,4 +1,4 @@
-from .base_detector import BaseDetector
+from ..base_detector import BaseDetector
 from .rule_a import RuleADetector
 from .rule_b import RuleBDetector
 from .rule_c import RuleCDetector

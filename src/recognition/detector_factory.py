@@ -6,7 +6,7 @@ from pathlib import Path
 # ----------------------------------------------------------
 # Rule Based Detectors
 # ----------------------------------------------------------
-from src.detectors import (
+from src.detectors.rule_detectors import (
     RuleADetector,
     RuleBDetector,
     RuleCDetector,
@@ -17,8 +17,8 @@ from src.detectors import (
 # ----------------------------------------------------------
 # Static ML
 # ----------------------------------------------------------
-from src.detectors.ml_detector import MLDetector
-
+from src.detectors.ml_detectors.static_detector import MLDetector
+from src.detectors.ml_detectors.sequence_detector import SequenceGestureDetector
 
 # ==========================================================
 # MAPA DE REGRAS
@@ -65,9 +65,6 @@ def load_static_models(config):
 # ==========================================================
 def load_dynamic_models(config):
 
-    from src.sequence_gesture_detector import (
-        SequenceGestureDetector,
-    )
 
     model_dir = Path(config["dynamic_ml"]["model_path"])
 

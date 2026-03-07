@@ -1,10 +1,10 @@
 app:
   camera_index: 0
   window_name: "Li-Vision"
-  run_mode: "collect"      # collect | train | inference
+  run_mode: "inference"      # collect | train | inference
 
 pipeline:
-  model_path: "src/models/hand_landmarker.task"
+  model_path: "models/mediapipe/hand_landmarker.task"
   num_hands: 2
 
 # ---------------------------------------------------
