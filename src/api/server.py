@@ -1,7 +1,14 @@
-from fastapi import FastAPI
-from src.api.routes import detect_routes, collect_routes
+# src/api/server.py (exemplo)
+from fastapi import FastAPI, HTTPException, BackgroundTasks
+from src.api.app_state import AppState
+from src.services.detection_service import DetectionService
+
 
 app = FastAPI(title="Li-Vision API")
 
-app.include_router(detect_routes.router)
-app.include_router(collect_routes.router)
+state = AppState("config.yaml")
+# start pipeline + detectors at boot (opcional)
+state.start_pipeline()
+state.build_detectors()
+
+detection_service = DetectionService(state.pipeline, state.detector_manager)

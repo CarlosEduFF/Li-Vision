@@ -3,7 +3,7 @@ from fastapi import APIRouter, UploadFile, File
 from src.api.dependencies import pipeline, detector_manager
 from src.services.detection_service import DetectionService
 
-router = APIRouter()
+router = APIRouter(prefix="/detect", tags=["Detection"])
 
 service = DetectionService(pipeline, detector_manager)
 
