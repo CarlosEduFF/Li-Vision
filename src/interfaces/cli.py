@@ -22,7 +22,7 @@ import cv2
 
 
 
-from src.pipeline import HandPipeline
+from src.vision.pipeline import HandPipeline
 from src.core.config_loader import Config
 from src.recognition.detector_factory import create_detectors
 from src.recognition.detector_manager import DetectorManager

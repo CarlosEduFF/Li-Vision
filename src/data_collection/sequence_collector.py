@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 from collections import deque
 
-from src.pipeline import HandPipeline
+from src.vision.pipeline import HandPipeline
 from src.core.config_loader import Config
 
 CONFIG_PATH = "config.yaml"

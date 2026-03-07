@@ -16,7 +16,7 @@ from pathlib import Path  # Para manipulação segura de caminhos de arquivos
 import numpy as np       # Para manipulação de arrays numéricos
 import joblib            # Para carregar modelos scikit-learn serializados
 
-from src.detectors.base import BaseDetector  # Classe base para todos detectores
+from src.detectors.base_detector import BaseDetector  # Classe base para todos detectores
 
 
 # ======================================================

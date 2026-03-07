@@ -30,6 +30,10 @@ class DetectorManager:
         self.cooldown_frames = cooldown_frames
         self.cooldown_counter = 0
 
+        # memória do último gesto detectado
+        self.last_label = None
+        self.last_score = 0.0
+
     def detect(self, hands):
         """
         Executa detectores e retorna gesto estabilizado.
@@ -40,7 +44,7 @@ class DetectorManager:
         # -------------------------------------------
         if self.cooldown_counter > 0:
             self.cooldown_counter -= 1
-            return None, 0.0
+            return self.last_label, self.last_score
 
         if not hands:
             self.history.clear()
@@ -53,28 +57,31 @@ class DetectorManager:
         # Executa todos detectores
         # -------------------------------------------
         for hand in hands:
-            try:
-                for det in self.detectors:
+            for det in self.detectors:
+                try:
                     label, score = det.detect(hand)
 
                     if label and score > best_score:
                         best_label = label
                         best_score = score
 
-            except Exception:
-                # Detectores estáticos usam apenas uma mão
-                label, score = det.detect(hands[0])
+                except Exception:
+                    # fallback para detectores que usam lista de mãos
+                    try:
+                        label, score = det.detect(hands)
 
-            if label and score > best_score:
-                best_label = label
-                best_score = score
+                        if label and score > best_score:
+                            best_label = label
+                            best_score = score
+                    except Exception:
+                        continue
 
         # -------------------------------------------
         # Threshold mínimo
         # -------------------------------------------
         if best_score < self.min_score:
             self.history.clear()
-            return None, 0.0
+            return self.last_label, self.last_score
 
         # -------------------------------------------
         # Estabilização temporal
@@ -82,11 +89,16 @@ class DetectorManager:
         self.history.append(best_label)
 
         if len(self.history) < self.history.maxlen:
-            return None, 0.0
+            return self.last_label, self.last_score
 
+        # verifica se todos frames detectaram o mesmo gesto
         if len(set(self.history)) == 1:
 
             label = self.history[0]
+
+            # salva como último gesto
+            self.last_label = label
+            self.last_score = best_score
 
             # ativa cooldown
             self.cooldown_counter = self.cooldown_frames
@@ -94,4 +106,4 @@ class DetectorManager:
 
             return label, best_score
 
-        return None, 0.0
+        return self.last_label, self.last_score

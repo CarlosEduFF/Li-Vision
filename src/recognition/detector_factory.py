@@ -65,7 +65,7 @@ def load_static_models(config):
 # ==========================================================
 def load_dynamic_models(config):
 
-    from src.recognition.sequence_gesture_detector import (
+    from src.sequence_gesture_detector import (
         SequenceGestureDetector,
     )
 

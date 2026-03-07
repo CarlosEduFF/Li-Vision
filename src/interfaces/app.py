@@ -1,6 +1,6 @@
 import cv2
 
-from pipeline import HandPipeline
+from src.vision.pipeline import HandPipeline
 from detectors import RuleADetector, RuleBDetector, RuleCDetector, RuleDDetector, RuleEDetector
 from recognition.detector_manager import DetectorManager
 

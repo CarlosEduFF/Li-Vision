@@ -5,13 +5,9 @@ from collections import deque
 
 class SequenceGestureDetector:
 
-    def __init__(self, model_path, window_size, threshold):
+    def __init__(self, model_path, threshold):
 
         self.model = joblib.load(model_path)
-
-        # descobre automaticamente o tamanho esperado
-        expected_features = self.model.n_features_in_
-        self.window_size = expected_features // 63
 
         self.threshold = threshold
         self.buffer = deque(maxlen=self.window_size)
