@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Li-Vision-app",
-    "slug": "Li-Vision-app",
+    "name": "Li-Vision",
+    "slug": "Li-Vision",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
