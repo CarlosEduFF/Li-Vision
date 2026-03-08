@@ -1,60 +1,55 @@
-import { useEffect, useRef, useState } from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
-import { CameraView, useCameraPermissions } from "expo-camera";
+import { useRef, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { CameraView } from "expo-camera";
 import { detectGesture } from "@/services/api";
 
-export default function HomeScreen() {
-
-  const [permission, requestPermission] = useCameraPermissions();
-  const [gesture, setGesture] = useState<string | null>(null);
+export default function CameraScreen() {
 
   const cameraRef = useRef<CameraView | null>(null);
 
-  useEffect(() => {
-    if (!permission) {
-      requestPermission();
-    }
-  }, []);
+  const [gesture, setGesture] = useState("Nenhum");
 
-  async function captureGesture() {
+  async function capture() {
 
     if (!cameraRef.current) return;
 
     const photo = await cameraRef.current.takePictureAsync({
-      quality: 0.5,
+      quality: 0.4
     });
 
     const result = await detectGesture(photo.uri);
 
-    setGesture(result.gesture);
-  }
-
-  if (!permission?.granted) {
-    return (
-      <View style={styles.center}>
-        <Text>Permissão da câmera necessária</Text>
-        <Button title="Permitir câmera" onPress={requestPermission} />
-      </View>
-    );
+    if (result.gesture) {
+      setGesture(`${result.gesture} (${result.confidence.toFixed(2)})`);
+    } else {
+      setGesture("Nenhum");
+    }
   }
 
   return (
     <View style={styles.container}>
 
       <CameraView
-        style={styles.camera}
         ref={cameraRef}
+        facing="front"
+        style={styles.camera}
       />
 
       <View style={styles.overlay}>
-        <Button
-          title="Detectar gesto"
-          onPress={captureGesture}
-        />
 
-        <Text style={styles.text}>
-          Gesto: {gesture ?? "nenhum"}
+        <Text style={styles.gestureText}>
+          {gesture}
         </Text>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={capture}
+        >
+          <Text style={styles.buttonText}>
+            Detectar
+          </Text>
+        </TouchableOpacity>
+
       </View>
 
     </View>
@@ -62,31 +57,40 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+
   container: {
-    flex: 1,
+    flex: 1
   },
 
   camera: {
-    flex: 1,
+    flex: 1
   },
 
   overlay: {
     position: "absolute",
-    bottom: 60,
+    bottom: 80,
     width: "100%",
-    alignItems: "center",
+    alignItems: "center"
   },
 
-  text: {
-    marginTop: 20,
-    fontSize: 28,
+  gestureText: {
+    fontSize: 32,
     color: "white",
     fontWeight: "bold",
+    marginBottom: 20
   },
 
-  center: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+  button: {
+    backgroundColor: "#00AEEF",
+    padding: 16,
+    borderRadius: 30,
+    width: 200,
+    alignItems: "center"
   },
+
+  buttonText: {
+    color: "white",
+    fontSize: 18
+  }
+
 });
