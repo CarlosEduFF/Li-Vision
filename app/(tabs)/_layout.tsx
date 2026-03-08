@@ -27,7 +27,9 @@ export default function TabLayout() {
         name="settings"
         options={{
           title: 'Configuração',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="gearshape" color={color} />
+          ),
         }}
       />
     </Tabs>
