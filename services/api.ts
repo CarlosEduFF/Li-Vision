@@ -48,3 +48,13 @@ export async function setDetectionMode(mode: string) {
   });
 
 }
+
+
+export async function getState() {
+
+  const response = await fetch(
+    "https://li-vision.onrender.com/admin/state"
+  );
+
+  return response.json();
+}

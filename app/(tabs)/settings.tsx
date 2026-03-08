@@ -1,7 +1,48 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { setRunMode, setDetectionMode } from "@/services/api";
+import { useEffect, useState } from "react";
+import { setRunMode, setDetectionMode, getState } from "@/services/api";
 
 export default function SettingsScreen() {
+
+  const [runMode, setRunModeState] = useState<string>("...");
+  const [detectionMode, setDetectionModeState] = useState<string>("...");
+
+  async function loadState() {
+
+    try {
+
+      const data = await getState();
+
+      setRunModeState(data.run_mode);
+      setDetectionModeState(data.detection?.mode);
+
+    } catch (e) {
+
+      console.log("Erro ao carregar estado da API", e);
+
+    }
+
+  }
+
+  useEffect(() => {
+    loadState();
+  }, []);
+
+  async function changeRunMode(mode: string) {
+
+    await setRunMode(mode);
+
+    setRunModeState(mode);
+
+  }
+
+  async function changeDetection(mode: string) {
+
+    await setDetectionMode(mode);
+
+    setDetectionModeState(mode);
+
+  }
 
   return (
 
@@ -11,6 +52,18 @@ export default function SettingsScreen() {
         Configuração da API
       </Text>
 
+      <View style={styles.statusCard}>
+
+        <Text style={styles.statusText}>
+          Run Mode: {runMode}
+        </Text>
+
+        <Text style={styles.statusText}>
+          Detection: {detectionMode}
+        </Text>
+
+      </View>
+
       <View style={styles.card}>
 
         <Text style={styles.sectionTitle}>
@@ -19,7 +72,7 @@ export default function SettingsScreen() {
 
         <TouchableOpacity
           style={styles.option}
-          onPress={() => setRunMode("collect")}
+          onPress={() => changeRunMode("collect")}
         >
           <Text style={styles.optionText}>
             Coleta de Dados
@@ -28,7 +81,7 @@ export default function SettingsScreen() {
 
         <TouchableOpacity
           style={styles.option}
-          onPress={() => setRunMode("train")}
+          onPress={() => changeRunMode("train")}
         >
           <Text style={styles.optionText}>
             Treinar Modelo
@@ -37,7 +90,7 @@ export default function SettingsScreen() {
 
         <TouchableOpacity
           style={styles.option}
-          onPress={() => setRunMode("inference")}
+          onPress={() => changeRunMode("inference")}
         >
           <Text style={styles.optionText}>
             Inferência
@@ -54,7 +107,7 @@ export default function SettingsScreen() {
 
         <TouchableOpacity
           style={styles.option}
-          onPress={() => setDetectionMode("rules")}
+          onPress={() => changeDetection("rules")}
         >
           <Text style={styles.optionText}>
             Regras
@@ -63,7 +116,7 @@ export default function SettingsScreen() {
 
         <TouchableOpacity
           style={styles.option}
-          onPress={() => setDetectionMode("ml")}
+          onPress={() => changeDetection("ml")}
         >
           <Text style={styles.optionText}>
             Machine Learning
@@ -72,7 +125,7 @@ export default function SettingsScreen() {
 
         <TouchableOpacity
           style={styles.option}
-          onPress={() => setDetectionMode("dynamic_ml")}
+          onPress={() => changeDetection("dynamic_ml")}
         >
           <Text style={styles.optionText}>
             Dinâmico
@@ -97,6 +150,19 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     marginBottom: 20
+  },
+
+  statusCard: {
+    backgroundColor: "#222",
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20
+  },
+
+  statusText: {
+    color: "white",
+    fontSize: 16,
+    marginBottom: 4
   },
 
   card: {
