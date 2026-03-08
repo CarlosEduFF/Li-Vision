@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { useRef, useState, useEffect } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 import { CameraView } from "expo-camera";
+import { LinearGradient } from "expo-linear-gradient";
 import { detectGesture } from "@/services/api";
 
 export default function CameraScreen() {
@@ -8,10 +9,27 @@ export default function CameraScreen() {
   const cameraRef = useRef<CameraView | null>(null);
 
   const [gesture, setGesture] = useState("Nenhum");
+  const [loading, setLoading] = useState(true);
+  const [detecting, setDetecting] = useState(false);
+  const [latency, setLatency] = useState<number | null>(null);
+
+  useEffect(() => {
+
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+
+  }, []);
 
   async function capture() {
 
     if (!cameraRef.current) return;
+
+    setDetecting(true);
+
+    const start = Date.now();
 
     const photo = await cameraRef.current.takePictureAsync({
       quality: 0.4
@@ -19,11 +37,43 @@ export default function CameraScreen() {
 
     const result = await detectGesture(photo.uri);
 
+    const end = Date.now();
+
+    setLatency(end - start);
+
     if (result.gesture) {
       setGesture(`${result.gesture} (${result.confidence.toFixed(2)})`);
     } else {
       setGesture("Nenhum");
     }
+
+    setDetecting(false);
+
+  }
+
+  if (loading) {
+
+    return (
+
+      <LinearGradient
+        colors={["#00AEEF", "#0077B6"]}
+        style={styles.loadingContainer}
+      >
+
+        <Text style={styles.logo}>
+          Li-Vision
+        </Text>
+
+        <ActivityIndicator size="large" color="white" />
+
+        <Text style={styles.loadingText}>
+          Inicializando câmera...
+        </Text>
+
+      </LinearGradient>
+
+    );
+
   }
 
   return (
@@ -35,22 +85,41 @@ export default function CameraScreen() {
         style={styles.camera}
       />
 
-      <View style={styles.overlay}>
+      <LinearGradient
+        colors={["transparent", "rgba(0,0,0,0.6)"]}
+        style={styles.overlay}
+      >
 
-        <Text style={styles.gestureText}>
-          {gesture}
-        </Text>
+        <View style={styles.hud}>
+
+          <Text style={styles.gestureText}>
+            {gesture}
+          </Text>
+
+          {latency && (
+            <Text style={styles.latency}>
+              {latency} ms
+            </Text>
+          )}
+
+        </View>
 
         <TouchableOpacity
-          style={styles.button}
+          style={styles.captureButton}
           onPress={capture}
         >
-          <Text style={styles.buttonText}>
-            Detectar
-          </Text>
+          {detecting ? (
+            <ActivityIndicator color="white"/>
+          ) : (
+            <View style={styles.captureInner}/>
+          )}
         </TouchableOpacity>
 
-      </View>
+        <Text style={styles.aiStatus}>
+          AI Online
+        </Text>
+
+      </LinearGradient>
 
     </View>
   );
@@ -66,31 +135,70 @@ const styles = StyleSheet.create({
     flex: 1
   },
 
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 20
+  },
+
+  logo: {
+    fontSize: 40,
+    color: "white",
+    fontWeight: "bold"
+  },
+
+  loadingText: {
+    color: "white",
+    fontSize: 16
+  },
+
   overlay: {
     position: "absolute",
-    bottom: 80,
+    bottom: 0,
     width: "100%",
-    alignItems: "center"
+    alignItems: "center",
+    paddingBottom: 60,
+    paddingTop: 40
+  },
+
+  hud: {
+    alignItems: "center",
+    marginBottom: 40
   },
 
   gestureText: {
-    fontSize: 32,
+    fontSize: 36,
     color: "white",
-    fontWeight: "bold",
+    fontWeight: "bold"
+  },
+
+  latency: {
+    color: "#00E5FF",
+    marginTop: 6
+  },
+
+  captureButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 4,
+    borderColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 20
   },
 
-  button: {
-    backgroundColor: "#00AEEF",
-    padding: 16,
+  captureInner: {
+    width: 60,
+    height: 60,
     borderRadius: 30,
-    width: 200,
-    alignItems: "center"
+    backgroundColor: "#00AEEF"
   },
 
-  buttonText: {
-    color: "white",
-    fontSize: 18
+  aiStatus: {
+    color: "#00E5FF",
+    fontSize: 14
   }
 
 });
