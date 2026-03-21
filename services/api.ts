@@ -23,7 +23,7 @@ export async function detectGesture(uri: string) {
 
 export async function setRunMode(mode: string) {
 
-  await fetch(`${BASE_URL}/admin/mode`, {
+  const response = await fetch(`${BASE_URL}/admin/mode`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -33,6 +33,14 @@ export async function setRunMode(mode: string) {
     })
   });
 
+  const data = await response.text();
+
+  console.log("SET RUN MODE STATUS:", response.status);
+  console.log("SET RUN MODE RESPONSE:", data);
+
+  if (!response.ok) {
+    throw new Error("Erro ao setar run mode");
+  }
 }
 
 export async function setDetectionMode(mode: string) {
