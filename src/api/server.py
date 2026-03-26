@@ -16,3 +16,8 @@ app.include_router(admin_router)
 app.include_router(detect_router)
 app.include_router(collect_router)
 app.include_router(ws_router)
+
+
+@app.get("/healthz")
+def health_check():
+    return {"status": "ok"}

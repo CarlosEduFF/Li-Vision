@@ -33,5 +33,5 @@ COPY . .
 # Porta padrão do Render
 EXPOSE 10000
 
-# Comando de inicialização
-CMD ["uvicorn", "src.api.server:app", "--host", "0.0.0.0", "--port", "10000"]
+# Comando de inicialização (shell form para expandir $PORT do Render)
+CMD uvicorn src.api.server:app --host 0.0.0.0 --port ${PORT:-10000}
