@@ -6,7 +6,7 @@
 # Este Dockerfile instala as dependências do sistema.
 # ===================================================
 
-FROM python:3.11-slim
+FROM python:3.11-slim-bookworm
 
 # Instala dependências do sistema necessárias para:
 # - MediaPipe (libGLESv2, libegl1, libgl1)
