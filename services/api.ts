@@ -1,4 +1,4 @@
-const BASE_URL = "https://li-vision.onrender.com";
+const BASE_URL = "https://li-visionv2.onrender.com";
 
 export async function detectGesture(uri: string) {
 
@@ -10,7 +10,7 @@ export async function detectGesture(uri: string) {
     type: "image/jpeg"
   } as any);
 
-  const response = await fetch(`${BASE_URL}/detect/detect`, {
+  const response = await fetch(`${BASE_URL}/detect/`, {
     method: "POST",
     body: form,
     headers: {
@@ -61,7 +61,7 @@ export async function setDetectionMode(mode: string) {
 export async function getState() {
 
   const response = await fetch(
-    "https://li-vision.onrender.com/admin/state"
+    "https://li-visionv2.onrender.com/admin/state"
   );
 
   return response.json();
