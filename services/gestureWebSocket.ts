@@ -92,12 +92,12 @@ class GestureWebSocket {
   }
 
   /**
-   * Envia um frame base64 para detecção.
+   * Envia as coordenadas puras dos Landmarks para a API (Zero Lag).
    * Só envia se a conexão estiver aberta.
    */
-  sendFrame(base64Data: string): void {
+  sendLandmarks(landmarksData: any[]): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(base64Data);
+      this.ws.send(JSON.stringify(landmarksData));
     }
   }
 
