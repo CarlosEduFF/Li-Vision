@@ -31,16 +31,20 @@ def landmarks_to_vector(hands):
             base_x = hand[0].x
             base_y = hand[0].y
 
+            # INJEÇÃO DA EDGE COMPUTING: Variáveis Espaciais Absolutas
+            vec.append(base_x)
+            vec.append(base_y)
+
             for lm in hand:
                 vec.append(lm.x - base_x)
                 vec.append(lm.y - base_y)
                 vec.append(getattr(lm, "z", 0.0))
 
         else:
-            vec.extend([0.0] * 63)
+            # 2 absolutas + 63 relativas originais = 65 posições por mão ausente
+            vec.extend([0.0] * 65)
 
     return vec
-
 def main(config):
 
     # ----------------------------

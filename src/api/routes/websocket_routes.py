@@ -1,22 +1,16 @@
 """
-WebSocket endpoint para detecção de gestos em tempo real.
+WebSocket endpoint para detecção de gestos em tempo real com Edge Computing.
 
-Cada conexão WebSocket mantém seu próprio timestamp/contador,
-mas usa o pipeline e detector_manager do estado global (state),
-garantindo que mudanças de modo de detecção feitas via /admin/detection
-sejam refletidas imediatamente nas conexões ativas.
-
-Protocolo:
-  - Cliente envia: string base64 do JPEG (texto puro, sem JSON)
+Protocolo Padrão-Ouro (Opção B):
+  - Cliente envia: JSON com landmarks. Formato:
+    [
+      [{"x": 0.1, "y": 0.2, "z": 0.0}, ... (21 pontos)]
+    ]
   - Servidor responde: JSON {"gesture": "A", "confidence": 0.92}
-  - Em caso de erro interno: JSON {"gesture": null, "confidence": 0.0, "error": "..."}
 """
 
-import base64
+import json
 import traceback
-
-import numpy as np
-import cv2
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
@@ -24,43 +18,34 @@ from src.api.app_state import state
 
 router = APIRouter(tags=["WebSocket"])
 
+class MockLandmark:
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
 
 @router.websocket("/ws/detect")
 async def websocket_detect(websocket: WebSocket):
     await websocket.accept()
 
-    # Cada conexão tem seu próprio timestamp (necessário para o modo VIDEO do MediaPipe)
-    timestamp = 0
-
     try:
         while True:
-            # Recebe frame como base64 (texto)
+            # Recebe o JSON cru
             data = await websocket.receive_text()
 
             try:
-                image_bytes = base64.b64decode(data)
+                hands_data = json.loads(data)
+                
+                hands = []
+                # Formata JSON para mock de objetos MediaPipe compatíveis
+                for hand_points in hands_data:
+                    hand = [MockLandmark(lm.get('x', 0.0), lm.get('y', 0.0), lm.get('z', 0.0)) for lm in hand_points]
+                    hands.append(hand)
 
-                # Decodifica imagem
-                npimg = np.frombuffer(image_bytes, np.uint8)
-                frame = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
-
-                if frame is None:
-                    await websocket.send_json({
-                        "gesture": None,
-                        "confidence": 0.0,
-                        "error": "Image decode failed",
-                    })
-                    continue
-
-                timestamp += 1
-
-                # Usa pipeline e detector_manager do estado global
-                # Assim, mudanças de modo via /admin/detection são refletidas
                 with state.lock:
-                    pipeline = state.pipeline
                     manager = state.detector_manager
 
-                if pipeline is None or manager is None:
+                if manager is None:
                     await websocket.send_json({
                         "gesture": None,
                         "confidence": 0.0,
@@ -68,7 +53,7 @@ async def websocket_detect(websocket: WebSocket):
                     })
                     continue
 
-                hands = pipeline.process_frame(frame, timestamp)
+                # Passa as mãos nativamente para o manager
                 label, score = manager.detect(hands)
 
                 await websocket.send_json({
@@ -76,6 +61,12 @@ async def websocket_detect(websocket: WebSocket):
                     "confidence": round(score, 4) if score else 0.0,
                 })
 
+            except json.JSONDecodeError:
+                await websocket.send_json({
+                    "gesture": None,
+                    "confidence": 0.0,
+                    "error": "Invalid format. Expected JSON Landmarks.",
+                })
             except Exception as e:
                 await websocket.send_json({
                     "gesture": None,
@@ -88,3 +79,4 @@ async def websocket_detect(websocket: WebSocket):
     except Exception as e:
         print(f"[WS] Erro inesperado: {e}")
         traceback.print_exc()
+

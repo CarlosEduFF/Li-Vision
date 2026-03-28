@@ -8,32 +8,47 @@ class SequenceGestureDetector:
     def __init__(self, model_path, window_size, threshold):
 
         self.model = joblib.load(model_path)
-        expected_features = self.model.n_features_in_
-        self.window_size = expected_features // 63
+        # O Feature Size agora eh 130 por frame (65 * 2)
+        expected_features = getattr(self.model, "n_features_in_", 130 * window_size)
+        self.window_size = window_size
         self.threshold = threshold
         self.buffer = deque(maxlen=self.window_size)
 
-    def landmarks_to_vector(self, hand):
-
-        base_x = hand[0].x
-        base_y = hand[0].y
+    def landmarks_to_vector(self, hands):
 
         vec = []
 
-        for lm in hand:
-            vec.append(lm.x - base_x)
-            vec.append(lm.y - base_y)
-            vec.append(getattr(lm, "z", 0.0))
+        if len(hands) > 0 and hasattr(hands[0], "__len__") and not hasattr(hands[0], "x"):
+            hands_list = hands
+        else:
+            hands_list = [hands]
+
+        for i in range(2):
+            if i < len(hands_list):
+                hand = hands_list[i]
+                base_x = hand[0].x
+                base_y = hand[0].y
+
+                # Track global placement to interpret temporal movement direction
+                vec.append(base_x)
+                vec.append(base_y)
+
+                for lm in hand:
+                    vec.append(lm.x - base_x)
+                    vec.append(lm.y - base_y)
+                    vec.append(getattr(lm, "z", 0.0))
+            else:
+                vec.extend([0.0] * 65)
 
         return vec
 
-    def detect(self, hand):
+    def detect(self, hands):
 
-        if not hand:
+        if not hands:
             self.buffer.clear()
             return None, 0.0
 
-        vec = self.landmarks_to_vector(hand)
+        vec = self.landmarks_to_vector(hands)
         self.buffer.append(vec)
 
         if len(self.buffer) < self.window_size:

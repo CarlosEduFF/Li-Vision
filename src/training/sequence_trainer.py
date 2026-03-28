@@ -1,14 +1,14 @@
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 import joblib
 
 
 CSV = "src/data/collected/sequences.csv"
-MODELS_DIR = Path("models")
+MODELS_DIR = Path("models/dynamic")
 
 
 def load_data(csv_path):
@@ -71,12 +71,16 @@ def main():
         random_state=42
     )
 
-    print("\nTreinando RandomForest...")
+    print("\nTreinando Rede Neural (MLPClassifier)...")
 
-    clf = RandomForestClassifier(
-        n_estimators=300,
-        n_jobs=-1,
-        random_state=42
+    clf = MLPClassifier(
+        hidden_layer_sizes=(128, 64),
+        activation='relu',
+        solver='adam',
+        max_iter=500,
+        random_state=42,
+        early_stopping=True,
+        n_iter_no_change=20
     )
 
     clf.fit(X_train, y_train)
