@@ -45,7 +45,50 @@ def landmarks_to_vector(hands):
             vec.extend([0.0] * 65)
 
     return vec
+from pathlib import Path
+
+def choose_dataset():
+    data_dir = Path("src/data/collected")
+    data_dir.mkdir(parents=True, exist_ok=True)
+    
+    csv_files = list(data_dir.glob("*.csv"))
+    
+    print("\n" + "="*40)
+    print("GERENCIADOR DE DATASET (COLETA)")
+    print("="*40)
+    
+    if not csv_files:
+        print("Nenhum dataset encontrado. Criando um novo.")
+        name = input("Digite o nome do novo dataset (ex: gestos_tcc): ").strip()
+        name = name if name else "sequences"
+        if not name.endswith(".csv"): name += ".csv"
+        return str(data_dir / name)
+        
+    for i, f in enumerate(csv_files):
+        print(f"[{i+1}] {f.name}")
+    print(f"[{len(csv_files)+1}] *** CRIAR NOVO DATASET ***")
+    
+    choice = input("\nEscolha o número do dataset para gravar: ").strip()
+    
+    try:
+        idx = int(choice) - 1
+        if 0 <= idx < len(csv_files):
+            return str(csv_files[idx])
+        elif idx == len(csv_files):
+            name = input("Digite o nome do novo dataset (ex: gestos_tcc): ").strip()
+            name = name if name else "sequences"
+            if not name.endswith(".csv"): name += ".csv"
+            return str(data_dir / name)
+    except ValueError:
+        pass
+        
+    print("Opção inválida. Usando sequences.csv por padrão.")
+    return str(data_dir / "sequences.csv")
+
 def main(config):
+
+    out_csv = choose_dataset()
+    print(f"\n=> Gravando amostras no arquivo: {out_csv}\n")
 
     # ----------------------------
     # Palavra do gesto
@@ -68,7 +111,7 @@ def main(config):
     with HandPipeline(
         model_path=model_path,
         num_hands=num_hands
-    ) as pipeline, open(OUT_CSV, "a", newline="") as f:
+    ) as pipeline, open(out_csv, "a", newline="") as f:
 
         writer = csv.writer(f)
 

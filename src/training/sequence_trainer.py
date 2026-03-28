@@ -56,10 +56,43 @@ def choose_model_name():
     return model_path
 
 
+import datetime
+import shutil
+
+def choose_dataset():
+    data_dir = Path("src/data/collected")
+    csv_files = list(data_dir.glob("*.csv"))
+    
+    print("\n" + "="*40)
+    print("GERENCIADOR DE DATASET (TREINAMENTO)")
+    print("="*40)
+    
+    if not csv_files:
+        print("Nenhum arquivo CSV encontrado em src/data/collected.")
+        exit()
+        
+    for i, f in enumerate(csv_files):
+        print(f"[{i+1}] {f.name}")
+        
+    choice = input("\nEscolha o número do dataset para treinar: ").strip()
+    
+    try:
+        idx = int(choice) - 1
+        if 0 <= idx < len(csv_files):
+            return str(csv_files[idx])
+    except ValueError:
+        pass
+        
+    print("Opção inválida. Usando o primeiro encontrado.")
+    return str(csv_files[0])
+
+
 def main():
 
-    print("Carregando dados...")
-    X, y = load_data(CSV)
+    csv_path = choose_dataset()
+
+    print(f"\nCarregando dados de: {csv_path} ...")
+    X, y = load_data(csv_path)
 
     print("Total de amostras:", len(X))
     print("Features por amostra:", X.shape[1])
@@ -96,6 +129,16 @@ def main():
 
     print("\nModelo salvo em:", model_path)
 
+    # Backup Automaico do Dataset usado
+    backup_dir = Path("src/data/collected/backups")
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    csv_filename = Path(csv_path).name
+    backup_path = backup_dir / f"{Path(csv_filename).stem}_{timestamp}.csv"
+    
+    shutil.copy2(csv_path, backup_path)
+    print(f"Backup do Dataset de treino salvo em: {backup_path}\n")
 
 if __name__ == "__main__":
     main()
