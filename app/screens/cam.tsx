@@ -20,7 +20,7 @@ export default function CameraScreen() {
 
   // TODO: Habilitar isso após o npm install
   const device = useCameraDevice("front");
-  const plugin = useTensorflowModel(require("../../assets/hand_landmarker.tflite"));
+  const plugin = useTensorflowModel(require("@/assets/hand_landmarker.task"));
   const { resize } = useResizePlugin(); // Plugin to convert Frame to TypedArray
 
   const handleGesture = useCallback((result: GestureResult) => {

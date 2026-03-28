@@ -55,35 +55,35 @@ export default function HomeScreen() {
         {/* Cards */}
         <View style={styles.grid}>
           {/* Card ML */}
-          <View style={styles.cardLarge}>
+          <TouchableOpacity style={styles.cardLarge} activeOpacity={0.8}>
             <Text style={styles.cardTitle}>
               Reconhecimento por Machine Learning
             </Text>
             <Text style={styles.cardText}>
               Modelos neurais para identificar gestos com alta precisão.
             </Text>
-          </View>
+          </TouchableOpacity>
 
           {/* Card Gestos */}
-          <View style={styles.card}>
+          <TouchableOpacity style={styles.card} activeOpacity={0.8}>
             <MaterialIcons name="gesture" size={30} color="#f2e9ff" />
             <Text style={styles.cardTitle}>Gestos Dinâmicos</Text>
             <Text style={styles.cardTextSmall}>
               Detecção de movimentos e trajetórias.
             </Text>
-          </View>
+          </TouchableOpacity>
 
           {/* Card Regras */}
-          <View style={styles.card}>
+          <TouchableOpacity style={styles.card} activeOpacity={0.8}>
             <MaterialIcons name="terminal" size={30} color="#00e5ff" />
             <Text style={styles.cardTitle}>Baseado em Regras</Text>
             <Text style={styles.cardTextSmall}>
               Lógica baseada nos landmarks.
             </Text>
-          </View>
+          </TouchableOpacity>
 
           {/* Libras */}
-          <View style={styles.cardWide}>
+          <TouchableOpacity style={styles.cardWide} activeOpacity={0.8}>
             <MaterialIcons name="sign-language" size={30} color="#b9c7e4" />
             <View>
               <Text style={styles.cardTitle}>Libras</Text>
@@ -91,7 +91,7 @@ export default function HomeScreen() {
                 Tradução em tempo real (experimental)
               </Text>
             </View>
-          </View>
+          </TouchableOpacity>
         </View>
 
       </ScrollView>
@@ -163,6 +163,11 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     gap: 8,
+    shadowColor: "#00e5ff",
+    shadowOpacity: 0.5,
+    shadowRadius: 15,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
   },
 
   buttonText: {
@@ -178,12 +183,26 @@ const styles = StyleSheet.create({
     backgroundColor: "#1c2026",
     padding: 16,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(0, 229, 255, 0.1)",
+    shadowColor: "#000",
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 5,
   },
 
   card: {
     backgroundColor: "#262a31",
     padding: 16,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
 
   cardWide: {
@@ -193,6 +212,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 4,
   },
 
   cardTitle: {
