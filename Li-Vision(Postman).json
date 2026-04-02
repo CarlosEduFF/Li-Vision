@@ -1,0 +1,146 @@
+{
+  "info": {
+    "name": "Li-Vision API",
+    "_postman_id": "8e9b1f2a-7a7a-4f3e-9c0a-li-vision",
+    "description": "Collection para testar a API Li-Vision",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://li-vision.onrender.com"
+    }
+  ],
+  "item": [
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get State",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/state",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "state"]
+            }
+          }
+        },
+        {
+          "name": "Set Run Mode",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"run_mode\": \"inference\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/mode",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "mode"]
+            }
+          }
+        },
+        {
+          "name": "Change Detection Mode",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mode\": \"dynamic_ml\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/detection",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "detection"]
+            }
+          }
+        },
+        {
+          "name": "Start Training",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/train",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "train"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Detection",
+      "item": [
+        {
+          "name": "Detect Gesture",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/detect/detect",
+              "host": ["{{base_url}}"],
+              "path": ["detect", "detect"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dataset Collection",
+      "item": [
+        {
+          "name": "Collect Image",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "label",
+                  "value": "A",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/collect/",
+              "host": ["{{base_url}}"],
+              "path": ["collect", ""]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
