@@ -13,15 +13,22 @@
 
 const WS_URL = "wss://li-visionv2.onrender.com/ws/detect";
 
-const MAX_RECONNECT_ATTEMPTS = 5;
+// Render plano gratuito fecha conexoes idle com codigo 1000.
+// Usamos tentativas ilimitadas com cap de 30s para manter conexao.
+const MAX_RECONNECT_ATTEMPTS = Infinity;
 const INITIAL_RECONNECT_DELAY = 1000; // 1s
+const MAX_RECONNECT_DELAY = 30_000;   // 30s teto
 
 export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "reconnecting" | "failed";
 
 export type GestureResult = {
   gesture: string | null;
   confidence: number;
+  /** Modo de detecção ativo na API (rules | ml | dynamic_ml | hybrid) */
+  mode?: string;
   error?: string;
+  /** Landmarks retornados pelo MediaPipe do servidor */
+  landmarks?: any[];
 };
 
 type GestureCallback = (result: GestureResult) => void;
@@ -75,13 +82,15 @@ class GestureWebSocket {
     };
 
     ws.onerror = (event: Event) => {
-      console.log("[WS] Erro:", event);
+      console.log("[WS] Erro Capturado na Conexão:", event);
     };
 
-    ws.onclose = () => {
-      console.log("[WS] Conexão fechada");
+    ws.onclose = (event: WebSocketCloseEvent) => {
+      console.log(`[WS] Conexao fechada. Codigo: ${event.code}, Razao: "${event.reason}"`);
 
       if (!this.intentionalClose) {
+        // Qualquer fechamento nao-intencional (incluindo codigo 1000 do Render
+        // por inatividade) dispara reconexao automatica.
         this._attemptReconnect();
       } else {
         this._setStatus("disconnected");
@@ -92,12 +101,23 @@ class GestureWebSocket {
   }
 
   /**
-   * Envia as coordenadas puras dos Landmarks para a API (Zero Lag).
-   * Só envia se a conexão estiver aberta.
+   * Envia os bytes do frame redimensionado para a API para processamento.
+   * @deprecated Use sendLandmarks() para edge computing (muito mais leve).
    */
-  sendLandmarks(landmarksData: any[]): void {
+  sendFrame(frameData: ArrayBuffer | Uint8Array): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(landmarksData));
+      this.ws.send(frameData);
+    }
+  }
+
+  /**
+   * Envia landmarks JSON para a API classificar o gesto.
+   * Formato esperado pela API: [[{x, y, z}, ...21 pontos], ...mãos]
+   * Trafego: ~1KB vs 196KB do sendFrame (redução de 99.5%)
+   */
+  sendLandmarks(hands: Array<Array<{ x: number; y: number; z: number }>>): void {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(hands));
     }
   }
 
@@ -132,16 +152,20 @@ class GestureWebSocket {
    */
   private _attemptReconnect(): void {
     if (this.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-      console.log("[WS] Número máximo de tentativas atingido");
-      this._setStatus("failed", `Falha ao reconectar após ${MAX_RECONNECT_ATTEMPTS} tentativas`);
+      console.log("[WS] Numero maximo de tentativas atingido");
+      this._setStatus("failed", `Falha ao reconectar apos ${this.reconnectAttempts} tentativas`);
       return;
     }
 
     this.reconnectAttempts++;
-    const delay = INITIAL_RECONNECT_DELAY * Math.pow(2, this.reconnectAttempts - 1);
+    // Backoff exponencial com teto em MAX_RECONNECT_DELAY
+    const delay = Math.min(
+      INITIAL_RECONNECT_DELAY * Math.pow(2, this.reconnectAttempts - 1),
+      MAX_RECONNECT_DELAY
+    );
 
-    console.log(`[WS] Reconectando em ${delay}ms (tentativa ${this.reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`);
-    this._setStatus("reconnecting", `Tentativa ${this.reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`);
+    console.log(`[WS] Reconectando em ${delay}ms (tentativa ${this.reconnectAttempts})`);
+    this._setStatus("reconnecting", `Tentativa ${this.reconnectAttempts}`);
 
     this.reconnectTimer = setTimeout(() => {
       this._connect();
