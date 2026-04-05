@@ -35,20 +35,9 @@ export default function CameraScreen() {
   const [landmarks, setLandmarks] = useState<LandmarkPoint[]>([]);
   const [showLandmarks, setShowLandmarks] = useState<boolean>(true);
   const [detectionMode, setDetectionMode] = useState<string>("edge");
-  const [transformIndex, setTransformIndex] = useState(0);
 
-  const transforms = [
-    // Troca X/Y (para quando o sensor é 640x480 girado 90)
-    { name: "1: Y/X Inv X", calc: (lm: any) => ({ x: 1.0 - lm.y, y: lm.x, z: lm.z }) }, 
-    { name: "2: Y/X Inv Y", calc: (lm: any) => ({ x: lm.y, y: 1.0 - lm.x, z: lm.z }) },
-    { name: "3: Y/X Inv XY", calc: (lm: any) => ({ x: 1.0 - lm.y, y: 1.0 - lm.x, z: lm.z }) },
-    { name: "4: Y/X Direto", calc: (lm: any) => ({ x: lm.y, y: lm.x, z: lm.z }) },
-    // Mantém X/Y (para quando o sensor já respeita retrato)
-    { name: "5: X/Y Inv X", calc: (lm: any) => ({ x: 1.0 - lm.x, y: lm.y, z: lm.z }) }, 
-    { name: "6: X/Y Inv Y", calc: (lm: any) => ({ x: lm.x, y: 1.0 - lm.y, z: lm.z }) },
-    { name: "7: X/Y Inv XY", calc: (lm: any) => ({ x: 1.0 - lm.x, y: 1.0 - lm.y, z: lm.z }) },
-    { name: "8: X/Y Direto", calc: (lm: any) => ({ x: lm.x, y: lm.y, z: lm.z }) }
-  ];
+  // Transformação correta de coordenadas para o sensor do aparelho (Modo 3)
+  const transformPoint = (lm: any) => ({ x: 1.0 - lm.y, y: 1.0 - lm.x, z: lm.z });
 
   const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -108,15 +97,11 @@ export default function CameraScreen() {
 
   /** Recebe landmarks do plugin nativo e atualiza UI + envia para API */
   const onLandmarksDetected = Worklets.createRunOnJS(
-    (hands: LandmarkPoint[][], tIndex: number) => {
+    (hands: LandmarkPoint[][]) => {
       if (hands.length > 0) {
-        console.log(`[Edge] 🖐 ${hands.length} mão(s) detectada(s), ${hands[0].length} pontos`);
         // Atualiza overlay imediatamente (edge — sem delay de rede)
-        // Aplica a transformação de coordenadas escolhida pelo usuário
-        const transform = transforms[tIndex] || transforms[0];
-        
-        // Aplica a transformação para todas as mãos detectadas
-        const transformedHands = hands.map(handLms => handLms.map(transform.calc));
+        // Aplica a transformação de coordenadas do sensor
+        const transformedHands = hands.map(handLms => handLms.map(transformPoint));
         
         // Atualiza a tela com a primeira mão
         setLandmarks(transformedHands[0]);
@@ -177,18 +162,18 @@ export default function CameraScreen() {
         }
 
         if (result && result.hands && result.hands.length > 0) {
-          onLandmarksDetected(result.hands, transformIndex);
+          onLandmarksDetected(result.hands);
         } else {
-          onLandmarksDetected([], transformIndex);
+          onLandmarksDetected([]);
         }
       } catch (e: any) {
         if (shouldLog) {
           onPluginError(`Frame: ${e?.message || String(e)}`);
         }
-        onLandmarksDetected([], transformIndex);
+        onLandmarksDetected([]);
       }
     },
-    [lastSync, frameCount, transformIndex]
+    [lastSync, frameCount]
   );
 
   // ──────────────────────────────────────────────
@@ -237,16 +222,6 @@ export default function CameraScreen() {
             size={20}
             color={showLandmarks ? "#00e5ff" : "#888"}
           />
-        </TouchableOpacity>
-
-        {/* Toggle Rotação */}
-        <TouchableOpacity
-          onPress={() => setTransformIndex((v) => (v + 1) % transforms.length)}
-          style={styles.iconBtn}
-          accessibilityLabel="Mudar Rotação"
-        >
-          <MaterialIcons name="screen-rotation" size={20} color="#ff9800" />
-          <Text style={{color: '#ff9800', fontSize: 10, position: 'absolute', bottom: -15, left: 0, width: 60}}>{transforms[transformIndex].name}</Text>
         </TouchableOpacity>
 
         <View style={styles.statusBadge}>

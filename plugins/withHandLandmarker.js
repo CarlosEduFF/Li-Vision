@@ -1,4 +1,4 @@
-  /**
+/**
  * Expo Config Plugin — MediaPipe HandLandmarker
  *
  * Injeta automaticamente durante o `expo prebuild`:
