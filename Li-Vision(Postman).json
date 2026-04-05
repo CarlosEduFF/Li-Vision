@@ -1,142 +1,190 @@
 {
   "info": {
     "name": "Li-Vision API",
-    "_postman_id": "8e9b1f2a-7a7a-4f3e-9c0a-li-vision",
-    "description": "Collection para testar a API Li-Vision",
+    "_postman_id": "li-vision-collection",
+    "description": "Collection para coleta, treinamento e gerenciamento de modelos",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "base_url",
-      "value": "https://li-vision.onrender.com"
+      "value": "http://localhost:8000"
     }
   ],
   "item": [
     {
-      "name": "Admin",
+      "name": "📦 Coleta",
       "item": [
         {
-          "name": "Get State",
+          "name": "Coleta Estática",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/collect/static",
+              "host": ["{{base_url}}"],
+              "path": ["collect", "static"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"A\",\n  \"dataset_name\": \"alfabeto_v1\",\n  \"landmarks\": [\n    {\"x\": 0.1, \"y\": 0.2, \"z\": 0.0},\n    {\"x\": 0.15, \"y\": 0.25, \"z\": 0.0}\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Iniciar Coleta Dinâmica",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/collect/dynamic/start",
+              "host": ["{{base_url}}"],
+              "path": ["collect", "dynamic", "start"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"OI\",\n  \"dataset_name\": \"gestos_v1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Finalizar Coleta Dinâmica",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/collect/dynamic/stop",
+              "host": ["{{base_url}}"],
+              "path": ["collect", "dynamic", "stop"]
+            }
+          }
+        },
+        {
+          "name": "Listar Datasets",
           "request": {
             "method": "GET",
-            "header": [],
             "url": {
-              "raw": "{{base_url}}/admin/state",
+              "raw": "{{base_url}}/collect/datasets",
               "host": ["{{base_url}}"],
-              "path": ["admin", "state"]
+              "path": ["collect", "datasets"]
             }
           }
         },
         {
-          "name": "Set Run Mode",
+          "name": "Stats do Dataset",
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"run_mode\": \"inference\"\n}"
-            },
+            "method": "GET",
             "url": {
-              "raw": "{{base_url}}/admin/mode",
+              "raw": "{{base_url}}/collect/datasets/{{dataset_id}}/stats",
               "host": ["{{base_url}}"],
-              "path": ["admin", "mode"]
-            }
-          }
-        },
-        {
-          "name": "Change Detection Mode",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"mode\": \"dynamic_ml\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/admin/detection",
-              "host": ["{{base_url}}"],
-              "path": ["admin", "detection"]
-            }
-          }
-        },
-        {
-          "name": "Start Training",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/admin/train",
-              "host": ["{{base_url}}"],
-              "path": ["admin", "train"]
+              "path": ["collect", "datasets", "{{dataset_id}}", "stats"]
             }
           }
         }
       ]
     },
     {
-      "name": "Detection",
+      "name": "🧠 Treinamento",
       "item": [
         {
-          "name": "Detect Gesture",
+          "name": "Listar Datasets para Treino",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/train/datasets",
+              "host": ["{{base_url}}"],
+              "path": ["train", "datasets"]
+            }
+          }
+        },
+        {
+          "name": "Iniciar Treinamento",
           "request": {
             "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "file",
-                  "type": "file",
-                  "src": ""
-                }
-              ]
-            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
             "url": {
-              "raw": "{{base_url}}/detect/detect",
+              "raw": "{{base_url}}/train/start",
               "host": ["{{base_url}}"],
-              "path": ["detect", "detect"]
+              "path": ["train", "start"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataset_id\": \"uuid-aqui\",\n  \"model_name\": \"libras_az\",\n  \"model_type\": \"static\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Status do Treinamento",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/train/status/{{job_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["train", "status", "{{job_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Retreinar Modelo",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/train/retrain",
+              "host": ["{{base_url}}"],
+              "path": ["train", "retrain"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model_id\": \"uuid-modelo\",\n  \"dataset_id\": \"uuid-novo-dataset\"\n}"
             }
           }
         }
       ]
     },
     {
-      "name": "Dataset Collection",
+      "name": "🤖 Modelos",
       "item": [
         {
-          "name": "Collect Image",
+          "name": "Listar Modelos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/train/models",
+              "host": ["{{base_url}}"],
+              "path": ["train", "models"]
+            }
+          }
+        },
+        {
+          "name": "Listar Modelos por Tipo",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/train/models/{{type}}",
+              "host": ["{{base_url}}"],
+              "path": ["train", "models", "{{type}}"]
+            }
+          }
+        },
+        {
+          "name": "Ativar Modelo",
           "request": {
             "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "label",
-                  "value": "A",
-                  "type": "text"
-                },
-                {
-                  "key": "file",
-                  "type": "file",
-                  "src": ""
-                }
-              ]
-            },
             "url": {
-              "raw": "{{base_url}}/collect/",
+              "raw": "{{base_url}}/train/activate/{{model_id}}",
               "host": ["{{base_url}}"],
-              "path": ["collect", ""]
+              "path": ["train", "activate", "{{model_id}}"]
             }
           }
         }
