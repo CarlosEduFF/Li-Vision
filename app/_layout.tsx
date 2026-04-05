@@ -18,6 +18,10 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
         <Stack.Screen name="screens/cam" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/collect-static" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/collect-dynamic" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/train" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/models" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

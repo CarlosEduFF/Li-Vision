@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator
 import { useEffect, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { setRunMode, setDetectionMode, getState } from "@/services/api";
+import { router } from "expo-router";
 
 export default function SettingsScreen() {
   const [runMode, setRunModeState] = useState<string>("...");
@@ -160,6 +161,51 @@ export default function SettingsScreen() {
                 activeMode="dynamic_ml"
                 onPress={() => changeDetection("dynamic_ml")}
               />
+            </View>
+          </View>
+          {/* CARD NAVIGATION */}
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <MaterialIcons name="dashboard" size={20} color="#fff" />
+              <Text style={styles.sectionTitle}>Telas de Coleta e Treinamento</Text>
+            </View>
+            <View style={styles.optionsGrid}>
+              <TouchableOpacity
+                style={styles.optionBtn}
+                onPress={() => router.push("/screens/collect-static")}
+              >
+                <View style={styles.optionContent}>
+                  <MaterialIcons name="camera" size={22} color="#888" />
+                  <Text style={styles.optionText}>Coleta Estática (A-Z)</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.optionBtn}
+                onPress={() => router.push("/screens/collect-dynamic")}
+              >
+                <View style={styles.optionContent}>
+                  <MaterialIcons name="videocam" size={22} color="#888" />
+                  <Text style={styles.optionText}>Coleta Dinâmica (LIBRAS)</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.optionBtn}
+                onPress={() => router.push("/screens/train")}
+              >
+                <View style={styles.optionContent}>
+                  <MaterialIcons name="model-training" size={22} color="#888" />
+                  <Text style={styles.optionText}>Treinar Modelo</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.optionBtn}
+                onPress={() => router.push("/screens/models")}
+              >
+                <View style={styles.optionContent}>
+                  <MaterialIcons name="list" size={22} color="#888" />
+                  <Text style={styles.optionText}>Gerenciar Modelos</Text>
+                </View>
+              </TouchableOpacity>
             </View>
           </View>
         </>
