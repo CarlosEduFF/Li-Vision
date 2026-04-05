@@ -1,4 +1,7 @@
 from collections import deque
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class DetectorManager:
@@ -7,7 +10,10 @@ class DetectorManager:
 
     Responsabilidades
     -----------------
-    - Executar detectores registrados
+    - Executar detectores registrados na ordem correta
+    - Detectores de sequência (SequenceGestureDetector) recebem
+      a lista completa de mãos (hands), detectores estáticos
+      recebem uma mão por vez.
     - Aplicar threshold de confiança
     - Estabilizar detecções no tempo
     """
@@ -19,7 +25,6 @@ class DetectorManager:
         stability_frames=3,
         cooldown_frames=10,
     ):
-
         self.detectors = detectors
         self.min_score = min_score
 
@@ -34,13 +39,31 @@ class DetectorManager:
         self.last_label = None
         self.last_score = 0.0
 
+    def _is_sequence_detector(self, det) -> bool:
+        """
+        Verifica se o detector é do tipo sequência (SequenceGestureDetector).
+        Detectores de sequência esperam a lista completa de mãos (mãos × frames),
+        enquanto detectores estáticos esperam uma única mão (lista de landmarks).
+        """
+        return hasattr(det, "buffer") and hasattr(det, "window_size")
+
     def detect(self, hands):
         """
         Executa detectores e retorna gesto estabilizado.
+
+        Parameters
+        ----------
+        hands : list[list[MockLandmark]]
+            Lista de mãos, cada mão é uma lista de 21 landmarks.
+
+        Returns
+        -------
+        tuple[str|None, float]
+            (label, score) — label pode ser None se nada detectado.
         """
 
         # -------------------------------------------
-        # Cooldown ativo
+        # Cooldown ativo — retorna último gesto estável
         # -------------------------------------------
         if self.cooldown_counter > 0:
             self.cooldown_counter -= 1
@@ -54,27 +77,37 @@ class DetectorManager:
         best_score = 0.0
 
         # -------------------------------------------
-        # Executa todos detectores
+        # Executa detectores
         # -------------------------------------------
-        for hand in hands:
-            for det in self.detectors:
-                try:
-                    label, score = det.detect(hand)
+        for det in self.detectors:
+            try:
+                if self._is_sequence_detector(det):
+                    # Detectores de sequência processam todas as mãos de uma vez
+                    label, score = det.detect(hands)
+                else:
+                    # Detectores estáticos: roda para cada mão, pega o melhor
+                    label, score = None, 0.0
+                    for hand in hands:
+                        try:
+                            lbl, scr = det.detect(hand)
+                            if lbl and scr > score:
+                                label, score = lbl, scr
+                        except Exception as e:
+                            logger.debug(
+                                "[DetectorManager] Erro em detector estático por mão: %s — %s",
+                                type(det).__name__, e
+                            )
 
-                    if label and score > best_score:
-                        best_label = label
-                        best_score = score
+                if label and score > best_score:
+                    best_label = label
+                    best_score = score
 
-                except Exception:
-                    # fallback para detectores que usam lista de mãos
-                    try:
-                        label, score = det.detect(hands)
-
-                        if label and score > best_score:
-                            best_label = label
-                            best_score = score
-                    except Exception:
-                        continue
+            except Exception as e:
+                logger.warning(
+                    "[DetectorManager] Erro em detector %s: %s",
+                    type(det).__name__, e
+                )
+                continue
 
         # -------------------------------------------
         # Threshold mínimo

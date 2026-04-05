@@ -11,7 +11,7 @@ pipeline:
 # CONFIGURAÇÃO DE DETECÇÃO
 # ---------------------------------------------------
 detection:
-  mode: "dynamic_ml"             # rules | ml | dynamic_ml | hybrid
+  mode: "rules"             # rules | ml | dynamic_ml | hybrid
 
   # parâmetros globais do DetectorManager
   min_score: 0.7

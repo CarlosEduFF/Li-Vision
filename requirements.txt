@@ -9,3 +9,5 @@ uvicorn
 python-multipart
 pyyaml
 websockets
+supabase
+python-dotenv

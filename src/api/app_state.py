@@ -17,6 +17,10 @@ class AppState:
         self.detector_manager = None
         self.detectors = None
         self.timestamp = 0
+        from src.services.collection_service import CollectionService
+        from src.services.training_service import TrainingService
+        self.collection_service = CollectionService()
+        self.training_service = TrainingService()
 
     def start_pipeline(self):
         """Cria e abre o HandPipeline (se não existir)."""
