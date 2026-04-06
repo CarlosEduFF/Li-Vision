@@ -37,7 +37,7 @@ export default function TabLayout() {
         options={{
           title: 'ML Studio',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="play" color={color} />
+            <IconSymbol size={28} name="play.rectangle.fill" color={color} />
           ),
         }}
       />
