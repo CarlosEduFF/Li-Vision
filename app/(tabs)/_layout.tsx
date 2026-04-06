@@ -32,6 +32,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="studio"
+        options={{
+          title: 'ML Studio',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="play" color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

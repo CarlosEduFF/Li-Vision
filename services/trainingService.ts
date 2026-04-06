@@ -62,6 +62,11 @@ export const trainingService = {
     return response.json();
   },
 
+  async getDatasetStats(datasetId: string) {
+    const response = await fetch(`${API_URL}/collect/datasets/${datasetId}/stats`);
+    return response.json();
+  },
+
   async listModels() {
     const response = await fetch(`${API_URL}/train/models`);
     return response.json();
