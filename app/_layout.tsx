@@ -1,7 +1,9 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
+import { useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -11,6 +13,17 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = await AsyncStorage.getItem("userToken");
+      if (!token) {
+        setTimeout(() => router.replace("/screens/login"), 100);
+      }
+    };
+    checkAuth();
+  }, []);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -22,6 +35,7 @@ export default function RootLayout() {
         <Stack.Screen name="screens/collect-dynamic" options={{ headerShown: false }} />
         <Stack.Screen name="screens/train" options={{ headerShown: false }} />
         <Stack.Screen name="screens/models" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/login" options={{ headerShown: false, animation: 'fade' }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

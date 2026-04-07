@@ -1,116 +1,123 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 const API_URL = "https://li-visionv2.onrender.com";
 
+const fetchWithAuth = async (endpoint: string, options: RequestInit = {}) => {
+  const token = await AsyncStorage.getItem("userToken");
+  const headers = new Headers(options.headers || {});
+  
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+  
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers
+  });
+  return response.json();
+};
+
 export const trainingService = {
-  async getDatasets() {
-    const response = await fetch(`${API_URL}/collect/datasets`);
+  async login(email: string, password: string) {
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
     return response.json();
+  },
+
+  async register(full_name: string, email: string, password: string) {
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ full_name, email, password })
+    });
+    return response.json();
+  },
+
+  async getDatasets() {
+    return fetchWithAuth("/collect/datasets");
   },
 
   async startStaticCollection(label: string, dataset_name: string, landmarks: any) {
     label = label.toUpperCase();
     dataset_name = dataset_name.toUpperCase();
-    const payload = {
-      label,
-      dataset_name,
-      landmarks
-    };
-    
-    const response = await fetch(`${API_URL}/collect/static`, {
+    return fetchWithAuth("/collect/static", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ label, dataset_name, landmarks })
     });
-    return response.json();
   },
 
   async startDynamicCollection(label: string, dataset_name: string) {
     label = label.toUpperCase();
     dataset_name = dataset_name.toUpperCase();
-    const payload = { label, dataset_name };
-    const response = await fetch(`${API_URL}/collect/dynamic/start`, {
+    return fetchWithAuth("/collect/dynamic/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ label, dataset_name })
     });
-    return response.json();
   },
 
   async stopDynamicCollection() {
-    const response = await fetch(`${API_URL}/collect/dynamic/stop`, {
-      method: "POST"
-    });
-    return response.json();
+    return fetchWithAuth("/collect/dynamic/stop", { method: "POST" });
   },
 
   async startTraining(datasetId: string, modelName: string, modelType: "static"|"dynamic") {
     modelName = modelName.toUpperCase();
-    const payload = {
-      dataset_id: datasetId,
-      model_name: modelName,
-      model_type: modelType
-    };
-    const response = await fetch(`${API_URL}/train/start`, {
+    return fetchWithAuth("/train/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ dataset_id: datasetId, model_name: modelName, model_type: modelType })
     });
-    return response.json();
   },
 
   async getTrainingStatus(jobId: string) {
-    const response = await fetch(`${API_URL}/train/status/${jobId}`);
-    return response.json();
+    return fetchWithAuth(`/train/status/${jobId}`);
   },
 
   async getDatasetStats(datasetId: string) {
-    const response = await fetch(`${API_URL}/collect/datasets/${datasetId}/stats`);
-    return response.json();
+    return fetchWithAuth(`/collect/datasets/${datasetId}/stats`);
   },
 
   async deleteDataset(datasetId: string) {
-    const response = await fetch(`${API_URL}/collect/datasets/${datasetId}`, {
-      method: "DELETE"
-    });
-    return response.json();
+    return fetchWithAuth(`/collect/datasets/${datasetId}`, { method: "DELETE" });
   },
 
   async renameDataset(datasetId: string, newName: string) {
-    const response = await fetch(`${API_URL}/collect/datasets/${datasetId}`, {
+    return fetchWithAuth(`/collect/datasets/${datasetId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ new_name: newName })
     });
-    return response.json();
   },
 
   async deleteLabel(datasetId: string, label: string) {
-    const response = await fetch(`${API_URL}/collect/datasets/${datasetId}/labels/${label}`, {
-      method: "DELETE"
-    });
-    return response.json();
+    return fetchWithAuth(`/collect/datasets/${datasetId}/labels/${label}`, { method: "DELETE" });
   },
 
   async renameLabel(datasetId: string, oldLabel: string, newLabel: string) {
-    const response = await fetch(`${API_URL}/collect/datasets/${datasetId}/labels/${oldLabel}`, {
+    return fetchWithAuth(`/collect/datasets/${datasetId}/labels/${oldLabel}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ new_label: newLabel })
     });
-    return response.json();
   },
 
   async listModels() {
-    const response = await fetch(`${API_URL}/train/models`);
-    return response.json();
+    return fetchWithAuth("/train/models");
   },
 
   async activateModel(modelId: string) {
-    const payload = { model_id: modelId };
-    const response = await fetch(`${API_URL}/train/activate`, {
+    return fetchWithAuth("/train/activate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ model_id: modelId })
     });
-    return response.json();
+  },
+
+  async getRanking() {
+    return fetchWithAuth("/collect/ranking");
   }
 };

@@ -1,8 +1,19 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useState, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function StudioScreen() {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkRole = async () => {
+      const role = await AsyncStorage.getItem("userRole");
+      setIsAdmin(role === "admin");
+    };
+    checkRole();
+  }, []);
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
       {/* HEADER */}
@@ -42,13 +53,24 @@ export default function StudioScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.optionBtn}
-            onPress={() => router.push("/screens/manage-datasets")}
+            onPress={() => router.push("/screens/ranking")}
           >
             <View style={styles.optionContent}>
-              <MaterialIcons name="folder-open" size={22} color="#00e5ff" />
-              <Text style={[styles.optionText, { color: "#00e5ff" }]}>Gerenciar Gestos e Datasets</Text>
+              <MaterialIcons name="leaderboard" size={22} color="#ffd700" />
+              <Text style={[styles.optionText, { color: "#ffd700" }]}>Ranking Global de Treinamento</Text>
             </View>
           </TouchableOpacity>
+          {isAdmin && (
+            <TouchableOpacity
+              style={styles.optionBtn}
+              onPress={() => router.push("/screens/manage-datasets")}
+            >
+              <View style={styles.optionContent}>
+                <MaterialIcons name="folder-open" size={22} color="#00e5ff" />
+                <Text style={[styles.optionText, { color: "#00e5ff" }]}>Gerenciar Gestos e Datasets</Text>
+              </View>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, Dimensions, Alert,
 import { MaterialIcons } from "@expo/vector-icons";
 import { trainingService } from "../../services/trainingService";
 import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Camera, useCameraDevice, useFrameProcessor } from "react-native-vision-camera";
 import { Worklets } from "react-native-worklets-core";
 import { detectHandLandmarks, LandmarkPoint } from "@/services/handLandmarkerPlugin";
@@ -16,9 +17,11 @@ export default function CollectDynamicScreen() {
   const [landmarks, setLandmarks] = useState<LandmarkPoint[]>([]);
   const [datasets, setDatasets] = useState<any[]>([]);
   const [gestureLabels, setGestureLabels] = useState<string[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     loadDatasets();
+    AsyncStorage.getItem("userRole").then(r => setIsAdmin(r === "admin"));
   }, []);
 
   useEffect(() => {
@@ -196,13 +199,17 @@ export default function CollectDynamicScreen() {
           </ScrollView>
         )}
 
-        <TextInput 
-          style={styles.input}
-          placeholderTextColor="#666"
-          placeholder="EX: LIBRAS_V1"
-          value={datasetName}
-          onChangeText={(v) => setDatasetName(v.toUpperCase())}
-        />
+        {isAdmin ? (
+          <TextInput 
+            style={styles.input}
+            placeholderTextColor="#666"
+            placeholder="EX: LIBRAS_V1"
+            value={datasetName}
+            onChangeText={(v) => setDatasetName(v.toUpperCase())}
+          />
+        ) : (
+          datasets.length === 0 && <Text style={{color:"#888"}}>Nenhum dataset disponível</Text>
+        )}
         
         <Text style={styles.label}>Label (Gesto)</Text>
         {gestureLabels.length > 0 && (
@@ -220,13 +227,18 @@ export default function CollectDynamicScreen() {
             ))}
           </ScrollView>
         )}
-        <TextInput 
-          style={styles.input}
-          placeholderTextColor="#666"
-          placeholder="EX: OI"
-          value={label}
-          onChangeText={(v) => setLabel(v.toUpperCase())}
-        />
+        
+        {isAdmin ? (
+          <TextInput 
+            style={styles.input}
+            placeholderTextColor="#666"
+            placeholder="EX: OI"
+            value={label}
+            onChangeText={(v) => setLabel(v.toUpperCase())}
+          />
+        ) : (
+          gestureLabels.length === 0 && datasetName && <Text style={{color:"#888"}}>Nenhum gesto cadastrado pelo Admin para este dataset.</Text>
+        )}
 
         <View style={styles.buttonRow}>
           <TouchableOpacity 
