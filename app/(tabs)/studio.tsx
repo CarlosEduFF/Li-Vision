@@ -40,6 +40,15 @@ export default function StudioScreen() {
               <Text style={styles.optionText}>Gravar Sequência Múltipla (Sinais)</Text>
             </View>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.optionBtn}
+            onPress={() => router.push("/screens/manage-datasets")}
+          >
+            <View style={styles.optionContent}>
+              <MaterialIcons name="folder-open" size={22} color="#00e5ff" />
+              <Text style={[styles.optionText, { color: "#00e5ff" }]}>Gerenciar Gestos e Datasets</Text>
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
 

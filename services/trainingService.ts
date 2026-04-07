@@ -67,6 +67,38 @@ export const trainingService = {
     return response.json();
   },
 
+  async deleteDataset(datasetId: string) {
+    const response = await fetch(`${API_URL}/collect/datasets/${datasetId}`, {
+      method: "DELETE"
+    });
+    return response.json();
+  },
+
+  async renameDataset(datasetId: string, newName: string) {
+    const response = await fetch(`${API_URL}/collect/datasets/${datasetId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ new_name: newName })
+    });
+    return response.json();
+  },
+
+  async deleteLabel(datasetId: string, label: string) {
+    const response = await fetch(`${API_URL}/collect/datasets/${datasetId}/labels/${label}`, {
+      method: "DELETE"
+    });
+    return response.json();
+  },
+
+  async renameLabel(datasetId: string, oldLabel: string, newLabel: string) {
+    const response = await fetch(`${API_URL}/collect/datasets/${datasetId}/labels/${oldLabel}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ new_label: newLabel })
+    });
+    return response.json();
+  },
+
   async listModels() {
     const response = await fetch(`${API_URL}/train/models`);
     return response.json();
