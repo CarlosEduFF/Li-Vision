@@ -6,28 +6,37 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { trainingService } from '../../services/trainingService';
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!email || !password) {
+    if (!email || !password || !fullName) {
       Alert.alert("Aviso", "Por favor preencha todos os campos.");
       return;
     }
     
     setLoading(true);
     try {
-      const res = await trainingService.login(email, password);
-      if (res.ok && res.token) {
-        await AsyncStorage.setItem("userToken", res.token);
-        await AsyncStorage.setItem("userId", String(res.user_id));
-        await AsyncStorage.setItem("userRole", String(res.role));
-        await AsyncStorage.setItem("userName", String(res.full_name));
-        router.replace("/(tabs)");
+      const res = await trainingService.register(fullName, email, password);
+      
+      // Mesmo com o erro de RLS (que devolvemos na API), se a API de auth do supabase retornar user/token,
+      // a conta foi criada na tabela auth.users com sucesso.
+      if (res.ok && res.token || res.user) {
+        if (res.token) {
+          await AsyncStorage.setItem("userToken", res.token);
+          await AsyncStorage.setItem("userId", String(res.user));
+          await AsyncStorage.setItem("userRole", "member");
+          await AsyncStorage.setItem("userName", fullName);
+          router.replace("/(tabs)");
+        } else {
+           Alert.alert("Sucesso", "Conta criada com sucesso! Faça login para continuar.");
+           router.replace("/screens/login");
+        }
       } else {
-        Alert.alert("Acesso Negado", res.detail || "Credenciais inválidas");
+        Alert.alert("Aviso no Cadastro", "Verifique o backend ou tente fazer login com a conta recém-criada. Erro: " + (res.detail || "Erro desconhecido"));
       }
     } catch(e) {
       Alert.alert("Erro de Conexão", "Não foi possível conectar com o servidor Li-Vision.");
@@ -44,8 +53,20 @@ export default function LoginScreen() {
         <View style={styles.iconCircle}>
           <FontAwesome5 name="robot" size={32} color="#00e5ff" />
         </View>
-        <Text style={styles.title}>Acesso Restrito</Text>
-        <Text style={styles.subtitle}>Entre para contribuir com os datasets do Li-Vision Edge.</Text>
+        <Text style={styles.title}>Novo Pesquisador</Text>
+        <Text style={styles.subtitle}>Crie uma conta para catalogar suas doações de dados.</Text>
+
+        <View style={styles.inputBox}>
+          <MaterialIcons name="person" size={20} color="#888" style={styles.icon}/>
+          <TextInput
+            style={styles.input}
+            placeholder="Nome Completo"
+            placeholderTextColor="#555"
+            autoCapitalize="words"
+            value={fullName}
+            onChangeText={setFullName}
+          />
+        </View>
 
         <View style={styles.inputBox}>
           <MaterialIcons name="email" size={20} color="#888" style={styles.icon}/>
@@ -74,12 +95,12 @@ export default function LoginScreen() {
 
         <TouchableOpacity style={styles.mainBtn} onPress={handleSubmit} disabled={loading}>
           {loading ? <ActivityIndicator color="#0c0f16"/> : (
-            <Text style={styles.mainBtnText}>Entrar</Text>
+            <Text style={styles.mainBtnText}>Criar Conta</Text>
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.replace("/screens/register")} style={styles.toggleBtn}>
-          <Text style={styles.toggleText}>Ainda não contribuiu? Crie sua conta!</Text>
+        <TouchableOpacity onPress={() => router.replace("/screens/login")} style={styles.toggleBtn}>
+          <Text style={styles.toggleText}>Já possuo conta (Fazer Login)</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

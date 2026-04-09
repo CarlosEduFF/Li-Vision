@@ -7,7 +7,7 @@ export async function detectGesture(uri: string): Promise<string> {
     type: "image/jpeg",
   } as any);
 
-  const response = await fetch("https://li-visionv2.onrender.com/detect/", {
+  const response = await fetch("https://li-vision-uyn3.onrender.com/detect/", {
     method: "POST",
     body: form,
   });

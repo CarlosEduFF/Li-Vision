@@ -1,4 +1,4 @@
-const BASE_URL = "https://li-visionv2.onrender.com";
+const BASE_URL = "https://li-vision-uyn3.onrender.com";
 
 export async function detectGesture(uri: string) {
 
@@ -61,7 +61,7 @@ export async function setDetectionMode(mode: string) {
 export async function getState() {
 
   const response = await fetch(
-    "https://li-visionv2.onrender.com/admin/state"
+    "https://li-vision-uyn3.onrender.com/admin/state"
   );
 
   return response.json();
