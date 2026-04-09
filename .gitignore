@@ -1,0 +1,5 @@
+# Ambientes do Python e variáveis de ambiente
+.env
+.env.local
+__pycache__/
+*.pyc

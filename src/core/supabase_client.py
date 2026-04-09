@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 url: str = os.getenv("SUPABASE_URL", "")
-key: str = os.getenv("SUPABASE_KEY", "")
+key: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 
 # Client único a ser exportado e usado em todo o backend
 supabase: Client = create_client(url, key)
