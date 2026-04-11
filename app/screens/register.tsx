@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Modal } from 'react-native';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,7 +11,8 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [hasToken, setHasToken] = useState(false);
   const handleSubmit = async () => {
     if (!email || !password || !fullName) {
       Alert.alert("Aviso", "Por favor preencha todos os campos.");
@@ -30,10 +31,11 @@ export default function RegisterScreen() {
           await AsyncStorage.setItem("userId", String(res.user));
           await AsyncStorage.setItem("userRole", "member");
           await AsyncStorage.setItem("userName", fullName);
-          router.replace("/(tabs)");
+          setHasToken(true);
+          setShowSuccessModal(true);
         } else {
-           Alert.alert("Sucesso", "Conta criada com sucesso! Faça login para continuar.");
-           router.replace("/screens/login");
+           setHasToken(false);
+           setShowSuccessModal(true);
         }
       } else {
         Alert.alert("Aviso no Cadastro", "Verifique o backend ou tente fazer login com a conta recém-criada. Erro: " + (res.detail || "Erro desconhecido"));
@@ -103,6 +105,35 @@ export default function RegisterScreen() {
           <Text style={styles.toggleText}>Já possuo conta (Fazer Login)</Text>
         </TouchableOpacity>
       </View>
+
+      {/* MODAL DE SUCESSO COBRINDO A TELA */}
+      <Modal transparent={true} visible={showSuccessModal} animationType="fade">
+        <View style={styles.modalBg}>
+          <View style={styles.modalCard}>
+            <FontAwesome5 name="check-circle" size={60} color="#00e5ff" style={{ marginBottom: 20 }} />
+            <Text style={styles.modalTitle}>Cadastro Realizado!</Text>
+            <Text style={styles.modalSubtitle}>
+              {hasToken 
+                ? "Sua conta de pesquisador foi criada com sucesso no Li-Vision. Bem-vindo(a)!"
+                : "Conta criada com sucesso! Faça login para continuar."}
+            </Text>
+            <TouchableOpacity 
+              style={styles.modalBtn} 
+              onPress={() => {
+                setShowSuccessModal(false);
+                if (hasToken) {
+                  router.replace("/(tabs)");
+                } else {
+                  router.replace("/screens/login");
+                }
+              }}
+            >
+              <Text style={styles.modalBtnText}>Continuar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </KeyboardAvoidingView>
   );
 }
@@ -119,5 +150,11 @@ const styles = StyleSheet.create({
   mainBtn: { backgroundColor: "#00e5ff", borderRadius: 12, paddingVertical: 16, alignItems: "center", marginTop: 10, shadowColor: "#00e5ff", shadowOpacity: 0.4, shadowRadius: 10, shadowOffset: { width: 0, height: 4 } },
   mainBtnText: { color: "#000", fontSize: 16, fontWeight: "bold" },
   toggleBtn: { marginTop: 25, alignSelf: "center", padding: 10 },
-  toggleText: { color: "#888", fontSize: 14, fontWeight: "600", textDecorationLine: "underline" }
+  toggleText: { color: "#888", fontSize: 14, fontWeight: "600", textDecorationLine: "underline" },
+  modalBg: { flex: 1, backgroundColor: "rgba(0,0,0,0.85)", justifyContent: "center", alignItems: "center", padding: 20 },
+  modalCard: { width: "100%", maxWidth: 350, backgroundColor: "#14171d", borderRadius: 24, padding: 30, alignItems: "center", borderWidth: 1, borderColor: "#00e5ff", shadowColor: "#00e5ff", shadowOpacity: 0.3, shadowRadius: 30, shadowOffset: { width: 0, height: 10 } },
+  modalTitle: { fontSize: 24, fontWeight: "800", color: "#fff", marginBottom: 10, textAlign: "center" },
+  modalSubtitle: { fontSize: 15, color: "#a0aab5", textAlign: "center", marginBottom: 30, lineHeight: 22 },
+  modalBtn: { backgroundColor: "#00e5ff", borderRadius: 12, paddingVertical: 16, paddingHorizontal: 30, width: "100%", alignItems: "center", shadowColor: "#00e5ff", shadowOpacity: 0.4, shadowRadius: 10, shadowOffset: { width: 0, height: 4 } },
+  modalBtnText: { color: "#000", fontSize: 16, fontWeight: "bold" }
 });

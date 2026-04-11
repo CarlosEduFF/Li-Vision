@@ -37,6 +37,7 @@ export default function RootLayout() {
         <Stack.Screen name="screens/models" options={{ headerShown: false }} />
         <Stack.Screen name="screens/login" options={{ headerShown: false, animation: 'fade' }} />
         <Stack.Screen name="screens/register" options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name='screens/ranking' options={{ headerShown: false, animation: 'fade' }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
