@@ -24,25 +24,29 @@ class CollectionService:
         return ins_res.data[0]["id"]
 
     def collect_static(self, label: str, hand, dataset_name: str, user_id: str = None) -> dict:
-        dataset_name = dataset_name.upper()
-        label = label.upper()
-        dataset_id = self._get_or_create_dataset(dataset_name, "static")
-        features = self.static_collector.landmarks_to_features(hand)
-        
-        insert_data = {
-            "dataset_id": dataset_id,
-            "label": label,
-            "features": features
-        }
-        if user_id:
-            insert_data["user_id"] = user_id
+        try:
+            dataset_name = dataset_name.upper()
+            label = label.upper()
+            dataset_id = self._get_or_create_dataset(dataset_name, "static")
+            features = self.static_collector.landmarks_to_features(hand)
             
-        supabase.table("samples").insert(insert_data).execute()
-        
-        res = supabase.table("samples").select("id", count="exact").eq("dataset_id", dataset_id).eq("label", label).execute()
-        count = res.count if hasattr(res, 'count') and res.count is not None else len(res.data)
-        
-        return {"ok": True, "sample_count": count}
+            insert_data = {
+                "dataset_id": dataset_id,
+                "label": label,
+                "features": features
+            }
+            if user_id:
+                insert_data["user_id"] = user_id
+                
+            supabase.table("samples").insert(insert_data).execute()
+            
+            res = supabase.table("samples").select("id", count="exact").eq("dataset_id", dataset_id).eq("label", label).execute()
+            count = res.count if hasattr(res, 'count') and res.count is not None else len(res.data)
+            
+            return {"ok": True, "sample_count": count}
+        except Exception as e:
+            logger.error(f"[collect_static] Erro: {str(e)}")
+            return {"ok": False, "error": f"Backend Error: {str(e)}"}
 
     def collect_dynamic_start(self, label: str, dataset_name: str, user_id: str = None) -> dict:
         dataset_name = dataset_name.upper()
@@ -75,33 +79,37 @@ class CollectionService:
         }
 
     def collect_dynamic_save(self) -> dict:
-        if not self.dynamic_session or len(self.dynamic_buffer) < 15:
-            return {"ok": False, "error": "Incomplete buffer or no session"}
+        try:
+            if not self.dynamic_session or len(self.dynamic_buffer) < 15:
+                return {"ok": False, "error": "Incomplete buffer or no session"}
+                
+            dataset_id = self.dynamic_session["dataset_id"]
+            label = self.dynamic_session["label"]
+            user_id = self.dynamic_session.get("user_id")
             
-        dataset_id = self.dynamic_session["dataset_id"]
-        label = self.dynamic_session["label"]
-        user_id = self.dynamic_session.get("user_id")
-        
-        # Flatten the 15 frames into a single features array
-        flattened_features = []
-        for frame in self.dynamic_buffer:
-            flattened_features.extend(frame)
+            # Flatten the 15 frames into a single features array
+            flattened_features = []
+            for frame in self.dynamic_buffer:
+                flattened_features.extend(frame)
+                
+            insert_data = {
+                "dataset_id": dataset_id,
+                "label": label,
+                "features": flattened_features
+            }
+            if user_id:
+                insert_data["user_id"] = user_id
+                
+            supabase.table("samples").insert(insert_data).execute()
             
-        insert_data = {
-            "dataset_id": dataset_id,
-            "label": label,
-            "features": flattened_features
-        }
-        if user_id:
-            insert_data["user_id"] = user_id
+            self.dynamic_buffer = []
             
-        supabase.table("samples").insert(insert_data).execute()
-        
-        self.dynamic_buffer = []
-        
-        res = supabase.table("samples").select("id").eq("dataset_id", dataset_id).eq("label", label).execute()
-        
-        return {"ok": True, "sequences": len(res.data)}
+            res = supabase.table("samples").select("id").eq("dataset_id", dataset_id).eq("label", label).execute()
+            
+            return {"ok": True, "sequences": len(res.data)}
+        except Exception as e:
+            logger.error(f"[collect_dynamic_save] Erro: {str(e)}")
+            return {"ok": False, "error": f"Backend Error: {str(e)}"}
 
     def collect_dynamic_stop(self) -> dict:
         self.dynamic_session = None
