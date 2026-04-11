@@ -22,7 +22,8 @@ const MAPPING = {
   'play': 'play-arrow',
   'play.circle': 'play-circle',
   'play.rectangle.fill': 'smart-display',
-} as IconMapping;
+  'person.circle.fill': 'person',
+} as Partial<IconMapping>;
 
 /**
  * An icon component that uses native SF Symbols on iOS, and Material Icons on Android and web.
