@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   Dimensions,
+  Modal,
 } from "react-native";
 import {
   Camera,
@@ -20,11 +21,22 @@ import {
   gestureWS,
   ConnectionStatus,
   GestureResult,
+  DetectionMode,
 } from "@/services/gestureWebSocket";
 import {
   detectHandLandmarks,
   LandmarkPoint,
 } from "@/services/handLandmarkerPlugin";
+
+// ──────────────────────────────────────────────
+// Configurações dos modos de detecção
+// ──────────────────────────────────────────────
+const DETECTION_MODES: { key: DetectionMode; label: string; desc: string; icon: string }[] = [
+  { key: "hybrid",     label: "Híbrido",        desc: "Combina regras + ML estático + ML dinâmico",   icon: "merge-type" },
+  { key: "rules",      label: "Regras Lógicas", desc: "Apenas detectores baseados em lógica (A–E)",   icon: "calculate" },
+  { key: "ml",         label: "ML Estático",    desc: "Apenas modelos de gestos sem movimento",       icon: "pan-tool" },
+  { key: "dynamic_ml", label: "ML Dinâmico",    desc: "Apenas modelos de gestos com movimento",       icon: "dynamic-form" },
+];
 
 export default function CameraScreen() {
   const [gesture, setGesture] = useState<string | null>(null);
@@ -34,7 +46,8 @@ export default function CameraScreen() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [landmarks, setLandmarks] = useState<LandmarkPoint[]>([]);
   const [showLandmarks, setShowLandmarks] = useState<boolean>(true);
-  const [detectionMode, setDetectionMode] = useState<string>("edge");
+  const [detectionMode, setDetectionMode] = useState<DetectionMode>("hybrid");
+  const [showModeModal, setShowModeModal] = useState<boolean>(false);
 
   // Transformação correta de coordenadas para o sensor do aparelho (Modo 3)
   const transformPoint = (lm: any) => ({ x: 1.0 - lm.y, y: 1.0 - lm.x, z: lm.z });
@@ -68,7 +81,7 @@ export default function CameraScreen() {
     }
 
     if (result.mode) {
-      setDetectionMode(result.mode);
+      setDetectionMode(result.mode as DetectionMode);
     }
   }, []);
 
@@ -87,9 +100,19 @@ export default function CameraScreen() {
   );
 
   useEffect(() => {
-    gestureWS.connect(handleGesture, handleStatusChange);
+    gestureWS.connect(handleGesture, handleStatusChange, detectionMode);
     return () => gestureWS.disconnect();
   }, []);
+
+  // ──────────────────────────────────────────────
+  // Mudar modo de detecção
+  // ──────────────────────────────────────────────
+  const changeMode = (mode: DetectionMode) => {
+    setDetectionMode(mode);
+    setShowModeModal(false);
+    // Reconecta com o novo modo (nova sessão no servidor)
+    gestureWS.reconnectWithMode(mode);
+  };
 
   // ──────────────────────────────────────────────
   // Bridges JS ↔ Worklet
@@ -189,6 +212,8 @@ export default function CameraScreen() {
     label: connectionStatus,
   };
 
+  const currentModeConfig = DETECTION_MODES.find(m => m.key === detectionMode);
+
   // Área da câmera (ocupa tudo menos o header)
   const HEADER_HEIGHT = 90;
   const CAM_WIDTH = screenWidth - 32; // margem de 16 cada lado
@@ -207,6 +232,22 @@ export default function CameraScreen() {
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Li-Vision Edge</Text>
+
+        {/* Botão modo de detecção */}
+        <TouchableOpacity
+          onPress={() => setShowModeModal(true)}
+          style={[styles.iconBtn, styles.modeBtnActive]}
+          accessibilityLabel="Selecionar modo de detecção"
+        >
+          <MaterialIcons
+            name={(currentModeConfig?.icon as any) || "memory"}
+            size={18}
+            color="#00e5ff"
+          />
+          <Text style={styles.modeBtnText}>
+            {currentModeConfig?.label || detectionMode}
+          </Text>
+        </TouchableOpacity>
 
         {/* Toggle landmarks */}
         <TouchableOpacity
@@ -360,6 +401,59 @@ export default function CameraScreen() {
           </View>
         )}
       </View>
+
+      {/* ── MODAL SELEÇÃO DE MODO ── */}
+      <Modal transparent visible={showModeModal} animationType="fade">
+        <View style={styles.modalBg}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <MaterialIcons name="memory" size={28} color="#00e5ff" />
+              <Text style={styles.modalTitle}>Modo de Detecção</Text>
+            </View>
+            <Text style={styles.modalSubtitle}>
+              Escolha o cérebro de reconhecimento para esta sessão.
+            </Text>
+
+            {DETECTION_MODES.map((mode) => {
+              const isActive = detectionMode === mode.key;
+              return (
+                <TouchableOpacity
+                  key={mode.key}
+                  style={[styles.modeOption, isActive && styles.modeOptionActive]}
+                  onPress={() => changeMode(mode.key)}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.modeOptionLeft}>
+                    <MaterialIcons
+                      name={mode.icon as any}
+                      size={22}
+                      color={isActive ? "#00e5ff" : "#888"}
+                    />
+                    <View>
+                      <Text style={[styles.modeLabel, isActive && styles.modeLabelActive]}>
+                        {mode.label}
+                      </Text>
+                      <Text style={styles.modeDesc}>{mode.desc}</Text>
+                    </View>
+                  </View>
+                  {isActive && (
+                    <View style={styles.activeDotOuter}>
+                      <View style={styles.activeDotInner} />
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+
+            <TouchableOpacity
+              style={styles.modalCloseBtn}
+              onPress={() => setShowModeModal(false)}
+            >
+              <Text style={styles.modalCloseBtnText}>Fechar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -396,7 +490,7 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingBottom: 12,
     paddingHorizontal: 16,
-    gap: 10,
+    gap: 8,
   },
   backBtn: {
     padding: 8,
@@ -412,6 +506,20 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 229, 255, 0.15)",
     borderWidth: 1,
     borderColor: "#00e5ff",
+  },
+  modeBtnActive: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    backgroundColor: "rgba(0, 229, 255, 0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(0, 229, 255, 0.4)",
+  },
+  modeBtnText: {
+    fontSize: 11,
+    fontWeight: "bold",
+    color: "#00e5ff",
   },
   headerTitle: {
     flex: 1,
@@ -552,5 +660,109 @@ const styles = StyleSheet.create({
   noHandText: {
     color: "#888",
     fontSize: 12,
+  },
+  // ── MODAL ──
+  modalBg: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.85)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalCard: {
+    width: "100%",
+    maxWidth: 380,
+    backgroundColor: "#14171d",
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: "#00e5ff",
+    shadowColor: "#00e5ff",
+    shadowOpacity: 0.3,
+    shadowRadius: 30,
+    shadowOffset: { width: 0, height: 10 },
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 8,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#fff",
+  },
+  modalSubtitle: {
+    fontSize: 13,
+    color: "#888",
+    marginBottom: 20,
+    lineHeight: 18,
+  },
+  modeOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#1c2026",
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "transparent",
+    marginBottom: 10,
+  },
+  modeOptionActive: {
+    backgroundColor: "rgba(0, 229, 255, 0.12)",
+    borderColor: "#00e5ff",
+    shadowColor: "#00e5ff",
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 0 },
+  },
+  modeOptionLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  modeLabel: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#aaa",
+  },
+  modeLabelActive: {
+    color: "#00e5ff",
+  },
+  modeDesc: {
+    fontSize: 11,
+    color: "#666",
+    marginTop: 2,
+  },
+  activeDotOuter: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "rgba(0, 229, 255, 0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  activeDotInner: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#00e5ff",
+  },
+  modalCloseBtn: {
+    marginTop: 10,
+    alignItems: "center",
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#1c2026",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  modalCloseBtnText: {
+    color: "#888",
+    fontSize: 15,
+    fontWeight: "600",
   },
 });

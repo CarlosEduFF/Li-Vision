@@ -1,8 +1,11 @@
 /**
  * Serviço WebSocket para detecção de gestos em tempo real.
  *
- * Mantém uma conexão persistente com a API, enviando frames base64
+ * Mantém uma conexão persistente com a API, enviando landmarks
  * e recebendo resultados de detecção continuamente.
+ *
+ * MULTI-TENANT: Suporta envio do modo de detecção via query param
+ * e ações de controle (set_mode, start_collect, stop_collect).
  *
  * Features:
  * - Reconexão automática com backoff exponencial
@@ -11,7 +14,7 @@
  * - Limpeza de recursos ao desconectar
  */
 
-const WS_URL = "wss://li-visionv2.onrender.com/ws/detect";
+const WS_BASE_URL = "wss://li-visionv2.onrender.com/ws/detect";
 
 // Render plano gratuito fecha conexoes idle com codigo 1000.
 // Usamos tentativas ilimitadas com cap de 30s para manter conexao.
@@ -21,14 +24,21 @@ const MAX_RECONNECT_DELAY = 30_000;   // 30s teto
 
 export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "reconnecting" | "failed";
 
+export type DetectionMode = "hybrid" | "rules" | "ml" | "dynamic_ml";
+
 export type GestureResult = {
   gesture: string | null;
   confidence: number;
-  /** Modo de detecção ativo na API (rules | ml | dynamic_ml | hybrid) */
+  /** Modo de detecção ativo na sessão (rules | ml | dynamic_ml | hybrid) */
   mode?: string;
   error?: string;
   /** Landmarks retornados pelo MediaPipe do servidor */
   landmarks?: any[];
+  /** Resposta de ações de controle */
+  ok?: boolean;
+  action?: string;
+  detectors?: number;
+  status?: string;
 };
 
 type GestureCallback = (result: GestureResult) => void;
@@ -41,17 +51,20 @@ class GestureWebSocket {
   private reconnectAttempts = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private intentionalClose = false;
+  private currentMode: DetectionMode = "hybrid";
 
   /**
-   * Conecta ao WebSocket da API.
+   * Conecta ao WebSocket da API com o modo de detecção especificado.
    * @param onGesture - callback chamado a cada resposta de detecção
    * @param onStatusChange - callback chamado quando o status da conexão muda
+   * @param mode - modo de detecção (hybrid/rules/ml/dynamic_ml)
    */
-  connect(onGesture: GestureCallback, onStatusChange?: StatusCallback): void {
+  connect(onGesture: GestureCallback, onStatusChange?: StatusCallback, mode?: DetectionMode): void {
     this.onGesture = onGesture;
     this.onStatusChange = onStatusChange ?? null;
     this.intentionalClose = false;
     this.reconnectAttempts = 0;
+    if (mode) this.currentMode = mode;
     this._connect();
   }
 
@@ -64,10 +77,12 @@ class GestureWebSocket {
 
     this._setStatus(this.reconnectAttempts > 0 ? "reconnecting" : "connecting");
 
-    const ws = new WebSocket(WS_URL);
+    // Envia o modo de detecção como query parameter
+    const wsUrl = `${WS_BASE_URL}?mode=${this.currentMode}`;
+    const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
-      console.log("[WS] Conectado");
+      console.log(`[WS] Conectado (modo: ${this.currentMode})`);
       this.reconnectAttempts = 0;
       this._setStatus("connected");
     };
@@ -101,6 +116,39 @@ class GestureWebSocket {
   }
 
   /**
+   * Reconecta com um novo modo de detecção.
+   * Fecha a conexão atual e reconecta com o modo especificado.
+   */
+  reconnectWithMode(mode: DetectionMode): void {
+    this.currentMode = mode;
+    this.intentionalClose = true; // Evita reconexão automática durante a troca
+
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+
+    if (this.ws) {
+      try { this.ws.close(); } catch {}
+      this.ws = null;
+    }
+
+    // Reconecta imediatamente com o novo modo
+    this.intentionalClose = false;
+    this.reconnectAttempts = 0;
+    this._connect();
+  }
+
+  /**
+   * Envia uma ação de controle (set_mode, start_collect, stop_collect) pelo WebSocket.
+   */
+  sendAction(action: Record<string, any>): void {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(action));
+    }
+  }
+
+  /**
    * Envia os bytes do frame redimensionado para a API para processamento.
    * @deprecated Use sendLandmarks() para edge computing (muito mais leve).
    */
@@ -126,6 +174,13 @@ class GestureWebSocket {
    */
   isConnected(): boolean {
     return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
+  }
+
+  /**
+   * Retorna o modo de detecção atual.
+   */
+  getMode(): DetectionMode {
+    return this.currentMode;
   }
 
   /**
