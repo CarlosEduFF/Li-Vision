@@ -3,7 +3,7 @@ Abaixo está um **guia prático para testar sua API no Postman** com base nas ro
 Base URL da API:
 
 ```
-https://li-vision.onrender.com
+https://li-vision-uyn3.onrender.com
 ```
 
 ---
@@ -19,7 +19,7 @@ GET /admin/state
 ### URL completa
 
 ```
-https://li-vision.onrender.com/admin/state
+https://li-vision-uyn3.onrender.com/admin/state
 ```
 
 ### Body
@@ -61,7 +61,7 @@ POST /admin/mode
 ### URL
 
 ```
-https://li-vision.onrender.com/admin/mode
+https://li-vision-uyn3.onrender.com/admin/mode
 ```
 
 ### Headers
@@ -107,7 +107,7 @@ POST /admin/detection
 ### URL
 
 ```
-https://li-vision.onrender.com/admin/detection
+https://li-vision-uyn3.onrender.com/admin/detection
 ```
 
 ### Headers
@@ -162,7 +162,7 @@ POST /admin/train
 ### URL
 
 ```
-https://li-vision.onrender.com/admin/train
+https://li-vision-uyn3.onrender.com/admin/train
 ```
 
 ### Body
@@ -193,7 +193,7 @@ POST /detect/detect
 ### URL
 
 ```
-https://li-vision.onrender.com/detect/detect
+https://li-vision-uyn3.onrender.com/detect/detect
 ```
 
 ### Body no Postman
@@ -245,7 +245,7 @@ POST /collect/
 ### URL
 
 ```
-https://li-vision.onrender.com/collect/
+https://li-vision-uyn3.onrender.com/collect/
 ```
 
 ### Body → form-data

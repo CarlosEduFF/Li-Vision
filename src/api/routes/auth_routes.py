@@ -1,3 +1,5 @@
+import os
+from supabase import create_client
 from fastapi import APIRouter, HTTPException, Depends, Header
 from pydantic import BaseModel
 from src.core.supabase_client import supabase
@@ -26,7 +28,11 @@ async def register(payload: RegisterPayload):
         
         if user_id:
             # Assuma que a primeira pessoa logada não seja necessariamente admin (vamos setar member, e dps o DB root muda dps via banco manual)
-            supabase.table("profiles").insert({
+            admin_supabase = create_client(
+                os.getenv("SUPABASE_URL", ""),
+                os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+            )
+            admin_supabase.table("profiles").insert({
                 "id": user_id, 
                 "full_name": payload.full_name,
                 "role": "member"
