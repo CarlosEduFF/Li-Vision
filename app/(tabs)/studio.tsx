@@ -51,15 +51,6 @@ export default function StudioScreen() {
               <Text style={styles.optionText}>Gravar Sequência Múltipla (Sinais)</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.optionBtn}
-            onPress={() => router.push("/(tabs)/ranking")}
-          >
-            <View style={styles.optionContent}>
-              <MaterialIcons name="leaderboard" size={22} color="#ffd700" />
-              <Text style={[styles.optionText, { color: "#ffd700" }]}>Ranking Global de Treinamento</Text>
-            </View>
-          </TouchableOpacity>
           {isAdmin && (
             <TouchableOpacity
               style={styles.optionBtn}
