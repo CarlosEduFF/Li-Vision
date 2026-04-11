@@ -10,3 +10,6 @@ key: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 
 # Client único a ser exportado e usado em todo o backend
 supabase: Client = create_client(url, key)
+
+# Client admin seguro (não sofre mutação ao chamar auth.sign_up)
+supabase_admin: Client = create_client(url, key)
