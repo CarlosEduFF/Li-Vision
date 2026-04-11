@@ -23,6 +23,14 @@ const MAPPING = {
   'play.circle': 'play-circle',
   'play.rectangle.fill': 'smart-display',
   'person.circle.fill': 'person',
+
+  // ✅ Leaderboard
+  'chart.bar.fill': 'leaderboard',
+  // alternativa:
+  // 'trophy.fill': 'emoji-events',
+
+  // ✅ Sobre
+  'info.circle.fill': 'info',
 } as Partial<IconMapping>;
 
 /**

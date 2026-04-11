@@ -53,7 +53,7 @@ export default function StudioScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.optionBtn}
-            onPress={() => router.push("/screens/ranking")}
+            onPress={() => router.push("/(tabs)/ranking")}
           >
             <View style={styles.optionContent}>
               <MaterialIcons name="leaderboard" size={22} color="#ffd700" />

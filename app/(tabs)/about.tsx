@@ -8,11 +8,11 @@ export default function SettingsScreen() {
       {/* HEADER */}
       <View style={styles.header}>
         <MaterialIcons name="tune" size={28} color="#00e5ff" />
-        <Text style={styles.title}>Configurações</Text>
+        <Text style={styles.title}>Sobre</Text>
       </View>
 
       <Text style={styles.subtitle}>
-        Gerencie suas preferências do Li-Vision.
+        Informações sobre o Li-Vision.
       </Text>
 
       {/* CARD INFO ARQUITETURA */}
@@ -73,7 +73,7 @@ export default function SettingsScreen() {
 
         <TouchableOpacity
           style={styles.actionBtn}
-          onPress={() => router.push("/screens/ranking")}
+          onPress={() => router.push("/(tabs)/ranking")}
           activeOpacity={0.7}
         >
           <View style={styles.actionLeft}>
@@ -95,11 +95,11 @@ export default function SettingsScreen() {
         </View>
         <View style={styles.versionRow}>
           <Text style={styles.versionLabel}>Versão do App</Text>
-          <Text style={styles.versionValue}>2.0.0 — Multi-Tenant</Text>
+          <Text style={styles.versionValue}>1.0.0 — Multi-Tenant</Text>
         </View>
         <View style={styles.versionRow}>
           <Text style={styles.versionLabel}>API Backend</Text>
-          <Text style={styles.versionValue}>li-vision · Render</Text>
+          <Text style={styles.versionValue}>Li-Vision · Render</Text>
         </View>
         <View style={[styles.versionRow, { borderBottomWidth: 0 }]}>
           <Text style={styles.versionLabel}>Arquitetura</Text>

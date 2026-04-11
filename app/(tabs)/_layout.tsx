@@ -23,15 +23,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Configuração',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="gearshape" color={color} />
-          ),
-        }}
-      />
+      
       <Tabs.Screen
         name="studio"
         options={{
@@ -41,12 +33,31 @@ export default function TabLayout() {
           ),
         }}
       />
+      
+      <Tabs.Screen
+        name="ranking"
+        options={{
+          title: 'Ranking',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="chart.bar.fill" color={color} />
+          ),
+        }}
+      />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Minha Conta',
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="person.circle.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="about"
+        options={{
+          title: 'Sobre',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="info.circle.fill" color={color} />
           ),
         }}
       />

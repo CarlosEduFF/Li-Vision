@@ -108,10 +108,10 @@ export default function CameraScreen() {
   // Mudar modo de detecção
   // ──────────────────────────────────────────────
   const changeMode = (mode: DetectionMode) => {
-    setDetectionMode(mode);
     setShowModeModal(false);
-    // Reconecta com o novo modo (nova sessão no servidor)
-    gestureWS.reconnectWithMode(mode);
+    setDetectionMode(mode);
+    // Envia ação de troca de modo pelo WebSocket existente (sem reconectar)
+    gestureWS.sendAction({ action: "set_mode", mode });
   };
 
   // ──────────────────────────────────────────────
@@ -231,8 +231,6 @@ export default function CameraScreen() {
           <MaterialIcons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>Li-Vision Edge</Text>
-
         {/* Botão modo de detecção */}
         <TouchableOpacity
           onPress={() => setShowModeModal(true)}
@@ -244,7 +242,7 @@ export default function CameraScreen() {
             size={18}
             color="#00e5ff"
           />
-          <Text style={styles.modeBtnText}>
+          <Text style={styles.modeBtnText} numberOfLines={1} ellipsizeMode="tail">
             {currentModeConfig?.label || detectionMode}
           </Text>
         </TouchableOpacity>
@@ -515,6 +513,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 229, 255, 0.12)",
     borderWidth: 1,
     borderColor: "rgba(0, 229, 255, 0.4)",
+    maxWidth: 140, // Impede que o botão creça demais e empurre os outros ícones
   },
   modeBtnText: {
     fontSize: 11,

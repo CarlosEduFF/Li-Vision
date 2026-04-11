@@ -68,9 +68,7 @@ export default function RankingScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.push("/(tabs)/studio")}>
-          <MaterialIcons name="arrow-back-ios" size={20} color="#fff" />
-        </TouchableOpacity>
+
         <Text style={styles.title}>Global Leaderboard</Text>
         <View style={{ width: 40 }} />
       </View>
