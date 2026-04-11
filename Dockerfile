@@ -30,8 +30,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia o código da aplicação
 COPY . .
 
-# Porta padrão do Render
+# Porta padrão do Render explícita ou via Env
 EXPOSE 10000
 
-# Comando de inicialização (shell form para expandir $PORT do Render)
-CMD uvicorn src.api.server:app --host 0.0.0.0 --port ${PORT:-10000}
+# Exec mode garante que seja PID 1 para scan do Render
+CMD ["sh", "-c", "uvicorn src.api.server:app --host 0.0.0.0 --port ${PORT:-10000}"]
