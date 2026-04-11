@@ -33,8 +33,6 @@ async def collect_static(payload: StaticPayload, user: dict = Depends(verify_tok
 
 @router.post("/dynamic/start")
 async def collect_dynamic_start(payload: DynamicStartPayload, user: dict = Depends(verify_token)):
-    from src.api.app_state import state
-    state.run_mode = "collect"
     return get_service().collect_dynamic_start(payload.label, payload.dataset_name, user.get("user_id"))
 
 @router.post("/dynamic/stop")

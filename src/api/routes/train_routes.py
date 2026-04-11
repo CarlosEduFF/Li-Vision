@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
+from src.core.model_cache import ModelCache
 
 router = APIRouter(prefix="/train", tags=["Training"])
 
@@ -29,9 +30,8 @@ async def list_models():
 
 @router.post("/activate")
 async def activate_model(payload: ActivatePayload):
-    from src.api.app_state import state
     res = get_service().activate_model(payload.model_id)
     if res.get("ok"):
-        # Rebuild detectors globally
-        state.build_detectors()
+        # Recarrega o cache global de modelos (novas sessões WS usarão o novo modelo)
+        ModelCache.reload()
     return res

@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 from src.api.app_state import state
+from src.core.model_cache import ModelCache
 
 class ModePayload(BaseModel):
     run_mode: str  # "collect" | "train" | "inference"
@@ -18,31 +19,40 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 @router.get("/state")
 def get_state():
+    """Retorna configuração padrão do servidor (não reflete sessões individuais)."""
     return {
-        "run_mode": state.run_mode,
+        "default_detection_mode": state.config["detection"].get("mode", "hybrid"),
         "detection": state.config["detection"],
+        "info": "Cada sessão WebSocket possui seu próprio modo. Este é apenas o padrão."
     }
 
 @router.post("/mode")
 def set_mode(payload: ModePayload):
+    """
+    Altera o modo padrão de operação do servidor.
+    NOTA: Isso NÃO afeta sessões WebSocket já conectadas.
+    Novas conexões usarão este modo como padrão.
+    """
     with state.lock:
-        # validar
         if payload.run_mode not in ("collect","train","inference"):
             raise HTTPException(400, "run_mode inválido")
-        # aplicar mudança simples
-        state.set_run_mode(payload.run_mode)
-        # se entrar em inference, garante pipeline e detectores rodando
+        state.run_mode = payload.run_mode
+        # Se entrar em inference, garante pipeline rodando
         if payload.run_mode == "inference":
             state.start_pipeline()
-            state.build_detectors()
-        # se entrar em collect ou train talvez queira parar pipeline (opcional)
-        else:
-            state.stop_pipeline()
-        return {"ok": True, "run_mode": state.run_mode}
+        return {
+            "ok": True, 
+            "run_mode": state.run_mode,
+            "info": "Modo padrão alterado. Sessões ativas não foram afetadas."
+        }
 
 @router.post("/detection")
 def set_detection(payload: DetectionPayload):
-    # aplica valores se fornecidos
+    """
+    Altera o modo de detecção padrão e recarrega o cache de modelos.
+    NOTA: Novas sessões WebSocket usarão este modo.
+    Sessões já conectadas mantêm seu modo atual.
+    """
     with state.lock:
         if payload.mode:
             state.config["detection"]["mode"] = payload.mode
@@ -55,13 +65,17 @@ def set_detection(payload: DetectionPayload):
         if payload.window_size:
             state.config["dynamic_ml"]["window_size"] = payload.window_size
 
-        # reconstruir detectores com nova configuração
+        # Recarrega o cache de modelos com a nova configuração
         try:
-            state.build_detectors()
+            ModelCache.reload(state.config)
         except Exception as e:
-            raise HTTPException(500, f"Falha ao rebuild detectors: {e}")
+            raise HTTPException(500, f"Falha ao recarregar modelos: {e}")
 
-        return {"ok": True, "detection": state.config["detection"]}
+        return {
+            "ok": True, 
+            "detection": state.config["detection"],
+            "info": "Cache de modelos recarregado. Novas sessões usarão esta configuração."
+        }
     
 @router.post("/train")
 def train_background(background_tasks: BackgroundTasks):

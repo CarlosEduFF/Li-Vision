@@ -1,12 +1,16 @@
 """
 WebSocket endpoint para detecção de gestos em tempo real com Edge Computing.
+MULTI-TENANT: cada conexão possui sua própria UserSession isolada.
 
-Protocolo Padrão-Ouro:
-  - Cliente envia: JSON com landmarks. Formato:
-    [
-      [{"x": 0.1, "y": 0.2, "z": 0.0}, ... (21 pontos)]
-    ]
-  - Servidor responde: JSON {"gesture": "A", "confidence": 0.92, "mode": "rules"}
+Protocolo:
+  - Landmarks (inferência):
+    Cliente envia: [[{"x": 0.1, "y": 0.2, "z": 0.0}, ... (21 pontos)]]
+    Servidor responde: {"gesture": "A", "confidence": 0.92, "mode": "hybrid"}
+
+  - Ações de controle (coleta / modo):
+    Cliente envia: {"action": "set_mode", "mode": "hybrid"}
+    Cliente envia: {"action": "start_collect", "label": "A", "dataset_name": "LIBRAS", "user_id": "..."}
+    Cliente envia: {"action": "stop_collect"}
 
 Erros retornados como:
   {"gesture": null, "confidence": 0.0, "error": "mensagem"}
@@ -20,6 +24,7 @@ import cv2
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from src.api.app_state import state
+from src.api.user_session import UserSession
 
 router = APIRouter(tags=["WebSocket"])
 
@@ -34,10 +39,55 @@ class MockLandmark:
         self.z = z
 
 
+async def handle_action(websocket: WebSocket, session: UserSession, payload: dict):
+    """
+    Processa mensagens de controle (actions) recebidas pelo WebSocket.
+    Permite que cada sessão mude de modo ou inicie/pare coleta independentemente.
+    """
+    action = payload.get("action")
+
+    # ---- Trocar modo de detecção ----
+    if action == "set_mode":
+        new_mode = payload.get("mode", "hybrid")
+        session.set_mode(new_mode)
+        await websocket.send_json({
+            "ok": True,
+            "action": "set_mode",
+            "mode": session.detection_mode,
+            "detectors": len(session.detector_manager.detectors) if session.detector_manager else 0,
+        })
+
+    # ---- Iniciar coleta dinâmica (por sessão) ----
+    elif action == "start_collect":
+        label = payload.get("label", "")
+        dataset_name = payload.get("dataset_name", "")
+        user_id = payload.get("user_id")
+        if not label or not dataset_name:
+            await websocket.send_json({"ok": False, "error": "label e dataset_name são obrigatórios"})
+            return
+        res = session.collection_service.collect_dynamic_start(label, dataset_name, user_id)
+        session.collecting = True
+        await websocket.send_json(res)
+
+    # ---- Parar coleta dinâmica ----
+    elif action == "stop_collect":
+        res = session.collection_service.collect_dynamic_stop()
+        session.collecting = False
+        await websocket.send_json(res)
+
+    else:
+        await websocket.send_json({"ok": False, "error": f"Ação desconhecida: {action}"})
+
+
 @router.websocket("/ws/detect")
 async def websocket_detect(websocket: WebSocket):
     await websocket.accept()
-    print("[WS] Cliente conectado")
+
+    # Extrai modo de detecção do query param (ex: ws://host/ws/detect?mode=hybrid)
+    detection_mode = websocket.query_params.get("mode", None)
+    session = UserSession(detection_mode=detection_mode)
+
+    print(f"[WS] Cliente conectado (modo: {session.detection_mode})")
 
     try:
         timestamp = 0
@@ -47,24 +97,21 @@ async def websocket_detect(websocket: WebSocket):
             if "bytes" in message:
                 data = message["bytes"]
                 try:
-                    # Tenta decodificar o frame bruto. Usaremos 256x256x3 por padrao,
-                    # mas se por acaso for JPEG, tentamos decodificar dinamicamente.
+                    # Decodifica frame de imagem binário
                     if len(data) == 256 * 256 * 3:
                         npimg = np.frombuffer(data, dtype=np.uint8).reshape((256, 256, 3))
                         bgr_frame = cv2.cvtColor(npimg, cv2.COLOR_RGB2BGR)
                     else:
-                        # Se enviarem jpeg ou outro formato suportado por imdecode
                         npimg = np.frombuffer(data, np.uint8)
                         bgr_frame = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
                         if bgr_frame is None:
                             raise ValueError(f"Falha ao decodificar imagem. Tamanho: {len(data)}")
 
+                    # Pipeline compartilhada (read-only, thread-safe para process_frame)
                     with state.lock:
                         pipeline = state.pipeline
-                        manager = state.detector_manager
-                        current_mode = state.config["detection"].get("mode", "unknown")
 
-                    if pipeline is None or manager is None:
+                    if pipeline is None:
                         await websocket.send_json({
                             "gesture": None,
                             "confidence": 0.0,
@@ -80,22 +127,22 @@ async def websocket_detect(websocket: WebSocket):
                         await websocket.send_json({
                             "gesture": None,
                             "confidence": 0.0,
-                            "mode": current_mode,
+                            "mode": session.detection_mode,
                             "landmarks": []
                         })
                         continue
 
-                    # Caso o modo ML não tenha detectores válidos
-                    if not manager.detectors:
+                    manager = session.detector_manager
+                    if not manager or not manager.detectors:
                          await websocket.send_json({
                             "gesture": None,
                             "confidence": 0.0,
-                            "mode": current_mode,
+                            "mode": session.detection_mode,
                             "landmarks": [
                                 [{"x": lm.x, "y": lm.y, "z": lm.z} for lm in hand]
                                 for hand in hands
                             ],
-                            "error": f"Nenhum detector carregado (modo: {current_mode})."
+                            "error": f"Nenhum detector carregado (modo: {session.detection_mode})."
                         })
                          continue
                     
@@ -104,7 +151,7 @@ async def websocket_detect(websocket: WebSocket):
                     await websocket.send_json({
                         "gesture": label,
                         "confidence": round(float(score), 4) if score else 0.0,
-                        "mode": current_mode,
+                        "mode": session.detection_mode,
                         "landmarks": [
                             [{"x": lm.x, "y": lm.y, "z": lm.z} for lm in hand]
                             for hand in hands
@@ -122,7 +169,15 @@ async def websocket_detect(websocket: WebSocket):
             elif "text" in message:
                 data = message["text"]
                 try:
-                    hands_data = json.loads(data)
+                    parsed = json.loads(data)
+
+                    # ----- Mensagem de CONTROLE (tem campo "action") -----
+                    if isinstance(parsed, dict) and "action" in parsed:
+                        await handle_action(websocket, session, parsed)
+                        continue
+
+                    # ----- Mensagem de LANDMARKS (array de mãos) -----
+                    hands_data = parsed
 
                     if not isinstance(hands_data, list) or len(hands_data) == 0:
                         await websocket.send_json({
@@ -158,23 +213,21 @@ async def websocket_detect(websocket: WebSocket):
                     if not hands:
                         continue
 
-                    with state.lock:
-                        run_mode = state.run_mode
-                        service = getattr(state, "collection_service", None)
-                        manager = state.detector_manager
-                        current_mode = state.config["detection"].get("mode", "unknown")
-                    
-                    if run_mode == "collect" and service:
-                        res = service.collect_dynamic_frame(hands[0])
+                    # ----- COLETA DINÂMICA (se a sessão está coletando) -----
+                    if session.collecting and session.collection_service.dynamic_session:
+                        res = session.collection_service.collect_dynamic_frame(hands[0])
                         await websocket.send_json(res)
                         continue
+
+                    # ----- INFERÊNCIA NORMAL -----
+                    manager = session.detector_manager
 
                     if manager is None:
                         await websocket.send_json({
                             "gesture": None,
                             "confidence": 0.0,
                             "landmarks": hands_data,
-                            "error": "Pipeline não inicializada.",
+                            "error": "Detectores não inicializados.",
                         })
                         continue
 
@@ -182,9 +235,9 @@ async def websocket_detect(websocket: WebSocket):
                         await websocket.send_json({
                             "gesture": None,
                             "confidence": 0.0,
-                            "mode": current_mode,
+                            "mode": session.detection_mode,
                             "landmarks": hands_data,
-                            "error": f"Nenhum detector carregado para o modo '{current_mode}'."
+                            "error": f"Nenhum detector carregado para o modo '{session.detection_mode}'."
                         })
                         continue
 
@@ -192,7 +245,7 @@ async def websocket_detect(websocket: WebSocket):
                     await websocket.send_json({
                         "gesture": label,
                         "confidence": round(float(score), 4) if score else 0.0,
-                        "mode": current_mode,
+                        "mode": session.detection_mode,
                         "landmarks": hands_data,
                     })
 
@@ -213,7 +266,7 @@ async def websocket_detect(websocket: WebSocket):
                     })
 
     except WebSocketDisconnect:
-        print("[WS] Cliente desconectou normalmente")
+        print(f"[WS] Cliente desconectou (modo: {session.detection_mode})")
     except Exception as e:
         print(f"[WS] Erro inesperado na conexão: {e}")
         traceback.print_exc()

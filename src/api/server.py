@@ -12,7 +12,8 @@ from src.api.routes.auth_routes import router as auth_router
 app = FastAPI(title="Li-Vision API")
 
 state.start_pipeline()
-state.build_detectors()
+# NOTA: Detectores agora são criados por sessão (UserSession).
+# O ModelCache já foi inicializado no AppState.__init__.
 
 app.include_router(auth_router)
 app.include_router(admin_router)

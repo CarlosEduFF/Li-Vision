@@ -1,26 +1,42 @@
 # src/api/app_state.py
+# ==========================================================
+# Estado global do servidor Li-Vision.
+#
+# MULTI-TENANT: O estado per-user foi movido para UserSession.
+# Este módulo mantém apenas recursos compartilhados:
+#   - config:             configuração do servidor (padrões)
+#   - pipeline:           HandPipeline do MediaPipe (compartilhado)
+#   - collection_service: para rotas REST de coleta estática
+#   - training_service:   para rotas REST de treinamento
+#   - ModelCache:         inicializado aqui na startup
+# ==========================================================
+
 import threading
 from src.core.config_loader import Config
 from src.vision.pipeline import HandPipeline
-from src.recognition.detector_factory import create_detectors
-from src.recognition.detector_manager import DetectorManager
+from src.core.model_cache import ModelCache
+
 
 class AppState:
     def __init__(self, config_path="config.yaml"):
         self.lock = threading.RLock()
         self.config_path = config_path
         self.config = Config(config_path)
-        # estado mutável
+
+        # modo padrão do servidor (usado como fallback quando o cliente não especifica)
         self.run_mode = self.config["app"].get("run_mode", "inference")
-        self.detection_cfg = self.config["detection"]
+
+        # pipeline compartilhada (MediaPipe HandLandmarker)
         self.pipeline = None
-        self.detector_manager = None
-        self.detectors = None
-        self.timestamp = 0
+
+        # serviços compartilhados (usados pelas rotas REST)
         from src.services.collection_service import CollectionService
         from src.services.training_service import TrainingService
         self.collection_service = CollectionService()
         self.training_service = TrainingService()
+
+        # Inicializa o cache global de modelos ML
+        ModelCache.initialize(self.config)
 
     def start_pipeline(self):
         """Cria e abre o HandPipeline (se não existir)."""
@@ -41,38 +57,14 @@ class AppState:
                 self.pipeline.__exit__(None, None, None)
             finally:
                 self.pipeline = None
-                self.timestamp = 0
-
-    def build_detectors(self):
-        """(Re)constroi detectores e manager com base na config atual."""
-        with self.lock:
-            # create_detectors espera um objeto config que seja indexável
-            self.detectors = create_detectors(self.config)
-            self.detector_manager = DetectorManager(
-                self.detectors,
-                min_score=self.config["detection"].get("min_score", 0.6),
-                stability_frames=self.config["detection"].get("stability_frames", 3),
-                cooldown_frames=self.config["detection"].get("cooldown_frames", 10),
-            )
 
     def reload_config_from_disk(self):
         """Recarrega config.yaml do disco e aplica (não salva alterações)."""
         with self.lock:
             self.config = Config(self.config_path)
             self.run_mode = self.config["app"].get("run_mode", self.run_mode)
-            self.detection_cfg = self.config["detection"]
+            # Recarrega modelos com nova config
+            ModelCache.reload(self.config)
 
-    # helpers para chamadas externas
-    def set_run_mode(self, mode):
-        with self.lock:
-            self.run_mode = mode
-
-    def set_detection_mode(self, detection_subcfg: dict):
-        """Recebe um dict parcial com keys para detection (mode, ml.path, etc)."""
-        with self.lock:
-            # atualiza a representação em memória da config
-            self.config["detection"].update(detection_subcfg)
-            # aplica reconstrução de detectores
-            self.build_detectors()
 
 state = AppState("config.yaml")
