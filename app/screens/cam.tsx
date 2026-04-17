@@ -17,6 +17,7 @@ import {
 import { Worklets } from "react-native-worklets-core";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   gestureWS,
   ConnectionStatus,
@@ -27,6 +28,8 @@ import {
   detectHandLandmarks,
   LandmarkPoint,
 } from "@/services/handLandmarkerPlugin";
+import { useModelStatus } from "@/hooks/useModelStatus";
+import { trainingService } from "@/services/trainingService";
 
 // ──────────────────────────────────────────────
 // Configurações dos modos de detecção
@@ -48,6 +51,10 @@ export default function CameraScreen() {
   const [showLandmarks, setShowLandmarks] = useState<boolean>(true);
   const [detectionMode, setDetectionMode] = useState<DetectionMode>("hybrid");
   const [showModeModal, setShowModeModal] = useState<boolean>(false);
+  const [activeModelName, setActiveModelName] = useState<string | null>(null);
+
+  // ── Health check do modelo Edge ──
+  const { status: modelStatus, errorMessage: modelError } = useModelStatus();
 
   // Transformação correta de coordenadas para o sensor do aparelho (Modo 3)
   const transformPoint = (lm: any) => ({ x: 1.0 - lm.y, y: 1.0 - lm.x, z: lm.z });
@@ -100,6 +107,30 @@ export default function CameraScreen() {
   );
 
   useEffect(() => {
+    // Auto-ativar melhor modelo no servidor se nenhum estiver ativo
+    const autoActivateModel = async () => {
+      const activeId = await AsyncStorage.getItem('activeModelId');
+      const modelName = await AsyncStorage.getItem('activeModelName');
+      if (modelName) setActiveModelName(modelName);
+
+      if (!activeId) {
+        try {
+          const res = await trainingService.listModels();
+          if (res.models && res.models.length > 0) {
+            const best = res.models.sort((a: any, b: any) => b.accuracy - a.accuracy)[0];
+            await trainingService.activateModel(best.id);
+            await AsyncStorage.setItem('activeModelId', best.id);
+            await AsyncStorage.setItem('activeModelName', best.name);
+            setActiveModelName(best.name);
+            console.log(`[AutoActivate] Modelo "${best.name}" ativado automaticamente`);
+          }
+        } catch (e) {
+          console.log('[AutoActivate] Falha na ativação automática:', e);
+        }
+      }
+    };
+
+    autoActivateModel();
     gestureWS.connect(handleGesture, handleStatusChange, detectionMode);
     return () => gestureWS.disconnect();
   }, []);
@@ -285,7 +316,7 @@ export default function CameraScreen() {
             style={StyleSheet.absoluteFill}
             device={device}
             isActive={true}
-            frameProcessor={frameProcessor}
+            frameProcessor={modelStatus === 'ready' ? frameProcessor : undefined}
           />
         ) : (
           <View style={styles.permissionBox}>
@@ -377,9 +408,32 @@ export default function CameraScreen() {
 
         {/* ── BADGE EDGE COMPUTING ── */}
         <View style={styles.edgeBadge}>
-          <MaterialIcons name="developer-board" size={12} color="#00e5ff" />
-          <Text style={styles.edgeBadgeText}>Edge</Text>
+          <MaterialIcons name="developer-board" size={12} color={modelStatus === 'ready' ? '#00e5ff' : '#ff6b6b'} />
+          <Text style={[styles.edgeBadgeText, modelStatus !== 'ready' && { color: '#ff6b6b' }]}>
+            {modelStatus === 'ready' ? 'Edge' : 'Edge ✗'}
+          </Text>
         </View>
+
+        {/* ── BADGE MODELO ATIVO ── */}
+        {activeModelName && (
+          <View style={styles.modelBadge}>
+            <MaterialIcons name="psychology" size={12} color="#b388ff" />
+            <Text style={styles.modelBadgeText} numberOfLines={1}>{activeModelName}</Text>
+          </View>
+        )}
+
+        {/* ── ERRO DO MODELO EDGE ── */}
+        {modelStatus === 'error' && (
+          <View style={styles.modelErrorBanner}>
+            <MaterialIcons name="error" size={20} color="#ff6b6b" />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.modelErrorTitle}>Modelo Edge indisponível</Text>
+              <Text style={styles.modelErrorDesc} numberOfLines={2}>
+                {modelError || 'HandLandmarker não carregou. Detecção local desativada.'}
+              </Text>
+            </View>
+          </View>
+        )}
 
         {/* ── ERRO DA API ── */}
         {apiError && (
@@ -659,6 +713,52 @@ const styles = StyleSheet.create({
   noHandText: {
     color: "#888",
     fontSize: 12,
+  },
+  // Badge modelo ativo
+  modelBadge: {
+    position: "absolute",
+    top: 12,
+    left: 12,
+    backgroundColor: "rgba(179, 136, 255, 0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(179, 136, 255, 0.35)",
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    maxWidth: 140,
+  },
+  modelBadgeText: {
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "#b388ff",
+  },
+  // Erro do modelo Edge
+  modelErrorBanner: {
+    position: "absolute",
+    top: 44,
+    left: 12,
+    right: 12,
+    backgroundColor: "rgba(255, 50, 50, 0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 107, 107, 0.4)",
+    borderRadius: 14,
+    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  modelErrorTitle: {
+    color: "#ff6b6b",
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  modelErrorDesc: {
+    color: "#aa6666",
+    fontSize: 11,
+    marginTop: 2,
   },
   // ── MODAL ──
   modalBg: {

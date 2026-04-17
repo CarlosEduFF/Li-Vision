@@ -16,6 +16,7 @@ export default function CollectStaticScreen() {
   const [datasets, setDatasets] = useState<any[]>([]);
   const [gestureLabels, setGestureLabels] = useState<string[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [labelHint, setLabelHint] = useState<string | null>(null);
 
   useEffect(() => {
     loadDatasets();
@@ -217,13 +218,36 @@ export default function CollectStaticScreen() {
           )}
 
           {isAdmin ? (
-            <TextInput
-              style={styles.input}
-              placeholderTextColor="#666"
-              placeholder="EX: A"
-              value={label}
-              onChangeText={(v) => setLabel(v.toUpperCase())}
-            />
+            <>
+              <TextInput
+                style={[
+                  styles.input,
+                  labelHint && { borderColor: 'rgba(255, 171, 0, 0.5)' },
+                ]}
+                placeholderTextColor="#666"
+                placeholder="EX: A"
+                value={label}
+                onChangeText={(v) => {
+                  const normalized = v.toUpperCase();
+                  setLabel(normalized);
+                  // Verifica se o label já existe no dataset atual
+                  if (normalized && gestureLabels.includes(normalized)) {
+                    setLabelHint(
+                      `O gesto "${normalized}" já existe neste dataset. ` +
+                      `Capturar adicionará mais amostras a ele.`
+                    );
+                  } else {
+                    setLabelHint(null);
+                  }
+                }}
+              />
+              {labelHint && (
+                <View style={styles.labelHint}>
+                  <MaterialIcons name="info-outline" size={16} color="#ffab00" />
+                  <Text style={styles.labelHintText}>{labelHint}</Text>
+                </View>
+              )}
+            </>
           ) : (
             gestureLabels.length === 0 && datasetName && <Text style={{ color: "#888" }}>Nenhum gesto cadastrado pelo Admin para este dataset.</Text>
           )}
@@ -271,5 +295,22 @@ const styles = StyleSheet.create({
   chip: { backgroundColor: "#262a31", paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20, marginRight: 10, borderWidth: 1, borderColor: "transparent" },
   chipActive: { borderColor: "#00e5ff", backgroundColor: "rgba(0, 229, 255, 0.15)" },
   chipText: { color: "#888", fontWeight: "bold" },
-  chipTextActive: { color: "#00e5ff" }
+  chipTextActive: { color: "#00e5ff" },
+  labelHint: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "rgba(255, 171, 0, 0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 171, 0, 0.2)",
+    borderRadius: 10,
+    padding: 12,
+    marginTop: -5,
+  },
+  labelHintText: {
+    color: "#ffab00",
+    fontSize: 12,
+    flex: 1,
+    lineHeight: 17,
+  },
 });
