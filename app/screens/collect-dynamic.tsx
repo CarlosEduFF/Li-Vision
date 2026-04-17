@@ -57,13 +57,13 @@ export default function CollectDynamicScreen() {
 
   const device = useCameraDevice("front");
   const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
-  
+
   const transformPoint = (lm: any) => ({ x: 1.0 - lm.y, y: 1.0 - lm.x, z: lm.z });
 
   const onLandmarksDetected = Worklets.createRunOnJS((hands: LandmarkPoint[][]) => {
     if (hands.length > 0) {
       const transformedHands = hands.map(handLms => handLms.map(transformPoint));
-      setLandmarks(transformedHands[0]); 
+      setLandmarks(transformedHands[0]);
 
       if (isRecording && gestureWS.isConnected()) {
         gestureWS.sendLandmarks(transformedHands);
@@ -101,24 +101,24 @@ export default function CollectDynamicScreen() {
 
   const startDynamic = async () => {
     if (!label || !datasetName) {
-        Alert.alert("Aviso", "Preencha Nome e Label");
-        return;
+      Alert.alert("Aviso", "Preencha Nome e Label");
+      return;
     }
-    gestureWS.connect(() => {}, () => {});
+    gestureWS.connect(() => { }, () => { });
 
     try {
       setIsRecording(true);
       await trainingService.startDynamicCollection(label, datasetName);
-      
+
       // Assume 15 frames stream takes ~2 seconds to send via WS realistically
       setTimeout(async () => {
         const res = await trainingService.stopDynamicCollection();
         setIsRecording(false);
         gestureWS.disconnect();
-        if(res.ok) {
-           setSequences(s => s + 1);
+        if (res.ok) {
+          setSequences(s => s + 1);
         } else {
-           Alert.alert("Erro", res.error || "Falha ao gravar sequência");
+          Alert.alert("Erro", res.error || "Falha ao gravar sequência");
         }
       }, 2500);
     } catch (e) {
@@ -136,7 +136,7 @@ export default function CollectDynamicScreen() {
     );
   };
 
-  const CAM_WIDTH = screenWidth - 32; 
+  const CAM_WIDTH = screenWidth - 32;
   const CAM_HEIGHT = 280;
 
   return (
@@ -158,112 +158,119 @@ export default function CollectDynamicScreen() {
           />
         ) : (
           <View style={styles.permissionBox}>
-            <Text style={{color:"#888"}}>Aguardando câmera...</Text>
+            <Text style={{ color: "#888" }}>Aguardando câmera...</Text>
           </View>
         )}
 
         {landmarks.length === 21 && (
           <View style={StyleSheet.absoluteFill} pointerEvents="none">
-             {landmarks.map((lm, idx) => {
-               const dotX = lm.x * CAM_WIDTH - 5;
-               const dotY = lm.y * CAM_HEIGHT - 5;
-               return <View key={idx} style={[styles.landmarkDot, { left: dotX, top: dotY, backgroundColor: isRecording ? "red" : "#00e5ff" }]} />;
-             })}
+            {landmarks.map((lm, idx) => {
+              const dotX = lm.x * CAM_WIDTH - 5;
+              const dotY = lm.y * CAM_HEIGHT - 5;
+              return <View key={idx} style={[styles.landmarkDot, { left: dotX, top: dotY, backgroundColor: isRecording ? "red" : "#00e5ff" }]} />;
+            })}
           </View>
         )}
-        
+
         {isRecording && (
           <View style={styles.recordingOverlay}>
-             <MaterialIcons name="videocam" size={20} color="red" />
-             <Text style={styles.recordingText}>GRAVANDO...</Text>
+            <MaterialIcons name="videocam" size={20} color="red" />
+            <Text style={styles.recordingText}>GRAVANDO...</Text>
           </View>
         )}
       </View>
 
-      <View style={styles.form}>
-        <Text style={styles.label}>Dataset Nome</Text>
-        
-        {datasets.length > 0 && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-            {datasets.map((ds) => (
-              <TouchableOpacity 
-                key={ds.id} 
-                style={[styles.chip, datasetName === ds.name && styles.chipActive]}
-                onPress={() => setDatasetName(ds.name)}
-              >
-                <Text style={[styles.chipText, datasetName === ds.name && styles.chipTextActive]}>
-                  {ds.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        )}
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.form}>
+          <Text style={styles.label}>Dataset Nome</Text>
 
-        {isAdmin ? (
-          <TextInput 
-            style={styles.input}
-            placeholderTextColor="#666"
-            placeholder="EX: LIBRAS_V1"
-            value={datasetName}
-            onChangeText={(v) => setDatasetName(v.toUpperCase())}
-          />
-        ) : (
-          datasets.length === 0 && <Text style={{color:"#888"}}>Nenhum dataset disponível</Text>
-        )}
-        
-        <Text style={styles.label}>Label (Gesto)</Text>
-        {gestureLabels.length > 0 && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-            {gestureLabels.map((lbl) => (
-              <TouchableOpacity 
-                key={lbl} 
-                style={[styles.chip, label === lbl && styles.chipActive]}
-                onPress={() => setLabel(lbl)}
-              >
-                <Text style={[styles.chipText, label === lbl && styles.chipTextActive]}>
-                  {lbl}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        )}
-        
-        {isAdmin ? (
-          <TextInput 
-            style={styles.input}
-            placeholderTextColor="#666"
-            placeholder="EX: OI"
-            value={label}
-            onChangeText={(v) => setLabel(v.toUpperCase())}
-          />
-        ) : (
-          gestureLabels.length === 0 && datasetName && <Text style={{color:"#888"}}>Nenhum gesto cadastrado pelo Admin para este dataset.</Text>
-        )}
-
-        <View style={styles.buttonRow}>
-          <TouchableOpacity 
-            style={[styles.captureBtn, isRecording && {backgroundColor: '#333'}]} 
-            onPress={startDynamic}
-            disabled={isRecording}
-          >
-            <MaterialIcons name={isRecording ? "radio-button-checked" : "fiber-manual-record"} size={24} color={isRecording ? "red" : "#000"} />
-            <Text style={[styles.captureBtnText, isRecording && {color: "#888"}]}>
-              {isRecording ? "Gravando Sequência..." : "Gravar Sequência"}
-            </Text>
-          </TouchableOpacity>
-
-          {sequences > 0 && !isRecording && (
-            <TouchableOpacity style={styles.finalizeBtn} onPress={finalizeDataset}>
-              <MaterialIcons name="check-circle" size={24} color="#fff" />
-              <Text style={styles.finalizeBtnText}>Finalizar Coleta</Text>
-            </TouchableOpacity>
+          {datasets.length > 0 && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
+              {datasets.map((ds) => (
+                <TouchableOpacity
+                  key={ds.id}
+                  style={[styles.chip, datasetName === ds.name && styles.chipActive]}
+                  onPress={() => setDatasetName(ds.name)}
+                >
+                  <Text style={[styles.chipText, datasetName === ds.name && styles.chipTextActive]}>
+                    {ds.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           )}
-        </View>
 
-        <Text style={styles.stats}>
-          Sequências gravadas: {sequences}
-        </Text>
-      </View>
+          {isAdmin ? (
+            <TextInput
+              style={styles.input}
+              placeholderTextColor="#666"
+              placeholder="EX: LIBRAS_V1"
+              value={datasetName}
+              onChangeText={(v) => setDatasetName(v.toUpperCase())}
+            />
+          ) : (
+            datasets.length === 0 && <Text style={{ color: "#888" }}>Nenhum dataset disponível</Text>
+          )}
+
+          <Text style={styles.label}>Label (Gesto)</Text>
+          {gestureLabels.length > 0 && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
+              {gestureLabels.map((lbl) => (
+                <TouchableOpacity
+                  key={lbl}
+                  style={[styles.chip, label === lbl && styles.chipActive]}
+                  onPress={() => setLabel(lbl)}
+                >
+                  <Text style={[styles.chipText, label === lbl && styles.chipTextActive]}>
+                    {lbl}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
+
+          {isAdmin ? (
+            <TextInput
+              style={styles.input}
+              placeholderTextColor="#666"
+              placeholder="EX: OI"
+              value={label}
+              onChangeText={(v) => setLabel(v.toUpperCase())}
+            />
+          ) : (
+            gestureLabels.length === 0 && datasetName && <Text style={{ color: "#888" }}>Nenhum gesto cadastrado pelo Admin para este dataset.</Text>
+          )}
+
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              style={[styles.captureBtn, isRecording && { backgroundColor: '#333' }]}
+              onPress={startDynamic}
+              disabled={isRecording}
+            >
+              <MaterialIcons name={isRecording ? "radio-button-checked" : "fiber-manual-record"} size={24} color={isRecording ? "red" : "#000"} />
+              <Text style={[styles.captureBtnText, isRecording && { color: "#888" }]}>
+                {isRecording ? "Gravando Sequência..." : "Gravar Sequência"}
+              </Text>
+            </TouchableOpacity>
+
+            {sequences > 0 && !isRecording && (
+              <TouchableOpacity style={styles.finalizeBtn} onPress={finalizeDataset}>
+                <MaterialIcons name="check-circle" size={24} color="#fff" />
+                <Text style={styles.finalizeBtnText}>Finalizar Coleta</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <Text style={styles.stats}>
+            Sequências gravadas: {sequences}
+          </Text>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -278,7 +285,7 @@ const styles = StyleSheet.create({
   recordingOverlay: { position: 'absolute', top: 10, right: 10, flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.6)', padding: 8, borderRadius: 10, gap: 5 },
   recordingText: { color: "red", fontWeight: "bold", fontSize: 12 },
   form: { gap: 15 },
-  label: { color: "#888", fontSize: 14, fontWeight:"bold" },
+  label: { color: "#888", fontSize: 14, fontWeight: "bold" },
   input: { backgroundColor: "#1c2026", color: "#00e5ff", padding: 15, borderRadius: 10, borderWidth: 1, borderColor: "rgba(0, 229, 255, 0.3)", fontSize: 18, fontWeight: "bold" },
   buttonRow: { flexDirection: "column", gap: 10, marginTop: 10 },
   captureBtn: { backgroundColor: "#00e5ff", flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 15, borderRadius: 10, gap: 10 },

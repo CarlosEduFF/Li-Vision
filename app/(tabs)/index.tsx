@@ -18,7 +18,9 @@ export default function HomeScreen() {
       {/* Top Bar */}
       <View style={styles.topBar}>
         <View style={styles.logoContainer}>
-          <MaterialIcons name="precision-manufacturing" size={24} color="#00e5ff" />
+          <View style={styles.iconCircle}>
+            <Image source={require('../../assets/images/Li-Vision (Logo-BackgroundOff).png')} style={{ width: 50, height: 50 }} resizeMode="contain" />
+          </View>
           <Text style={styles.logoText}>Li-Vision</Text>
         </View>
 
@@ -104,6 +106,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#10141a",
   },
+  iconCircle: { width: 30, height: 30, borderRadius: 35, backgroundColor: "rgba(0, 229, 255, 0.1)", justifyContent: "center", alignItems: "center", alignSelf: "center", marginBottom: 20, borderWidth: 1, borderColor: "#00e5ff" },
 
   topBar: {
     flexDirection: "row",

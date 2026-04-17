@@ -1,29 +1,35 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from "react-native";
 import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
+import { useFocusEffect } from "@react-navigation/native";
 import { trainingService } from "@/services/trainingService";
 
 export default function ProfileScreen() {
   const [userName, setUserName] = useState("Usuário");
   const [userRole, setUserRole] = useState("member");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [myRank, setMyRank] = useState<any>(null);
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
+  // Recarrega os dados toda vez que a tela recebe foco (ex: voltando de edit-profile)
+  useFocusEffect(
+    useCallback(() => {
+      loadProfile();
+    }, [])
+  );
 
   const loadProfile = async () => {
     try {
       const name = await AsyncStorage.getItem("userName");
       const role = await AsyncStorage.getItem("userRole");
       const id = await AsyncStorage.getItem("userId");
+      const avatar = await AsyncStorage.getItem("userAvatar");
       
       setUserName(name || "Colaborador");
       setUserRole(role || "member");
+      setAvatarUrl(avatar || null);
 
       // Buscar pontuação
       if (id) {
@@ -33,6 +39,22 @@ export default function ProfileScreen() {
           setMyRank(userItem || { samples: 0, rankNum: 0 });
         }
       }
+
+      // Buscar dados frescos do servidor (avatar atualizado, etc)
+      try {
+        const profileRes = await trainingService.getProfile();
+        if (profileRes.ok && profileRes.profile) {
+          const p = profileRes.profile;
+          if (p.full_name) {
+            setUserName(p.full_name);
+            await AsyncStorage.setItem("userName", p.full_name);
+          }
+          if (p.avatar_url) {
+            setAvatarUrl(p.avatar_url);
+            await AsyncStorage.setItem("userAvatar", p.avatar_url);
+          }
+        }
+      } catch { /* silencioso — usa cached */ }
     } catch (e) {
       console.log(e);
     } finally {
@@ -66,16 +88,41 @@ export default function ProfileScreen() {
       ) : (
         <>
           <View style={styles.profileCard}>
-            <View style={styles.avatar}>
-               <FontAwesome5 name="user-astronaut" size={40} color="#00e5ff" />
+            {/* Avatar */}
+            <TouchableOpacity
+              style={styles.avatar}
+              onPress={() => router.push("/screens/edit-profile")}
+              activeOpacity={0.8}
+            >
+              {avatarUrl ? (
+                <Image
+                  source={{ uri: avatarUrl }}
+                  style={styles.avatarImage}
+                />
+              ) : (
+                <FontAwesome5 name="user-astronaut" size={40} color="#00e5ff" />
+              )}
                {userRole === "admin" && (
                  <View style={styles.adminBadge}>
                    <MaterialIcons name="admin-panel-settings" size={14} color="#000" />
                  </View>
                )}
-            </View>
+               {/* Badge de editar */}
+               <View style={styles.editAvatarBadge}>
+                 <MaterialIcons name="edit" size={12} color="#fff" />
+               </View>
+            </TouchableOpacity>
             <Text style={styles.name}>{userName}</Text>
             <Text style={styles.role}>{userRole === "admin" ? "Chefe / Administrador" : "Colaborador"}</Text>
+            
+            {/* Botão editar perfil */}
+            <TouchableOpacity
+              style={styles.editProfileBtn}
+              onPress={() => router.push("/screens/edit-profile")}
+            >
+              <MaterialIcons name="edit" size={16} color="#00e5ff" />
+              <Text style={styles.editProfileBtnText}>Editar Perfil</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.statsCard}>
@@ -94,7 +141,7 @@ export default function ProfileScreen() {
               </View>
             </View>
             
-            <TouchableOpacity style={styles.rankingBtn} onPress={() => router.push("/screens/ranking")}>
+            <TouchableOpacity style={styles.rankingBtn} onPress={() => router.push("/(tabs)/ranking")}>
                <Text style={styles.rankingBtnText}>Ver Ranking Geral</Text>
                <MaterialIcons name="chevron-right" size={20} color="#00e5ff" />
             </TouchableOpacity>
@@ -117,10 +164,14 @@ const styles = StyleSheet.create({
   header: { marginBottom: 30 },
   title: { fontSize: 28, fontWeight: "800", color: "#ffffff" },
   profileCard: { alignItems: "center", backgroundColor: "#1c2026", padding: 30, borderRadius: 20, marginBottom: 20, borderWidth: 1, borderColor: "rgba(0, 229, 255, 0.15)" },
-  avatar: { width: 90, height: 90, borderRadius: 45, backgroundColor: "rgba(0, 229, 255, 0.1)", justifyContent: "center", alignItems: "center", marginBottom: 15, position: "relative" },
+  avatar: { width: 90, height: 90, borderRadius: 45, backgroundColor: "rgba(0, 229, 255, 0.1)", justifyContent: "center", alignItems: "center", marginBottom: 15, position: "relative", overflow: "visible" },
+  avatarImage: { width: 90, height: 90, borderRadius: 45, borderWidth: 2, borderColor: "#00e5ff" },
   adminBadge: { position: "absolute", bottom: 0, right: 0, backgroundColor: "#ffdf00", width: 28, height: 28, borderRadius: 14, justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: "#1c2026" },
+  editAvatarBadge: { position: "absolute", top: -2, right: -2, backgroundColor: "rgba(0, 229, 255, 0.8)", width: 24, height: 24, borderRadius: 12, justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: "#1c2026" },
   name: { fontSize: 22, color: "#fff", fontWeight: "700", marginBottom: 5 },
-  role: { fontSize: 14, color: "#888", fontWeight: "600" },
+  role: { fontSize: 14, color: "#888", fontWeight: "600", marginBottom: 16 },
+  editProfileBtn: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "rgba(0, 229, 255, 0.1)", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 12, borderWidth: 1, borderColor: "rgba(0, 229, 255, 0.3)" },
+  editProfileBtnText: { color: "#00e5ff", fontWeight: "700", fontSize: 13 },
   statsCard: { backgroundColor: "#1c2026", borderRadius: 20, padding: 20 },
   statsTitle: { color: "#fff", fontSize: 16, fontWeight: "700", marginBottom: 20 },
   statsRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },

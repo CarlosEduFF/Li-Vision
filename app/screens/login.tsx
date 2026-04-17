@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -25,6 +25,9 @@ export default function LoginScreen() {
         await AsyncStorage.setItem("userId", String(res.user_id));
         await AsyncStorage.setItem("userRole", String(res.role));
         await AsyncStorage.setItem("userName", String(res.full_name));
+        if (res.avatar_url) {
+          await AsyncStorage.setItem("userAvatar", res.avatar_url);
+        }
         router.replace("/(tabs)");
       } else {
         Alert.alert("Acesso Negado", res.detail || "Credenciais inválidas");
@@ -42,7 +45,7 @@ export default function LoginScreen() {
       
       <View style={styles.card}>
         <View style={styles.iconCircle}>
-          <FontAwesome5 name="robot" size={32} color="#00e5ff" />
+          <Image source={require('../../assets/images/Li-Vision (Logo-BackgroundOff).png')} style={{ width: 50, height: 50 }} resizeMode="contain" />
         </View>
         <Text style={styles.title}>Acesso Restrito</Text>
         <Text style={styles.subtitle}>Entre para contribuir com os datasets do Li-Vision Edge.</Text>

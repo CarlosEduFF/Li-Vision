@@ -119,5 +119,38 @@ export const trainingService = {
 
   async getRanking() {
     return fetchWithAuth("/collect/ranking");
+  },
+
+  // ── Profile ──────────────────────────────────────
+
+  async getProfile() {
+    return fetchWithAuth("/auth/profile");
+  },
+
+  async updateProfile(full_name: string) {
+    return fetchWithAuth("/auth/profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ full_name })
+    });
+  },
+
+  async uploadAvatar(imageUri: string) {
+    const token = await AsyncStorage.getItem("userToken");
+    const form = new FormData();
+    form.append("file", {
+      uri: imageUri,
+      name: "avatar.jpg",
+      type: "image/jpeg"
+    } as any);
+
+    const response = await fetch(`${API_URL}/auth/profile/upload-avatar`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+      body: form,
+    });
+    return response.json();
   }
 };
