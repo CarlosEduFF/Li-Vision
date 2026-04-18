@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_URL = "https://li-vision-uyn3.onrender.com";
+const API_URL = "https://li-visionv2.onrender.com";
 
 const fetchWithAuth = async (endpoint: string, options: RequestInit = {}) => {
   const token = await AsyncStorage.getItem("userToken");
