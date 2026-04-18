@@ -64,12 +64,12 @@ export const trainingService = {
     return fetchWithAuth("/collect/dynamic/stop", { method: "POST" });
   },
 
-  async startTraining(datasetId: string, modelName: string, modelType: "static"|"dynamic") {
+  async startTraining(datasetIds: string[], modelName: string) {
     modelName = modelName.toUpperCase();
     return fetchWithAuth("/train/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ dataset_id: datasetId, model_name: modelName, model_type: modelType })
+      body: JSON.stringify({ dataset_ids: datasetIds, model_name: modelName })
     });
   },
 
