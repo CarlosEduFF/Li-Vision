@@ -80,28 +80,7 @@ export default function EditProfileScreen() {
     }
   };
 
-  const handleUploadAvatar = async () => {
-    if (!localImageUri) return;
-
-    setUploadingPhoto(true);
-    try {
-      const res = await trainingService.uploadAvatar(localImageUri);
-      if (res.ok && res.avatar_url) {
-        setAvatarUrl(res.avatar_url);
-        setLocalImageUri(null);
-        await AsyncStorage.setItem("userAvatar", res.avatar_url);
-        Alert.alert("✅ Foto atualizada!", "Sua foto de perfil foi salva com sucesso.");
-      } else {
-        Alert.alert("Erro", res.detail || "Falha ao enviar a foto.");
-      }
-    } catch (e) {
-      Alert.alert("Erro de rede", "Não foi possível enviar a foto: " + String(e));
-    } finally {
-      setUploadingPhoto(false);
-    }
-  };
-
-  const handleSaveName = async () => {
+  const handleSaveChanges = async () => {
     if (!fullName.trim()) {
       Alert.alert("Aviso", "O nome não pode estar vazio.");
       return;
@@ -109,15 +88,42 @@ export default function EditProfileScreen() {
 
     setSaving(true);
     try {
-      const res = await trainingService.updateProfile(fullName.trim());
-      if (res.ok) {
-        await AsyncStorage.setItem("userName", res.full_name);
-        Alert.alert("✅ Nome atualizado!", `Seu nome agora é "${res.full_name}".`);
+      let nameSuccess = false;
+      let photoSuccess = false;
+
+      // 1. Atualizar Nome
+      const resName = await trainingService.updateProfile(fullName.trim());
+      if (resName.ok) {
+        await AsyncStorage.setItem("userName", resName.full_name);
+        nameSuccess = true;
       } else {
-        Alert.alert("Erro", res.detail || "Falha ao atualizar o nome.");
+        Alert.alert("Erro", resName.detail || "Falha ao atualizar o nome.");
+        setSaving(false);
+        return;
+      }
+
+      // 2. Atualizar Foto (se escolhida)
+      if (localImageUri) {
+        setUploadingPhoto(true);
+        const resPhoto = await trainingService.uploadAvatar(localImageUri);
+        if (resPhoto.ok && resPhoto.avatar_url) {
+          setAvatarUrl(resPhoto.avatar_url);
+          setLocalImageUri(null);
+          await AsyncStorage.setItem("userAvatar", resPhoto.avatar_url);
+          photoSuccess = true;
+        } else {
+          Alert.alert("Erro", resPhoto.detail || "Falha ao enviar a foto.");
+        }
+        setUploadingPhoto(false);
+      }
+
+      if (nameSuccess && !localImageUri) {
+        Alert.alert("✅ Sucesso!", `Perfil atualizado com sucesso.`);
+      } else if (nameSuccess && photoSuccess) {
+        Alert.alert("✅ Sucesso!", "Nome e foto de perfil atualizados com sucesso!");
       }
     } catch (e) {
-      Alert.alert("Erro de rede", "Não foi possível salvar: " + String(e));
+      Alert.alert("Erro de rede", "Não foi possível salvar as alterações: " + String(e));
     } finally {
       setSaving(false);
     }
@@ -184,23 +190,6 @@ export default function EditProfileScreen() {
               <MaterialIcons name="camera-alt" size={18} color="#fff" />
             </TouchableOpacity>
           </View>
-
-          {localImageUri && (
-            <TouchableOpacity
-              style={styles.uploadBtn}
-              onPress={handleUploadAvatar}
-              disabled={uploadingPhoto}
-            >
-              {uploadingPhoto ? (
-                <ActivityIndicator size="small" color="#000" />
-              ) : (
-                <>
-                  <MaterialIcons name="cloud-upload" size={20} color="#000" />
-                  <Text style={styles.uploadBtnText}>Enviar Nova Foto</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          )}
         </View>
 
         {/* Form */}
@@ -220,8 +209,8 @@ export default function EditProfileScreen() {
 
           <TouchableOpacity
             style={styles.saveBtn}
-            onPress={handleSaveName}
-            disabled={saving}
+            onPress={handleSaveChanges}
+            disabled={saving || uploadingPhoto}
           >
             {saving ? (
               <ActivityIndicator size="small" color="#000" />
