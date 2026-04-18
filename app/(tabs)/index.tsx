@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,11 +8,41 @@ import {
   ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { router, useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { trainingService } from "@/services/trainingService";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [fullName, setFullName] = useState("");
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    try {
+      // Primeiro tenta carregar do AsyncStorage (cached)
+      const name = await AsyncStorage.getItem("userName");
+      const avatar = await AsyncStorage.getItem("userAvatar");
+      if (name) setFullName(name);
+      if (avatar) setAvatarUrl(avatar);
+
+      // Depois busca os dados frescos do servidor
+      const res = await trainingService.getProfile();
+      if (res.ok && res.profile) {
+        setFullName(res.profile.full_name || "");
+        setAvatarUrl(res.profile.avatar_url || null);
+      }
+    } catch (e) {
+      console.log("Erro ao carregar perfil:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Top Bar */}
@@ -21,7 +51,7 @@ export default function HomeScreen() {
           <View style={styles.iconCircle}>
             <Image source={require('../../assets/images/Li-Vision-Logo-BackgroundOff.png')} style={{ width: 50, height: 50 }} resizeMode="contain" />
           </View>
-          <Text style={styles.logoText}>Li-Vision</Text>
+          <Text style={styles.logoText}>{fullName}</Text>
         </View>
 
         <View style={styles.topActions}>
@@ -29,12 +59,14 @@ export default function HomeScreen() {
             <MaterialIcons name="notifications" size={24} color="#dfe2eb" />
           </TouchableOpacity>
 
-          <Image
-            source={{
-              uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuDSZjojJ-8jnM6Lv4FA8cVNPYzHD6-MbsBTYLn2_-_lT-BAEHqNkDvUG6p4LtM9pBMknhjS8t8MTYTwoxZBgHjn5Ojvn8EhiF6Nsza9AlcwgFaxbuJkGz4YXKWPKNIjIo7DBQIdNzoaMSMMlhMdBFTQ-6FFBudV59cDfKHWZkJvp4mCgjq5QzPbFXvJkJ9N45O-GFxGk7xpPzT3nrOGXNCZ0BpxkamONYdfECrKTLojPN195i0agdGPm-hWtwraUPXWYM9zNvyBiGeB",
-            }}
-            style={styles.avatar}
-          />
+          {avatarUrl ? (
+            <Image
+              source={{ uri: avatarUrl }}
+              style={styles.avatarImage}
+            />
+          ) : (
+            <FontAwesome5 name="user-astronaut" size={40} color="#00e5ff" />
+          )}
         </View>
       </View>
 
@@ -107,7 +139,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#10141a",
   },
   iconCircle: { width: 30, height: 30, borderRadius: 35, backgroundColor: "rgba(0, 229, 255, 0.1)", justifyContent: "center", alignItems: "center", alignSelf: "center", marginBottom: 20, borderWidth: 1, borderColor: "#00e5ff" },
-
+  avatarImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 60,
+    borderWidth: 3,
+    borderColor: "#00e5ff",
+  },
   topBar: {
     flexDirection: "row",
     justifyContent: "space-between",
