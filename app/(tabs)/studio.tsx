@@ -51,7 +51,7 @@ export default function StudioScreen() {
               <Text style={styles.optionText}>Gravar Sequência Múltipla (Sinais)</Text>
             </View>
           </TouchableOpacity>
-          {isAdmin && (
+         
             <TouchableOpacity
               style={styles.optionBtn}
               onPress={() => router.push("/screens/manage-datasets")}
@@ -61,11 +61,11 @@ export default function StudioScreen() {
                 <Text style={[styles.optionText, { color: "#00e5ff" }]}>Gerenciar Gestos e Datasets</Text>
               </View>
             </TouchableOpacity>
-          )}
         </View>
       </View>
 
       {/* CARD NAVIGATION */}
+      {isAdmin && (
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <MaterialIcons name="model-training" size={20} color="#fff" />
@@ -92,6 +92,7 @@ export default function StudioScreen() {
           </TouchableOpacity>
         </View>
       </View>
+      )}
     </ScrollView>
   );
 }

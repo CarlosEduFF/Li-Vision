@@ -95,9 +95,15 @@ export default function CollectDynamicScreen() {
   }, [lastSync, isRecording]);
 
   useEffect(() => {
-    // When ws receives message from collect mode, it might trigger things
-    // For now we rely on the timer because WebSocket responses do not mutate seq naturally without a dedicated handler in cam.tsx 
-    // We will just do the same mockup timer for STOP logic since WS stream is fast enough in 3s
+    gestureWS.connect((res) => {
+      if (res.ok && res.sequences !== undefined) {
+        setSequences(res.sequences);
+      }
+    }, () => { });
+
+    return () => {
+      gestureWS.disconnect();
+    };
   }, []);
 
   const startDynamic = async () => {
@@ -105,27 +111,26 @@ export default function CollectDynamicScreen() {
       Alert.alert("Aviso", "Preencha Nome e Label");
       return;
     }
-    gestureWS.connect(() => { }, () => { });
 
     try {
       setIsRecording(true);
-      await trainingService.startDynamicCollection(label, datasetName);
+      const userId = await AsyncStorage.getItem("userId") || undefined;
+      
+      gestureWS.sendAction({ 
+        action: "start_collect", 
+        label, 
+        dataset_name: datasetName, 
+        user_id: userId 
+      });
 
       // Assume 15 frames stream takes ~2 seconds to send via WS realistically
-      setTimeout(async () => {
-        const res = await trainingService.stopDynamicCollection();
+      setTimeout(() => {
+        gestureWS.sendAction({ action: "stop_collect" });
         setIsRecording(false);
-        gestureWS.disconnect();
-        if (res.ok) {
-          setSequences(s => s + 1);
-        } else {
-          Alert.alert("Erro", res.error || "Falha ao gravar sequência");
-        }
       }, 2500);
     } catch (e) {
       Alert.alert("Erro na Gravação", String(e));
       setIsRecording(false);
-      gestureWS.disconnect();
     }
   };
 

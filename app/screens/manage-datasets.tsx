@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Modal, Tex
 import { MaterialIcons } from "@expo/vector-icons";
 import { trainingService } from "../../services/trainingService";
 import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ManageDatasetsScreen() {
   const [datasets, setDatasets] = useState<any[]>([]);
@@ -14,9 +15,11 @@ export default function ManageDatasetsScreen() {
   const [editType, setEditType] = useState<"dataset" | "label">("dataset");
   const [editContext, setEditContext] = useState<any>(null);
   const [editValue, setEditValue] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     loadDatasets();
+    AsyncStorage.getItem("userRole").then(r => setIsAdmin(r === "admin"));
   }, []);
 
   const loadDatasets = async () => {
@@ -168,16 +171,18 @@ export default function ManageDatasetsScreen() {
 
                 {isExpanded && (
                   <View style={styles.expandedContent}>
-                    <View style={styles.datasetActions}>
-                      <TouchableOpacity style={styles.actionBtn} onPress={() => openEditDataset(ds)}>
-                        <MaterialIcons name="edit" size={18} color="#fff" />
-                        <Text style={styles.actionText}>Renomear</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity style={[styles.actionBtn, {backgroundColor: '#e53935'}]} onPress={() => confirmDeleteDataset(ds)}>
-                        <MaterialIcons name="delete" size={18} color="#fff" />
-                        <Text style={styles.actionText}>Excluir Dataset</Text>
-                      </TouchableOpacity>
-                    </View>
+                    {isAdmin && (
+                      <View style={styles.datasetActions}>
+                        <TouchableOpacity style={styles.actionBtn} onPress={() => openEditDataset(ds)}>
+                          <MaterialIcons name="edit" size={18} color="#fff" />
+                          <Text style={styles.actionText}>Renomear</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.actionBtn, {backgroundColor: '#e53935'}]} onPress={() => confirmDeleteDataset(ds)}>
+                          <MaterialIcons name="delete" size={18} color="#fff" />
+                          <Text style={styles.actionText}>Excluir Dataset</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
                     
                     <Text style={styles.labelsTitle}>Gestos / Labels Cadastrados:</Text>
                     
@@ -193,12 +198,16 @@ export default function ManageDatasetsScreen() {
                              <Text style={styles.labelCount}>{datasetStats[label]} amostras</Text>
                            </View>
                            <View style={styles.labelActions}>
-                             <TouchableOpacity onPress={() => openEditLabel(ds.id, label)} style={styles.iconBtn}>
-                               <MaterialIcons name="edit" size={20} color="#00e5ff" />
-                             </TouchableOpacity>
-                             <TouchableOpacity onPress={() => confirmDeleteLabel(ds.id, label)} style={styles.iconBtn}>
-                               <MaterialIcons name="delete-outline" size={20} color="#e53935" />
-                             </TouchableOpacity>
+                             {isAdmin && (
+                               <>
+                                 <TouchableOpacity onPress={() => openEditLabel(ds.id, label)} style={styles.iconBtn}>
+                                   <MaterialIcons name="edit" size={20} color="#00e5ff" />
+                                 </TouchableOpacity>
+                                 <TouchableOpacity onPress={() => confirmDeleteLabel(ds.id, label)} style={styles.iconBtn}>
+                                   <MaterialIcons name="delete-outline" size={20} color="#e53935" />
+                                 </TouchableOpacity>
+                               </>
+                             )}
                            </View>
                          </View>
                        ))
