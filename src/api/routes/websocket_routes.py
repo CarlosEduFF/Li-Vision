@@ -83,11 +83,12 @@ async def handle_action(websocket: WebSocket, session: UserSession, payload: dic
 async def websocket_detect(websocket: WebSocket):
     await websocket.accept()
 
-    # Extrai modo de detecção do query param (ex: ws://host/ws/detect?mode=hybrid)
+    # Extrai modo de conexão do query param (ex: ws://host/ws/detect?mode=hybrid&model=LIBRAS_BR)
     detection_mode = websocket.query_params.get("mode", None)
-    session = UserSession(detection_mode=detection_mode)
+    active_model = websocket.query_params.get("model", None)
+    session = UserSession(detection_mode=detection_mode, active_model_name=active_model)
 
-    print(f"[WS] Cliente conectado (modo: {session.detection_mode})")
+    print(f"[WS] Cliente conectado (modo: {session.detection_mode}, modelo: {active_model})")
 
     try:
         timestamp = 0

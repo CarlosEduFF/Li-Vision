@@ -53,7 +53,7 @@ class ModelCache:
             return
         for model_file in model_dir.glob("*.joblib"):
             logger.info("[ModelCache] Carregando modelo estático: %s", model_file.name)
-            cls._static_models[str(model_file)] = joblib.load(model_file)
+            cls._static_models[model_file.stem] = joblib.load(model_file)
 
     @classmethod
     def _load_dynamic(cls, config):
@@ -64,7 +64,7 @@ class ModelCache:
             return
         for model_file in model_dir.glob("*.joblib"):
             logger.info("[ModelCache] Carregando modelo dinâmico: %s", model_file.name)
-            cls._dynamic_models[str(model_file)] = joblib.load(model_file)
+            cls._dynamic_models[model_file.stem] = joblib.load(model_file)
 
     @classmethod
     def reload(cls, config=None):

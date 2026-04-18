@@ -170,7 +170,7 @@ class TrainingService:
                 if not storage_path:
                     continue
 
-                target_path = os.path.join(local_dir, model["type"], "classifier.joblib")
+                target_path = os.path.join(local_dir, model["type"], f"{model_name}.joblib")
                 
                 with open(target_path, 'wb+') as f:
                     data = supabase.storage.from_("models").download(storage_path)
