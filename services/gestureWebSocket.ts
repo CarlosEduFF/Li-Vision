@@ -53,18 +53,22 @@ class GestureWebSocket {
   private intentionalClose = false;
   private currentMode: DetectionMode = "hybrid";
 
+  private activeModelName: string | null = null;
+
   /**
    * Conecta ao WebSocket da API com o modo de detecção especificado.
    * @param onGesture - callback chamado a cada resposta de detecção
    * @param onStatusChange - callback chamado quando o status da conexão muda
    * @param mode - modo de detecção (hybrid/rules/ml/dynamic_ml)
+   * @param activeModelName - nome do idioma de IA principal selecionado
    */
-  connect(onGesture: GestureCallback, onStatusChange?: StatusCallback, mode?: DetectionMode): void {
+  connect(onGesture: GestureCallback, onStatusChange?: StatusCallback, mode?: DetectionMode, activeModelName?: string | null): void {
     this.onGesture = onGesture;
     this.onStatusChange = onStatusChange ?? null;
     this.intentionalClose = false;
     this.reconnectAttempts = 0;
     if (mode) this.currentMode = mode;
+    if (activeModelName !== undefined) this.activeModelName = activeModelName;
     this._connect();
   }
 
@@ -77,8 +81,12 @@ class GestureWebSocket {
 
     this._setStatus(this.reconnectAttempts > 0 ? "reconnecting" : "connecting");
 
-    // Envia o modo de detecção como query parameter
-    const wsUrl = `${WS_BASE_URL}?mode=${this.currentMode}`;
+    // Envia o modo de detecção e o modelo ativo como query parameter
+    let wsUrl = `${WS_BASE_URL}?mode=${this.currentMode}`;
+    if (this.activeModelName) {
+      wsUrl += `&model=${this.activeModelName}`;
+    }
+    
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {

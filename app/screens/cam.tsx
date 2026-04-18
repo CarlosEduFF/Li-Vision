@@ -111,6 +111,8 @@ export default function CameraScreen() {
     const autoActivateModel = async () => {
       const activeId = await AsyncStorage.getItem('activeModelId');
       const modelName = await AsyncStorage.getItem('activeModelName');
+      
+      let finalModelName = modelName;
       if (modelName) setActiveModelName(modelName);
 
       if (!activeId) {
@@ -118,9 +120,11 @@ export default function CameraScreen() {
           const res = await trainingService.listModels();
           if (res.models && res.models.length > 0) {
             const best = res.models.sort((a: any, b: any) => b.accuracy - a.accuracy)[0];
-            await trainingService.activateModel(best.id);
+            await trainingService.activateModel(best.id); // Avisar ao servidor para baixar se não existir
             await AsyncStorage.setItem('activeModelId', best.id);
             await AsyncStorage.setItem('activeModelName', best.name);
+            
+            finalModelName = best.name;
             setActiveModelName(best.name);
             console.log(`[AutoActivate] Modelo "${best.name}" ativado automaticamente`);
           }
@@ -128,10 +132,12 @@ export default function CameraScreen() {
           console.log('[AutoActivate] Falha na ativação automática:', e);
         }
       }
+
+      // Conecta já com o nome do modelo carregado da memória
+      gestureWS.connect(handleGesture, handleStatusChange, detectionMode, finalModelName);
     };
 
     autoActivateModel();
-    gestureWS.connect(handleGesture, handleStatusChange, detectionMode);
     return () => gestureWS.disconnect();
   }, []);
 
