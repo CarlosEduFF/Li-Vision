@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Dimensions, Alert, ScrollView } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { trainingService } from "../../services/trainingService";
@@ -13,12 +13,18 @@ export default function CollectDynamicScreen() {
   const [label, setLabel] = useState("");
   const [datasetName, setDatasetName] = useState("");
   const [isRecording, setIsRecording] = useState(false);
+  const isRecordingRef = useRef(isRecording);
+  const recordingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [sequences, setSequences] = useState(0);
   const [landmarks, setLandmarks] = useState<LandmarkPoint[]>([]);
   const [datasets, setDatasets] = useState<any[]>([]);
   const [gestureLabels, setGestureLabels] = useState<string[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [labelHint, setLabelHint] = useState<string | null>(null);
+
+  useEffect(() => {
+    isRecordingRef.current = isRecording;
+  }, [isRecording]);
 
   useEffect(() => {
     loadDatasets();
@@ -66,7 +72,7 @@ export default function CollectDynamicScreen() {
       const transformedHands = hands.map(handLms => handLms.map(transformPoint));
       setLandmarks(transformedHands[0]);
 
-      if (isRecording && gestureWS.isConnected()) {
+      if (isRecordingRef.current && gestureWS.isConnected()) {
         gestureWS.sendLandmarks(transformedHands);
       }
     } else {
@@ -96,8 +102,25 @@ export default function CollectDynamicScreen() {
 
   useEffect(() => {
     gestureWS.connect((res) => {
+      console.log("WS Response:", res);
       if (res.ok && res.sequences !== undefined) {
         setSequences(res.sequences);
+        // Stop recording cleanly upon success
+        if (isRecordingRef.current) {
+          setIsRecording(false);
+          gestureWS.sendAction({ action: "stop_collect" });
+          if (recordingTimeoutRef.current) {
+             clearTimeout(recordingTimeoutRef.current);
+             recordingTimeoutRef.current = null;
+          }
+        }
+      }
+      if (!res.ok && res.error) {
+        console.error("WS Error:", res.error);
+        if (isRecordingRef.current) {
+          setIsRecording(false);
+          gestureWS.sendAction({ action: "stop_collect" });
+        }
       }
     }, () => { });
 
@@ -123,11 +146,14 @@ export default function CollectDynamicScreen() {
         user_id: userId 
       });
 
-      // Assume 15 frames stream takes ~2 seconds to send via WS realistically
-      setTimeout(() => {
-        gestureWS.sendAction({ action: "stop_collect" });
-        setIsRecording(false);
-      }, 2500);
+      // Allow up to 6 seconds for the user to provide 15 valid ML frames
+      recordingTimeoutRef.current = setTimeout(() => {
+        if (isRecordingRef.current) {
+           gestureWS.sendAction({ action: "stop_collect" });
+           setIsRecording(false);
+           Alert.alert("Tempo Esgotado", "Não foi possível detectar as mãos ou focar as 15 frames suficientes a tempo. Tente novamente focando a mão.");
+        }
+      }, 6000);
     } catch (e) {
       Alert.alert("Erro na Gravação", String(e));
       setIsRecording(false);

@@ -45,7 +45,7 @@ export default function LoginScreen() {
       
       <View style={styles.card}>
         <View style={styles.iconCircle}>
-          <Image source={require('../../assets/images/Li-Vision (Logo-BackgroundOff).png')} style={{ width: 50, height: 50 }} resizeMode="contain" />
+          <Image source={require('../../assets/images/Li-Vision-Logo-BackgroundOff.png')} style={{ width: 50, height: 50 }} resizeMode="contain" />
         </View>
         <Text style={styles.title}>Acesso Restrito</Text>
         <Text style={styles.subtitle}>Entre para contribuir com os datasets do Li-Vision Edge.</Text>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Modal } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Modal, Image } from 'react-native';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -53,7 +53,7 @@ export default function RegisterScreen() {
       
       <View style={styles.card}>
         <View style={styles.iconCircle}>
-          <FontAwesome5 name="robot" size={32} color="#00e5ff" />
+          <Image source={require('../../assets/images/Li-Vision-Logo-BackgroundOff.png')} style={{ width: 50, height: 50 }} resizeMode="contain" />
         </View>
         <Text style={styles.title}>Novo Pesquisador</Text>
         <Text style={styles.subtitle}>Crie uma conta para catalogar suas doações de dados.</Text>

@@ -19,7 +19,7 @@ export default function HomeScreen() {
       <View style={styles.topBar}>
         <View style={styles.logoContainer}>
           <View style={styles.iconCircle}>
-            <Image source={require('../../assets/images/Li-Vision (Logo-BackgroundOff).png')} style={{ width: 50, height: 50 }} resizeMode="contain" />
+            <Image source={require('../../assets/images/Li-Vision-Logo-BackgroundOff.png')} style={{ width: 50, height: 50 }} resizeMode="contain" />
           </View>
           <Text style={styles.logoText}>Li-Vision</Text>
         </View>
