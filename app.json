@@ -4,7 +4,8 @@
     "slug": "Li-Vision",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/Li-Vision-Logo-BackgroundOff.png",
+    "icon": "./assets/images/images/Li-Vision(Logo-icon).png",
+    //"icon": "./assets/images/Li-Vision(Logo).png",
     "scheme": "livisionapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -14,9 +15,9 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#10141a",
-        "foregroundImage": "./assets/images/Li-Vision-Logo-BackgroundOff.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/Li-Vision-Logo-BackgroundOff.png"
+        "foregroundImage": "./assets/images/Li-Vision(Logo).png",
+        "backgroundImage": "./assets/images/Li-Vision(Logo).png",
+        "monochromeImage": "./assets/images/Li-Vision(Logo).png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -38,7 +39,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/Li-Vision-Logo-BackgroundOff.png",
+          "image": "./assets/images/Li-Vision(Logo).png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#10141a",

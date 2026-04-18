@@ -71,7 +71,7 @@ export default function ModelsScreen() {
       </View>
 
       <Text style={styles.subtitle}>
-        Abaixo estão os seus modelos base. Ao ativar um modelo mestre, tanto suas capacidades estáticas quanto dinâmicas serão carregadas no servidor.
+        Abaixo estão os seus modelos base. Ao ativar um modelo mestre, tanto suas capacidades estáticas quanto dinâmicas serão carregadas e disponibilizadas globalmente no servidor.
       </Text>
 
       {isLoading ? (

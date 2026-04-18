@@ -39,6 +39,7 @@ export default function RootLayout() {
         <Stack.Screen name="screens/register" options={{ headerShown: false, animation: 'fade' }} />
         <Stack.Screen name="screens/manage-datasets" options={{ headerShown: false }} />
         <Stack.Screen name="screens/edit-profile" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/select-model" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

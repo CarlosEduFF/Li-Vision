@@ -17,7 +17,9 @@ export default function HomeScreen() {
   const router = useRouter();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [fullName, setFullName] = useState("");
+  const [activeModelName, setActiveModelName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     loadProfile();
   }, []);
@@ -27,8 +29,11 @@ export default function HomeScreen() {
       // Primeiro tenta carregar do AsyncStorage (cached)
       const name = await AsyncStorage.getItem("userName");
       const avatar = await AsyncStorage.getItem("userAvatar");
+      const model = await AsyncStorage.getItem("activeModelName");
+      
       if (name) setFullName(name);
       if (avatar) setAvatarUrl(avatar);
+      if (model) setActiveModelName(model);
 
       // Depois busca os dados frescos do servidor
       const res = await trainingService.getProfile();
@@ -88,6 +93,21 @@ export default function HomeScreen() {
 
         {/* Cards */}
         <View style={styles.grid}>
+          
+          {/* Selecionar Modelo / Idioma */}
+          <TouchableOpacity style={styles.cardWide} activeOpacity={0.8} onPress={() => router.push("/screens/select-model")}>
+            <MaterialIcons name="language" size={34} color="#b388ff" />
+            <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+              <View>
+                <Text style={[styles.cardTitle, { color: "#b388ff" }]}>Idioma Base (IA)</Text>
+                <Text style={styles.cardTextSmall}>
+                  Selecionado: {activeModelName || "Padrão"}
+                </Text>
+              </View>
+              <MaterialIcons name="chevron-right" size={24} color="#b388ff" />
+            </View>
+          </TouchableOpacity>
+
           {/* Card ML */}
           <TouchableOpacity style={styles.cardLarge} activeOpacity={0.8}>
             <Text style={styles.cardTitle}>
@@ -114,17 +134,6 @@ export default function HomeScreen() {
             <Text style={styles.cardTextSmall}>
               Lógica baseada nos landmarks.
             </Text>
-          </TouchableOpacity>
-
-          {/* Libras */}
-          <TouchableOpacity style={styles.cardWide} activeOpacity={0.8}>
-            <MaterialIcons name="sign-language" size={30} color="#b9c7e4" />
-            <View>
-              <Text style={styles.cardTitle}>Libras</Text>
-              <Text style={styles.cardTextSmall}>
-                Tradução em tempo real (experimental)
-              </Text>
-            </View>
           </TouchableOpacity>
         </View>
 
