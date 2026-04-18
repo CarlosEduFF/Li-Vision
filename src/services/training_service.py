@@ -156,26 +156,41 @@ class TrainingService:
         return {"models": list(grouped.values())}
 
     def activate_model(self, model_name: str) -> dict:
+        import yaml
+        # Lê os caminhos dos modelos do config.yaml (mesmos que o ModelCache usa)
+        config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "config.yaml")
+        with open(config_path, "r") as f:
+            config = yaml.safe_load(f)
+
+        static_dir = config["ml"]["model_path"]       # ex: "models/static"
+        dynamic_dir = config["dynamic_ml"]["model_path"]  # ex: "models/dynamic"
+
+        os.makedirs(static_dir, exist_ok=True)
+        os.makedirs(dynamic_dir, exist_ok=True)
+
         mod_res = supabase.table("models").select("*").eq("name", model_name).execute()
         if len(mod_res.data) == 0:
             return {"error": "Model not found"}
-            
-        local_dir = "c:/Users/carlo/Downloads/Li-Vision/src/models/"
-        os.makedirs(os.path.join(local_dir, "static"), exist_ok=True)
-        os.makedirs(os.path.join(local_dir, "dynamic"), exist_ok=True)
-        
+
         try:
             for model in mod_res.data:
                 storage_path = model.get("storage_path")
                 if not storage_path:
                     continue
 
-                target_path = os.path.join(local_dir, model["type"], f"{model_name}.joblib")
-                
-                with open(target_path, 'wb+') as f:
-                    data = supabase.storage.from_("models").download(storage_path)
+                # Decide o diretório local baseado no tipo (static ou dynamic)
+                if model["type"] == "static":
+                    target_path = os.path.join(static_dir, f"{model_name}.joblib")
+                else:
+                    target_path = os.path.join(dynamic_dir, f"{model_name}.joblib")
+
+                data = supabase.storage.from_("models").download(storage_path)
+                with open(target_path, 'wb') as f:
                     f.write(data)
-                    
+
+                logger.info("[TrainingService] Modelo '%s' (%s) salvo em: %s", model_name, model["type"], target_path)
+
             return {"ok": True, "active_model": model_name, "type": "hybrid"}
         except Exception as e:
+            logger.error("[TrainingService] Falha ao ativar modelo '%s': %s", model_name, e)
             return {"ok": False, "error": str(e)}
