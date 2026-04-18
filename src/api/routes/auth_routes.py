@@ -158,22 +158,22 @@ async def upload_avatar_file(file: UploadFile = File(...), user: dict = Depends(
         
         # Tentar remover o arquivo antigo (se existir)
         try:
-            supabase.storage.from_("avatars").remove([storage_path])
+            supabase_admin.storage.from_("avatars").remove([storage_path])
         except:
             pass
         
         # Upload do novo avatar
-        supabase.storage.from_("avatars").upload(
+        supabase_admin.storage.from_("avatars").upload(
             path=storage_path,
             file=contents,
             file_options={"content-type": file.content_type or "image/jpeg", "upsert": "true"}
         )
         
         # Montar a URL pública
-        public_url = supabase.storage.from_("avatars").get_public_url(storage_path)
+        public_url = supabase_admin.storage.from_("avatars").get_public_url(storage_path)
         
         # Atualizar a tabela profiles com a URL do avatar
-        supabase.table("profiles").update({
+        supabase_admin.table("profiles").update({
             "avatar_url": public_url
         }).eq("id", user_id).execute()
         
