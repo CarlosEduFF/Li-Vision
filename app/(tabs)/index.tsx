@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#10141a",
   },
-  iconCircle: { width: 30, height: 30, borderRadius: 35, backgroundColor: "rgba(0, 229, 255, 0.1)", justifyContent: "center", alignItems: "center", alignSelf: "center", marginBottom: 20, borderWidth: 1, borderColor: "#00e5ff" },
+  iconCircle: { width: 40, height: 30, borderRadius: 35, backgroundColor: "rgba(0, 229, 255, 0.1)", justifyContent: "center", alignItems: "center", alignSelf: "center", marginBottom: 20, borderWidth: 1, borderColor: "#00e5ff" },
   avatarImage: {
     width: 50,
     height: 50,
