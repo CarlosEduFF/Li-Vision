@@ -5,9 +5,8 @@ from src.core.model_cache import ModelCache
 router = APIRouter(prefix="/train", tags=["Training"])
 
 class TrainStartPayload(BaseModel):
-    dataset_id: str
+    dataset_ids: list[str]
     model_name: str
-    model_type: str
 
 class ActivatePayload(BaseModel):
     model_id: str
@@ -18,7 +17,7 @@ def get_service():
 
 @router.post("/start")
 async def start_training(payload: TrainStartPayload):
-    return get_service().train_model(payload.dataset_id, payload.model_name, payload.model_type)
+    return get_service().train_model(payload.dataset_ids, payload.model_name)
 
 @router.get("/status/{job_id}")
 async def get_training_status(job_id: str):
