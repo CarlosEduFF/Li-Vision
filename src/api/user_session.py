@@ -99,11 +99,19 @@ class UserSession:
 
     def _create_static_detectors(self, config) -> list:
         threshold = config["ml"]["confidence_threshold"]
-        detectors = []
-        for name, model in ModelCache.get_static_models().items():
-            if self.active_model_name and name != self.active_model_name:
-                continue
+        all_models = ModelCache.get_static_models()
 
+        # Filtra pelo modelo ativo; se não achar nenhum, carrega todos os disponíveis
+        if self.active_model_name and self.active_model_name in all_models:
+            filtered = {self.active_model_name: all_models[self.active_model_name]}
+        else:
+            if self.active_model_name:
+                logger.warning("[UserSession] Modelo estático '%s' não encontrado no cache. Carregando todos (%d).",
+                               self.active_model_name, len(all_models))
+            filtered = all_models
+
+        detectors = []
+        for name, model in filtered.items():
             det = MLDetector.__new__(MLDetector)
             from src.detectors.ml_detectors.static_detector import MLGestureDetector
             inner = MLGestureDetector.__new__(MLGestureDetector)
@@ -116,11 +124,19 @@ class UserSession:
     def _create_dynamic_detectors(self, config) -> list:
         threshold = config["dynamic_ml"]["confidence_threshold"]
         window_size = config["dynamic_ml"]["window_size"]
-        detectors = []
-        for name, model in ModelCache.get_dynamic_models().items():
-            if self.active_model_name and name != self.active_model_name:
-                continue
+        all_models = ModelCache.get_dynamic_models()
 
+        # Filtra pelo modelo ativo; se não achar nenhum, carrega todos os disponíveis
+        if self.active_model_name and self.active_model_name in all_models:
+            filtered = {self.active_model_name: all_models[self.active_model_name]}
+        else:
+            if self.active_model_name:
+                logger.warning("[UserSession] Modelo dinâmico '%s' não encontrado no cache. Carregando todos (%d).",
+                               self.active_model_name, len(all_models))
+            filtered = all_models
+
+        detectors = []
+        for name, model in filtered.items():
             det = SequenceGestureDetector.__new__(SequenceGestureDetector)
             det.model = model
             det.window_size = window_size
