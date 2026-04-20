@@ -11,3 +11,4 @@ pyyaml
 websockets
 supabase
 python-dotenv
+torch

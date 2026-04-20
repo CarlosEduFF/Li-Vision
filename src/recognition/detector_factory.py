@@ -15,10 +15,11 @@ from src.detectors.rule_detectors import (
 )
 
 # ----------------------------------------------------------
-# Static ML
+# ML Detectors
 # ----------------------------------------------------------
 from src.detectors.ml_detectors.static_detector import MLDetector
 from src.detectors.ml_detectors.sequence_detector import SequenceGestureDetector
+from src.detectors.ml_detectors.lstm_model import LSTMGestureDetector
 
 # ==========================================================
 # MAPA DE REGRAS
@@ -33,7 +34,7 @@ RULE_MAP = {
 
 
 # ==========================================================
-# CARREGAR MODELOS ESTÁTICOS
+# CARREGAR MODELOS ESTATICOS
 # ==========================================================
 def load_static_models(config):
 
@@ -43,13 +44,11 @@ def load_static_models(config):
     detectors = []
 
     if not model_dir.exists():
-        print(f"[WARN] Pasta de modelos estáticos não encontrada: {model_dir}")
+        print(f"[WARN] Pasta de modelos estaticos nao encontrada: {model_dir}")
         return detectors
 
     for model_file in model_dir.glob("*.joblib"):
-
         print(f"[STATIC] carregando modelo: {model_file.name}")
-
         detectors.append(
             MLDetector(
                 model_path=str(model_file),
@@ -61,33 +60,44 @@ def load_static_models(config):
 
 
 # ==========================================================
-# CARREGAR MODELOS DINÂMICOS
+# CARREGAR MODELOS DINAMICOS (PyTorch GRU + sklearn legado)
 # ==========================================================
 def load_dynamic_models(config):
 
-
     model_dir = Path(config["dynamic_ml"]["model_path"])
-
     threshold = config["dynamic_ml"]["confidence_threshold"]
     window_size = config["dynamic_ml"]["window_size"]
 
     detectors = []
 
     if not model_dir.exists():
-        print(f"[WARN] Pasta de modelos dinâmicos não encontrada: {model_dir}")
+        print(f"[WARN] Pasta de modelos dinamicos nao encontrada: {model_dir}")
         return detectors
 
-    for model_file in model_dir.glob("*.joblib"):
-
-        print(f"[DYNAMIC] carregando modelo: {model_file.name}")
-
+    # Carrega modelos PyTorch (.pt) - prioridade
+    loaded_stems = set()
+    for model_file in model_dir.glob("*.pt"):
+        print(f"[DYNAMIC] carregando modelo GRU: {model_file.name}")
         detectors.append(
-            SequenceGestureDetector(
+            LSTMGestureDetector(
                 model_path=str(model_file),
                 window_size=window_size,
                 threshold=threshold,
             )
         )
+        loaded_stems.add(model_file.stem)
+
+    # Carrega modelos sklearn legado (.joblib) - apenas se nao existir .pt
+    for model_file in model_dir.glob("*.joblib"):
+        if model_file.stem not in loaded_stems:
+            print(f"[DYNAMIC] carregando modelo MLP legado: {model_file.name}")
+            detectors.append(
+                SequenceGestureDetector(
+                    model_path=str(model_file),
+                    window_size=window_size,
+                    threshold=threshold,
+                )
+            )
 
     return detectors
 
@@ -107,7 +117,6 @@ def create_detectors(config):
     """
 
     mode = config["detection"]["mode"]
-
     detectors = []
 
     # ------------------------------------------------------
@@ -115,30 +124,20 @@ def create_detectors(config):
     # ------------------------------------------------------
     if mode == "hybrid":
 
-        # Dynamic ML
         if config["dynamic_ml"]["enabled"]:
             detectors.extend(load_dynamic_models(config))
 
-        # Static ML
         if config["ml"]["enabled"]:
             detectors.extend(load_static_models(config))
 
-        # Rules
         if config["rules"]["enabled"]:
             letters = config["rules"]["letters"]
-
             for letter in letters:
-
                 if letter in RULE_MAP:
-
                     print(f"[RULE] carregando detector: {letter}")
-
-                    detectors.append(
-                        RULE_MAP[letter]()
-                    )
-
+                    detectors.append(RULE_MAP[letter]())
                 else:
-                    print(f"[WARN] Detector para '{letter}' não existe")
+                    print(f"[WARN] Detector para \'{letter}\' nao existe")
 
         return detectors
 
@@ -148,16 +147,10 @@ def create_detectors(config):
     elif mode == "rules":
 
         if config["rules"]["enabled"]:
-
             letters = config["rules"]["letters"]
-
             for letter in letters:
-
                 if letter in RULE_MAP:
-
-                    detectors.append(
-                        RULE_MAP[letter]()
-                    )
+                    detectors.append(RULE_MAP[letter]())
 
         return detectors
 
@@ -167,9 +160,7 @@ def create_detectors(config):
     elif mode == "ml":
 
         if config["ml"]["enabled"]:
-            detectors.extend(
-                load_static_models(config)
-            )
+            detectors.extend(load_static_models(config))
 
         return detectors
 
@@ -179,9 +170,7 @@ def create_detectors(config):
     elif mode == "dynamic_ml":
 
         if config["dynamic_ml"]["enabled"]:
-            detectors.extend(
-                load_dynamic_models(config)
-            )
+            detectors.extend(load_dynamic_models(config))
 
         return detectors
 

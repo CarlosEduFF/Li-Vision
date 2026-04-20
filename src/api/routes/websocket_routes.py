@@ -216,7 +216,7 @@ async def websocket_detect(websocket: WebSocket):
 
                     # ----- COLETA DINÂMICA (se a sessão está coletando) -----
                     if session.collecting and session.collection_service.dynamic_session:
-                        res = session.collection_service.collect_dynamic_frame(hands[0])
+                        res = session.collection_service.collect_dynamic_frame(hands)
                         await websocket.send_json(res)
                         continue
 

@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from src.core.supabase_client import supabase
 from src.data_collection.static_collector import StaticCollector
 
@@ -62,11 +62,16 @@ class CollectionService:
         self.dynamic_buffer = []
         return {"ok": True, "status": "started"}
 
-    def collect_dynamic_frame(self, hand) -> dict:
+    def collect_dynamic_frame(self, hands) -> dict:
+        """
+        Recebe a lista completa de maos (hands) e extrai features no mesmo
+        formato do SequenceGestureDetector.landmarks_to_vector().
+        130 features por frame: 2 maos x (2 absolutas + 21x3 relativas) = 65 cada.
+        """
         if not self.dynamic_session:
             return {"ok": False, "error": "No dynamic session active"}
         
-        features = self.static_collector.landmarks_to_features(hand)
+        features = self._dynamic_landmarks_to_vector(hands)
         self.dynamic_buffer.append(features)
         
         if len(self.dynamic_buffer) >= 15:
@@ -77,6 +82,40 @@ class CollectionService:
             "collecting": True, 
             "buffer": len(self.dynamic_buffer)
         }
+
+    def _dynamic_landmarks_to_vector(self, hands) -> list:
+        """
+        Converte landmarks para vetor identico ao SequenceGestureDetector.
+        Suporta ate 2 maos, com padding de zeros para mao ausente.
+        Gera 130 features por frame (65 por mao).
+        """
+        vec = []
+
+        # Normaliza entrada para lista de maos
+        if len(hands) > 0 and hasattr(hands[0], "__len__") and not hasattr(hands[0], "x"):
+            hands_list = hands
+        else:
+            hands_list = [hands]
+
+        for i in range(2):
+            if i < len(hands_list):
+                hand = hands_list[i]
+                base_x = hand[0].x
+                base_y = hand[0].y
+
+                # Posicao absoluta do pulso (para capturar direcao do movimento)
+                vec.append(base_x)
+                vec.append(base_y)
+
+                for lm in hand:
+                    vec.append(lm.x - base_x)
+                    vec.append(lm.y - base_y)
+                    vec.append(getattr(lm, "z", 0.0))
+            else:
+                # 2 absolutas + 63 relativas = 65 posicoes por mao ausente
+                vec.extend([0.0] * 65)
+
+        return vec
 
     def collect_dynamic_save(self) -> dict:
         try:
