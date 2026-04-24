@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
-import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";

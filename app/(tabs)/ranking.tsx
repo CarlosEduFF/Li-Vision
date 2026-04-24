@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
-import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { View, Text, StyleSheet, FlatList, ActivityIndicator } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { trainingService } from "../../services/trainingService";
 

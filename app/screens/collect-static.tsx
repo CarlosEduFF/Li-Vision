@@ -1,12 +1,12 @@
-import { useState, useCallback, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Dimensions, Alert, ScrollView } from "react-native";
+import { detectHandLandmarks, LandmarkPoint } from "@/services/handLandmarkerPlugin";
 import { MaterialIcons } from "@expo/vector-icons";
-import { trainingService } from "../../services/trainingService";
-import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { Alert, Dimensions, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Camera, useCameraDevice, useFrameProcessor } from "react-native-vision-camera";
 import { Worklets } from "react-native-worklets-core";
-import { detectHandLandmarks, LandmarkPoint } from "@/services/handLandmarkerPlugin";
+import { trainingService } from "../../services/trainingService";
 
 export default function CollectStaticScreen() {
   const [label, setLabel] = useState("");
@@ -56,7 +56,7 @@ export default function CollectStaticScreen() {
   };
 
   const device = useCameraDevice("front");
-  const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+  const { width: screenWidth } = Dimensions.get("window");
 
   // same transformation mode as cam.tsx
   const transformPoint = (lm: any) => ({ x: 1.0 - lm.y, y: 1.0 - lm.x, z: lm.z });
@@ -85,7 +85,7 @@ export default function CollectStaticScreen() {
       } else {
         onLandmarksDetected([]);
       }
-    } catch (e) {
+    } catch {
       onLandmarksDetected([]);
     }
   }, [lastSync]);

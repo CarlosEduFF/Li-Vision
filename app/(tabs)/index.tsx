@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import { router, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { trainingService } from "@/services/trainingService";
 
@@ -45,6 +45,7 @@ export default function HomeScreen() {
       console.log("Erro ao carregar perfil:", e);
     } finally {
       setLoading(false);
+      console.log(loading);
     }
   };
 

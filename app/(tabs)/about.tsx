@@ -1,8 +1,12 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-export default function SettingsScreen() {
+export default function AboutScreen() {
+  const openModal = (slide: number) => {
+    router.push(`/modal?slide=${slide}`);
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
       {/* HEADER */}
@@ -34,23 +38,38 @@ export default function SettingsScreen() {
         </View>
       </View>
 
-      {/* CARD AÇÕES RÁPIDAS */}
+      {/* CARD AÇÕES RÁPIDAS - 4 BOTÕES COM MODAIS */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <MaterialIcons name="flash-on" size={20} color="#fff" />
-          <Text style={styles.sectionTitle}>Ações Rápidas</Text>
+          <Text style={styles.sectionTitle}>Guia do Aplicativo</Text>
         </View>
 
         <TouchableOpacity
           style={styles.actionBtn}
-          onPress={() => router.push("/screens/cam")}
+          onPress={() => openModal(1)}
+          activeOpacity={0.7}
+        >
+          <View style={styles.actionLeft}>
+            <MaterialIcons name="dashboard" size={22} color="#00e5ff" />
+            <View>
+              <Text style={styles.actionLabel}>Apresentação do App</Text>
+              <Text style={styles.actionDesc}>Conheça todas as funcionalidades e abas</Text>
+            </View>
+          </View>
+          <MaterialIcons name="chevron-right" size={22} color="#555" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.actionBtn}
+          onPress={() => openModal(2)}
           activeOpacity={0.7}
         >
           <View style={styles.actionLeft}>
             <MaterialIcons name="videocam" size={22} color="#00e5ff" />
             <View>
-              <Text style={styles.actionLabel}>Abrir Câmera</Text>
-              <Text style={styles.actionDesc}>Inferência em tempo real com Edge Computing</Text>
+              <Text style={styles.actionLabel}>Como Fazer Inferência</Text>
+              <Text style={styles.actionDesc}>Use a câmera para reconhecimento em tempo real</Text>
             </View>
           </View>
           <MaterialIcons name="chevron-right" size={22} color="#555" />
@@ -58,14 +77,14 @@ export default function SettingsScreen() {
 
         <TouchableOpacity
           style={styles.actionBtn}
-          onPress={() => router.push("/(tabs)/studio")}
+          onPress={() => openModal(3)}
           activeOpacity={0.7}
         >
           <View style={styles.actionLeft}>
             <MaterialIcons name="science" size={22} color="#00e5ff" />
             <View>
-              <Text style={styles.actionLabel}>ML Studio</Text>
-              <Text style={styles.actionDesc}>Coleta de dados, treinos e modelos</Text>
+              <Text style={styles.actionLabel}>Como Treinar Modelos</Text>
+              <Text style={styles.actionDesc}>Coleta de dados e treinamento no ML Studio</Text>
             </View>
           </View>
           <MaterialIcons name="chevron-right" size={22} color="#555" />
@@ -73,14 +92,14 @@ export default function SettingsScreen() {
 
         <TouchableOpacity
           style={styles.actionBtn}
-          onPress={() => router.push("/(tabs)/ranking")}
+          onPress={() => openModal(4)}
           activeOpacity={0.7}
         >
           <View style={styles.actionLeft}>
             <MaterialIcons name="leaderboard" size={22} color="#00e5ff" />
             <View>
-              <Text style={styles.actionLabel}>Ranking</Text>
-              <Text style={styles.actionDesc}>Veja os maiores contribuidores de dados</Text>
+              <Text style={styles.actionLabel}>Pontuação e Ranking</Text>
+              <Text style={styles.actionDesc}>Entenda como funciona o sistema de pontos</Text>
             </View>
           </View>
           <MaterialIcons name="chevron-right" size={22} color="#555" />
