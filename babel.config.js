@@ -1,9 +1,11 @@
-module.exports = function(api) {
-  api.cache(true);
+module.exports = function (api) {
+  const isTest = api.env('test');
+  api.cache(() => !isTest);
+
   return {
     presets: ['babel-preset-expo'],
     plugins: [
-      ['react-native-worklets-core/plugin'],
+      ...(!isTest ? [['react-native-worklets-core/plugin']] : []),
     ],
   };
 };

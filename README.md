@@ -42,6 +42,43 @@ To learn more about developing your project with Expo, look at the following res
 - [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
 - [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
+## Testes Automatizados 🚀
+
+### Configuração
+- **Jest + React Testing Library** para testes unitários em componentes e serviços.
+- **GitHub Actions** para CI/CD (roda testes em push/PR).
+
+### Como rodar testes localmente
+```bash
+npm test
+```
+Ou com coverage:
+```bash
+npm test -- --coverage
+```
+
+### Testes criados
+- `services/__tests__/api.test.ts`: Testa funções API (detectGesture, setRunMode, getState).
+- `app/__tests__/_layout.test.tsx`: Testa layout principal (auth redirect).
+
+### GitHub Actions
+- Workflow `.github/workflows/ci.yml` roda automaticamente:
+  - Instala deps
+  - Executa testes
+  - Gera coverage (Codecov)
+
+**Push para `main` ou `develop` para testar!**
+
+### Adicionar novos testes
+1. Crie arquivo em `__tests__/` ou `nome.test.tsx`.
+2. Use `render`, `fireEvent` do `@testing-library/react-native`.
+3. Mock módulos como `fetch`, `AsyncStorage`.
+
+### Expandir
+- Testes para screens (cam.tsx, collect-static.tsx).
+- Testes E2E com Detox.
+- Integração com Python API tests (req/test_video_api.py).
+
 ## Join the community
 
 Join our community of developers creating universal apps.
