@@ -1,20 +1,14 @@
-# Implementação Seção Aprendizagem + API CRUD
+# TODO – Voice Synthesis & Spelling Detection
 
-## Status Geral
-- [x] Plano aprovado
-- [x] 1. Criar learningService.ts
-- [x] 2. Criar app/(tabs)/learn.tsx (níveis)
-- [x] 3. Editar app/(tabs)/_layout.tsx (adicionar tab)
-- [x] 4. Criar app/screens/gesture-detail.tsx
-- [x] 5. Corrigir build nativo (worklets compatível)
-
-## Nova Etapa (Backend + Integração)
-- [ ] 6. Criar rota backend `learning_routes.py` (CRUD + admin)
-- [ ] 7. Registrar rota em `server.py`
-- [ ] 8. Atualizar `services/api.ts` com endpoints de aprendizagem
-- [ ] 9. Atualizar `services/learningService.ts` (alfabeto iniciante + outros níveis + API/fallback)
-- [ ] 10. Atualizar `app/(tabs)/learn.tsx` para dados da API
-- [ ] 11. Atualizar `app/screens/gesture-detail.tsx` para dados da API
-- [ ] 12. Validar fluxo mínimo (sem testes completos, conforme pedido)
-
-**Notas:** Público crianças-adultos, foco alfabeto no iniciante, sem vídeo, sem integração câmera/ranking.
+## Steps
+- [x] Plan approved
+- [ ] 1. Install `expo-speech` dependency
+- [ ] 2. Create `services/speechService.ts` (TTS wrapper + queue + preferences)
+- [ ] 3. Create `hooks/useSpellingDetector.ts` (buffer + debounce + idle finalize)
+- [ ] 4. Update `app/screens/cam.tsx`
+  - [ ] Integrate `speechService` on gesture detection
+  - [ ] Integrate `useSpellingDetector` hook
+  - [ ] Add settings modal (toggles + sliders)
+  - [ ] Add visual spelling feedback (buffer, status, buttons)
+- [ ] 5. Verify no regressions on existing features
+- [ ] 6. Document usage in code comments

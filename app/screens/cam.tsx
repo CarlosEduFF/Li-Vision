@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -30,10 +30,12 @@ import {
 } from "@/services/handLandmarkerPlugin";
 import { useModelStatus } from "@/hooks/useModelStatus";
 import { trainingService } from "@/services/trainingService";
+import speechService, { SpeechPreferences } from "@/services/speechService";
+import { useSpellingDetector } from "@/hooks/useSpellingDetector";
+import SpellingPanel from "@/components/voice/SpellingPanel";
+import VoiceSettingsModal from "@/components/voice/VoiceSettingsModal";
+import { camStyles as styles } from "./cam.styles";
 
-// ──────────────────────────────────────────────
-// Configurações dos modos de detecção
-// ──────────────────────────────────────────────
 const DETECTION_MODES: { key: DetectionMode; label: string; desc: string; icon: string }[] = [
   { key: "hybrid",     label: "Híbrido",        desc: "Combina regras + ML estático + ML dinâmico",   icon: "merge-type" },
   { key: "rules",      label: "Regras Lógicas", desc: "Apenas detectores baseados em lógica (A–E)",   icon: "calculate" },
@@ -41,11 +43,19 @@ const DETECTION_MODES: { key: DetectionMode; label: string; desc: string; icon: 
   { key: "dynamic_ml", label: "ML Dinâmico",    desc: "Apenas modelos de gestos com movimento",       icon: "dynamic-form" },
 ];
 
+const SKELETON_CONNECTIONS: [number, number][] = [
+  [0, 1], [1, 2], [2, 3], [3, 4],
+  [0, 5], [5, 6], [6, 7], [7, 8],
+  [0, 9], [9, 10], [10, 11], [11, 12],
+  [0, 13], [13, 14], [14, 15], [15, 16],
+  [0, 17], [17, 18], [18, 19], [19, 20],
+  [5, 9], [9, 13], [13, 17],
+];
+
 export default function CameraScreen() {
   const [gesture, setGesture] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number>(0);
-  const [connectionStatus, setConnectionStatus] =
-    useState<ConnectionStatus>("disconnected");
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("disconnected");
   const [apiError, setApiError] = useState<string | null>(null);
   const [landmarks, setLandmarks] = useState<LandmarkPoint[]>([]);
   const [showLandmarks, setShowLandmarks] = useState<boolean>(true);
@@ -53,26 +63,50 @@ export default function CameraScreen() {
   const [showModeModal, setShowModeModal] = useState<boolean>(false);
   const [activeModelName, setActiveModelName] = useState<string | null>(null);
 
-  // ── Health check do modelo Edge ──
+  // Voz / Soletração
+  const [speechPrefs, setSpeechPrefs] = useState<SpeechPreferences>(speechService.getPreferences());
+  const [showSpeechModal, setShowSpeechModal] = useState<boolean>(false);
+  const [lastSpokenWord, setLastSpokenWord] = useState<string | null>(null);
+
+  const handleWordComplete = useCallback((word: string) => {
+    setLastSpokenWord(word);
+    speechService.speakWord(word);
+    setTimeout(() => setLastSpokenWord((prev) => (prev === word ? null : prev)), 4000);
+  }, []);
+
+  const spellingConfig = useMemo(() => ({
+    spellingIdleMs: speechPrefs.spellingIdleMs,
+    letterStableMs: speechPrefs.letterStableMs,
+    minConfidence: speechPrefs.minConfidence,
+    enabled: speechPrefs.enabled && speechPrefs.spellingEnabled,
+  }), [
+    speechPrefs.spellingIdleMs,
+    speechPrefs.letterStableMs,
+    speechPrefs.minConfidence,
+    speechPrefs.enabled,
+    speechPrefs.spellingEnabled,
+  ]);
+
+  const spelling = useSpellingDetector({
+    config: spellingConfig,
+    onWordComplete: handleWordComplete,
+  });
+
+  useEffect(() => {
+    let mounted = true;
+    speechService.init().then((prefs) => { if (mounted) setSpeechPrefs(prefs); });
+    const unsubscribe = speechService.subscribe((prefs) => { if (mounted) setSpeechPrefs(prefs); });
+    return () => { mounted = false; unsubscribe(); speechService.stop(); };
+  }, []);
+
   const { status: modelStatus, errorMessage: modelError } = useModelStatus();
-
-  // Transformação correta de coordenadas para o sensor do aparelho (Modo 3)
   const transformPoint = (lm: any) => ({ x: 1.0 - lm.y, y: 1.0 - lm.x, z: lm.z });
-
   const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
-
   const device = useCameraDevice("front");
   const { hasPermission, requestPermission } = useCameraPermission();
 
-  useEffect(() => {
-    if (!hasPermission) {
-      requestPermission();
-    }
-  }, [hasPermission]);
+  useEffect(() => { if (!hasPermission) requestPermission(); }, [hasPermission]);
 
-  // ──────────────────────────────────────────────
-  // Callbacks WebSocket (resposta do servidor MLP)
-  // ──────────────────────────────────────────────
   const handleGesture = useCallback((result: GestureResult) => {
     if (result.error) {
       console.log("[API Error]:", result.error);
@@ -85,12 +119,30 @@ export default function CameraScreen() {
     if (result.gesture) {
       setGesture(result.gesture);
       setConfidence(result.confidence);
+
+      const prefs = speechService.getPreferences();
+      const conf = result.confidence ?? 0;
+      const label = result.gesture;
+
+      // Alimenta o detector de soletração (filtro interno para letras)
+      spelling.onDetection(label, conf);
+
+      // Coexistência: se soletração está ON e é letra, não fala individual.
+      const looksLikeLetter =
+        typeof label === "string" &&
+        label.trim().length === 1 &&
+        /^[A-Za-zÀ-ÿ]$/.test(label.trim());
+
+      const shouldSpeakIndividual =
+        prefs.enabled &&
+        prefs.speakGestures &&
+        !(prefs.spellingEnabled && looksLikeLetter);
+
+      if (shouldSpeakIndividual) speechService.speakGesture(label);
     }
 
-    if (result.mode) {
-      setDetectionMode(result.mode as DetectionMode);
-    }
-  }, []);
+    if (result.mode) setDetectionMode(result.mode as DetectionMode);
+  }, [spelling]);
 
   const handleStatusChange = useCallback(
     (status: ConnectionStatus, message?: string) => {
@@ -102,16 +154,13 @@ export default function CameraScreen() {
           [{ text: "OK" }]
         );
       }
-    },
-    []
+    }, []
   );
 
   useEffect(() => {
-    // Auto-ativar melhor modelo no servidor se nenhum estiver ativo
     const autoActivateModel = async () => {
-      const activeId = await AsyncStorage.getItem('activeModelId');
-      const modelName = await AsyncStorage.getItem('activeModelName');
-      
+      const activeId = await AsyncStorage.getItem("activeModelId");
+      const modelName = await AsyncStorage.getItem("activeModelName");
       let finalModelName = modelName;
       if (modelName) setActiveModelName(modelName);
 
@@ -120,20 +169,18 @@ export default function CameraScreen() {
           const res = await trainingService.listModels();
           if (res.models && res.models.length > 0) {
             const best = res.models.sort((a: any, b: any) => b.accuracy - a.accuracy)[0];
-            await trainingService.activateModel(best.id); // Avisar ao servidor para baixar se não existir
-            await AsyncStorage.setItem('activeModelId', best.id);
-            await AsyncStorage.setItem('activeModelName', best.name);
-            
+            await trainingService.activateModel(best.id);
+            await AsyncStorage.setItem("activeModelId", best.id);
+            await AsyncStorage.setItem("activeModelName", best.name);
             finalModelName = best.name;
             setActiveModelName(best.name);
             console.log(`[AutoActivate] Modelo "${best.name}" ativado automaticamente`);
           }
         } catch (e) {
-          console.log('[AutoActivate] Falha na ativação automática:', e);
+          console.log("[AutoActivate] Falha na ativação automática:", e);
         }
       }
 
-      // Conecta já com o nome do modelo carregado da memória
       gestureWS.connect(handleGesture, handleStatusChange, detectionMode, finalModelName);
     };
 
@@ -141,205 +188,167 @@ export default function CameraScreen() {
     return () => gestureWS.disconnect();
   }, []);
 
-  // ──────────────────────────────────────────────
-  // Mudar modo de detecção
-  // ──────────────────────────────────────────────
   const changeMode = (mode: DetectionMode) => {
     setShowModeModal(false);
     setDetectionMode(mode);
-    // Envia ação de troca de modo pelo WebSocket existente (sem reconectar)
     gestureWS.sendAction({ action: "set_mode", mode });
   };
 
-  // ──────────────────────────────────────────────
-  // Bridges JS ↔ Worklet
-  // ──────────────────────────────────────────────
-
-  /** Recebe landmarks do plugin nativo e atualiza UI + envia para API */
-  const onLandmarksDetected = Worklets.createRunOnJS(
-    (hands: LandmarkPoint[][]) => {
-      if (hands.length > 0) {
-        // Atualiza overlay imediatamente (edge — sem delay de rede)
-        // Aplica a transformação de coordenadas do sensor
-        const transformedHands = hands.map(handLms => handLms.map(transformPoint));
-        
-        // Atualiza a tela com a primeira mão
-        setLandmarks(transformedHands[0]);
-
-        // Envia landmarks JSON ROTACIONADOS CORRETAMENTE para a API
-        if (gestureWS.isConnected()) {
-          gestureWS.sendLandmarks(transformedHands);
-        }
-      } else {
-        setLandmarks([]);
-      }
+  const onLandmarksDetected = Worklets.createRunOnJS((hands: LandmarkPoint[][]) => {
+    if (hands.length > 0) {
+      const transformedHands = hands.map(handLms => handLms.map(transformPoint));
+      setLandmarks(transformedHands[0]);
+      if (gestureWS.isConnected()) gestureWS.sendLandmarks(transformedHands);
+    } else {
+      setLandmarks([]);
     }
-  );
-
-  const sendLogToJS = Worklets.createRunOnJS((msg: string) => {
-    console.log("[Edge MediaPipe]:", msg);
   });
 
-  const onPluginError = Worklets.createRunOnJS((error: string) => {
-    console.error("[Edge ERRO]:", error);
-  });
+  const sendLogToJS = Worklets.createRunOnJS((msg: string) => { console.log("[Edge MediaPipe]:", msg); });
+  const onPluginError = Worklets.createRunOnJS((error: string) => { console.error("[Edge ERRO]:", error); });
 
-  // ──────────────────────────────────────────────
-  // Frame Processor (Edge Computing local)
-  // ──────────────────────────────────────────────
-  // Throttle: ~10 FPS para manter CPU leve
   const lastSync = Worklets.createSharedValue(0);
   const frameCount = Worklets.createSharedValue(0);
 
-  const frameProcessor = useFrameProcessor(
-    (frame) => {
-      "worklet";
+  const frameProcessor = useFrameProcessor((frame) => {
+    "worklet";
+    const now = performance.now();
+    if (now - lastSync.value < 100) return;
+    lastSync.value = now;
+    frameCount.value += 1;
+    const shouldLog = frameCount.value % 30 === 1;
 
-      // Throttle: processa no máximo ~10 FPS
-      const now = performance.now();
-      if (now - lastSync.value < 100) return;
-      lastSync.value = now;
-
-      frameCount.value += 1;
-      const shouldLog = frameCount.value % 30 === 1; // Log a cada ~3 segundos
-
-      try {
-        // Executa MediaPipe HandLandmarker LOCALMENTE no dispositivo
-        const result = detectHandLandmarks(frame);
-
-        if (shouldLog) {
-          if (result) {
-            const handsLen = result.hands ? result.hands.length : 0;
-            const errorMsg = (result as any).error;
-            sendLogToJS(
-              `Frame #${frameCount.value}: ${frame.width}x${frame.height} → ` +
-              `${handsLen} mão(s)` +
-              (errorMsg ? ` | ERRO: ${errorMsg}` : "")
-            );
-          } else {
-            sendLogToJS(`Frame #${frameCount.value}: plugin retornou null`);
-          }
-        }
-
-        if (result && result.hands && result.hands.length > 0) {
-          onLandmarksDetected(result.hands);
+    try {
+      const result = detectHandLandmarks(frame);
+      if (shouldLog) {
+        if (result) {
+          const handsLen = result.hands ? result.hands.length : 0;
+          const errorMsg = (result as any).error;
+          sendLogToJS(
+            `Frame #${frameCount.value}: ${frame.width}x${frame.height} → ${handsLen} mão(s)` +
+            (errorMsg ? ` | ERRO: ${errorMsg}` : "")
+          );
         } else {
-          onLandmarksDetected([]);
+          sendLogToJS(`Frame #${frameCount.value}: plugin retornou null`);
         }
-      } catch (e: any) {
-        if (shouldLog) {
-          onPluginError(`Frame: ${e?.message || String(e)}`);
-        }
-        onLandmarksDetected([]);
       }
-    },
-    [lastSync, frameCount]
-  );
+      if (result && result.hands && result.hands.length > 0) onLandmarksDetected(result.hands);
+      else onLandmarksDetected([]);
+    } catch (e: any) {
+      if (shouldLog) onPluginError(`Frame: ${e?.message || String(e)}`);
+      onLandmarksDetected([]);
+    }
+  }, [lastSync, frameCount]);
 
-  // ──────────────────────────────────────────────
-  // UI helpers
-  // ──────────────────────────────────────────────
   const statusConfig = {
-    color:
-      connectionStatus === "connected"
-        ? "#4caf50"
-        : connectionStatus === "reconnecting"
-        ? "#ff9800"
-        : "#f44336",
+    color: connectionStatus === "connected" ? "#4caf50"
+         : connectionStatus === "reconnecting" ? "#ff9800" : "#f44336",
     label: connectionStatus,
   };
 
   const currentModeConfig = DETECTION_MODES.find(m => m.key === detectionMode);
-
-  // Área da câmera (ocupa tudo menos o header)
   const HEADER_HEIGHT = 90;
-  const CAM_WIDTH = screenWidth - 32; // margem de 16 cada lado
+  const CAM_WIDTH = screenWidth - 32;
   const CAM_HEIGHT = screenHeight - HEADER_HEIGHT - 32;
+
+  const toggleSpeech = async () => { await speechService.toggleEnabled(); };
+  const toggleSpeakGestures = async () => { await speechService.toggleSpeakGestures(); };
+  const toggleSpellingEnabled = async () => {
+    const wasEnabled = speechPrefs.spellingEnabled;
+    await speechService.toggleSpellingEnabled();
+    if (wasEnabled) spelling.clear();
+  };
+  const adjustIdle = (d: number) => {
+    const next = Math.min(5000, Math.max(1000, speechPrefs.spellingIdleMs + d));
+    speechService.setPreferences({ spellingIdleMs: next });
+  };
+  const adjustStable = (d: number) => {
+    const next = Math.min(1500, Math.max(200, speechPrefs.letterStableMs + d));
+    speechService.setPreferences({ letterStableMs: next });
+  };
+  const adjustConfidence = (d: number) => {
+    const next = Math.min(0.95, Math.max(0.3, +(speechPrefs.minConfidence + d).toFixed(2)));
+    speechService.setPreferences({ minConfidence: next });
+  };
+  const testVoice = () => {
+    speechService.speak("Olá! Eu falo os gestos que você realizar.", { interrupt: true });
+  };
 
   return (
     <View style={styles.container}>
-      {/* ── HEADER ── */}
+      {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backBtn}
-          accessibilityLabel="Voltar"
-        >
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityLabel="Voltar">
           <MaterialIcons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
 
-        {/* Botão modo de detecção */}
         <TouchableOpacity
           onPress={() => setShowModeModal(true)}
           style={[styles.iconBtn, styles.modeBtnActive]}
           accessibilityLabel="Selecionar modo de detecção"
         >
-          <MaterialIcons
-            name={(currentModeConfig?.icon as any) || "memory"}
-            size={18}
-            color="#00e5ff"
-          />
+          <MaterialIcons name={(currentModeConfig?.icon as any) || "memory"} size={18} color="#00e5ff" />
           <Text style={styles.modeBtnText} numberOfLines={1} ellipsizeMode="tail">
             {currentModeConfig?.label || detectionMode}
           </Text>
         </TouchableOpacity>
 
-        {/* Toggle landmarks */}
         <TouchableOpacity
           onPress={() => setShowLandmarks((v) => !v)}
-          style={[
-            styles.iconBtn,
-            showLandmarks && styles.iconBtnActive,
-          ]}
+          style={[styles.iconBtn, showLandmarks && styles.iconBtnActive]}
           accessibilityLabel="Alternar landmarks"
         >
+          <MaterialIcons name="grain" size={20} color={showLandmarks ? "#00e5ff" : "#888"} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={toggleSpeech}
+          onLongPress={() => setShowSpeechModal(true)}
+          style={[styles.iconBtn, speechPrefs.enabled && styles.iconBtnActive]}
+          accessibilityLabel="Ativar/desativar síntese de voz"
+        >
           <MaterialIcons
-            name="grain"
+            name={speechPrefs.enabled ? "volume-up" : "volume-off"}
             size={20}
-            color={showLandmarks ? "#00e5ff" : "#888"}
+            color={speechPrefs.enabled ? "#00e5ff" : "#888"}
           />
         </TouchableOpacity>
 
+        <TouchableOpacity
+          onPress={() => setShowSpeechModal(true)}
+          style={styles.iconBtn}
+          accessibilityLabel="Configurações de voz"
+        >
+          <MaterialIcons name="settings-voice" size={20} color="#b388ff" />
+        </TouchableOpacity>
+
         <View style={styles.statusBadge}>
-          <View
-            style={[styles.statusDot, { backgroundColor: statusConfig.color }]}
-          />
-          <Text style={[styles.statusText, { color: statusConfig.color }]}>
-            {statusConfig.label}
-          </Text>
+          <View style={[styles.statusDot, { backgroundColor: statusConfig.color }]} />
+          <Text style={[styles.statusText, { color: statusConfig.color }]}>{statusConfig.label}</Text>
         </View>
       </View>
 
-      {/* ── CÂMERA + OVERLAY ── */}
-      <View
-        style={[
-          styles.cameraContainer,
-          { width: CAM_WIDTH, height: CAM_HEIGHT },
-        ]}
-      >
+      {/* CÂMERA + OVERLAY */}
+      <View style={[styles.cameraContainer, { width: CAM_WIDTH, height: CAM_HEIGHT }]}>
         {hasPermission && device ? (
           <Camera
             style={StyleSheet.absoluteFill}
             device={device}
             isActive={true}
-            frameProcessor={modelStatus === 'ready' ? frameProcessor : undefined}
+            frameProcessor={modelStatus === "ready" ? frameProcessor : undefined}
           />
         ) : (
           <View style={styles.permissionBox}>
             <MaterialIcons name="videocam-off" size={48} color="#888" />
-            <Text style={styles.warn}>
-              Aguardando permissão da câmera...
-            </Text>
+            <Text style={styles.warn}>Aguardando permissão da câmera...</Text>
           </View>
         )}
 
-        {/* ── OVERLAY LANDMARKS (local — instantâneo) ── */}
         {showLandmarks && landmarks.length === 21 && (
           <View style={StyleSheet.absoluteFill} pointerEvents="none">
             {landmarks.map((lm, idx) => {
               const dotX = lm.x * CAM_WIDTH - 5;
               const dotY = lm.y * CAM_HEIGHT - 5;
-              // Pontilha de cor diferente para pontas dos dedos
               const isTip = [4, 8, 12, 16, 20].includes(idx);
               const isWrist = idx === 0;
               return (
@@ -350,11 +359,7 @@ export default function CameraScreen() {
                     {
                       left: dotX,
                       top: dotY,
-                      backgroundColor: isWrist
-                        ? "#ff6b6b"
-                        : isTip
-                        ? "#00e5ff"
-                        : "rgba(255,255,255,0.7)",
+                      backgroundColor: isWrist ? "#ff6b6b" : isTip ? "#00e5ff" : "rgba(255,255,255,0.7)",
                       width: isTip || isWrist ? 10 : 7,
                       height: isTip || isWrist ? 10 : 7,
                       borderRadius: isTip || isWrist ? 5 : 3.5,
@@ -364,14 +369,8 @@ export default function CameraScreen() {
               );
             })}
 
-            {/* Linhas dos ossos — esqueleto simplificado */}
             {SKELETON_CONNECTIONS.map(([a, b], idx) => {
-              if (
-                landmarks.length !== 21 ||
-                a >= landmarks.length ||
-                b >= landmarks.length
-              )
-                return null;
+              if (landmarks.length !== 21 || a >= landmarks.length || b >= landmarks.length) return null;
               const ax = landmarks[a].x * CAM_WIDTH;
               const ay = landmarks[a].y * CAM_HEIGHT;
               const bx = landmarks[b].x * CAM_WIDTH;
@@ -400,27 +399,22 @@ export default function CameraScreen() {
           </View>
         )}
 
-        {/* ── BADGE GESTO ── */}
         {gesture && (
           <View style={styles.gestureOverlay}>
             <Text style={styles.gestureLabel}>{gesture}</Text>
             <View style={styles.confidencePill}>
-              <Text style={styles.confidenceText}>
-                {(confidence * 100).toFixed(0)}%
-              </Text>
+              <Text style={styles.confidenceText}>{(confidence * 100).toFixed(0)}%</Text>
             </View>
           </View>
         )}
 
-        {/* ── BADGE EDGE COMPUTING ── */}
         <View style={styles.edgeBadge}>
-          <MaterialIcons name="developer-board" size={12} color={modelStatus === 'ready' ? '#00e5ff' : '#ff6b6b'} />
-          <Text style={[styles.edgeBadgeText, modelStatus !== 'ready' && { color: '#ff6b6b' }]}>
-            {modelStatus === 'ready' ? 'Edge' : 'Edge ✗'}
+          <MaterialIcons name="developer-board" size={12} color={modelStatus === "ready" ? "#00e5ff" : "#ff6b6b"} />
+          <Text style={[styles.edgeBadgeText, modelStatus !== "ready" && { color: "#ff6b6b" }]}>
+            {modelStatus === "ready" ? "Edge" : "Edge ✗"}
           </Text>
         </View>
 
-        {/* ── BADGE MODELO ATIVO ── */}
         {activeModelName && (
           <View style={styles.modelBadge}>
             <MaterialIcons name="psychology" size={12} color="#b388ff" />
@@ -428,30 +422,36 @@ export default function CameraScreen() {
           </View>
         )}
 
-        {/* ── ERRO DO MODELO EDGE ── */}
-        {modelStatus === 'error' && (
+        {speechPrefs.spellingEnabled && speechPrefs.enabled && (
+          <SpellingPanel
+            isSpelling={spelling.isSpelling}
+            buffer={spelling.buffer}
+            candidate={spelling.candidate}
+            lastSpokenWord={lastSpokenWord}
+            onFinalize={spelling.finalize}
+            onClear={spelling.clear}
+          />
+        )}
+
+        {modelStatus === "error" && (
           <View style={styles.modelErrorBanner}>
             <MaterialIcons name="error" size={20} color="#ff6b6b" />
             <View style={{ flex: 1 }}>
               <Text style={styles.modelErrorTitle}>Modelo Edge indisponível</Text>
               <Text style={styles.modelErrorDesc} numberOfLines={2}>
-                {modelError || 'HandLandmarker não carregou. Detecção local desativada.'}
+                {modelError || "HandLandmarker não carregou. Detecção local desativada."}
               </Text>
             </View>
           </View>
         )}
 
-        {/* ── ERRO DA API ── */}
         {apiError && (
           <View style={styles.errorBanner}>
             <MaterialIcons name="error-outline" size={16} color="#ff6b6b" />
-            <Text style={styles.errorText} numberOfLines={2}>
-              {apiError}
-            </Text>
+            <Text style={styles.errorText} numberOfLines={2}>{apiError}</Text>
           </View>
         )}
 
-        {/* ── SEM LANDMARKS ── */}
         {showLandmarks && landmarks.length === 0 && hasPermission && !apiError && (
           <View style={styles.noHandBadge}>
             <MaterialIcons name="pan-tool" size={14} color="#888" />
@@ -460,7 +460,7 @@ export default function CameraScreen() {
         )}
       </View>
 
-      {/* ── MODAL SELEÇÃO DE MODO ── */}
+      {/* MODAL SELEÇÃO DE MODO */}
       <Modal transparent visible={showModeModal} animationType="fade">
         <View style={styles.modalBg}>
           <View style={styles.modalCard}>
@@ -503,371 +503,26 @@ export default function CameraScreen() {
               );
             })}
 
-            <TouchableOpacity
-              style={styles.modalCloseBtn}
-              onPress={() => setShowModeModal(false)}
-            >
+            <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setShowModeModal(false)}>
               <Text style={styles.modalCloseBtnText}>Fechar</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
+
+      {/* MODAL DE CONFIGURAÇÕES DE VOZ */}
+      <VoiceSettingsModal
+        visible={showSpeechModal}
+        prefs={speechPrefs}
+        onClose={() => setShowSpeechModal(false)}
+        onToggleEnabled={toggleSpeech}
+        onToggleSpeakGestures={toggleSpeakGestures}
+        onToggleSpelling={toggleSpellingEnabled}
+        onAdjustIdle={adjustIdle}
+        onAdjustStable={adjustStable}
+        onAdjustConfidence={adjustConfidence}
+        onTestVoice={testVoice}
+      />
     </View>
   );
 }
-
-// ──────────────────────────────────────────────────────────────
-// Conexões do esqueleto de mão (índices MediaPipe)
-// ──────────────────────────────────────────────────────────────
-const SKELETON_CONNECTIONS: [number, number][] = [
-  // Palma
-  [0, 1], [1, 2], [2, 3], [3, 4],
-  // Indicador
-  [0, 5], [5, 6], [6, 7], [7, 8],
-  // Médio
-  [0, 9], [9, 10], [10, 11], [11, 12],
-  // Anelar
-  [0, 13], [13, 14], [14, 15], [15, 16],
-  // Mínimo
-  [0, 17], [17, 18], [18, 19], [19, 20],
-  // Arco da palma
-  [5, 9], [9, 13], [13, 17],
-];
-
-// ──────────────────────────────────────────────────────────────
-// Estilos
-// ──────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#10141a",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingTop: 50,
-    paddingBottom: 12,
-    paddingHorizontal: 16,
-    gap: 8,
-  },
-  backBtn: {
-    padding: 8,
-    borderRadius: 12,
-    backgroundColor: "#1c2026",
-  },
-  iconBtn: {
-    padding: 8,
-    borderRadius: 12,
-    backgroundColor: "#1c2026",
-  },
-  iconBtnActive: {
-    backgroundColor: "rgba(0, 229, 255, 0.15)",
-    borderWidth: 1,
-    borderColor: "#00e5ff",
-  },
-  modeBtnActive: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 10,
-    backgroundColor: "rgba(0, 229, 255, 0.12)",
-    borderWidth: 1,
-    borderColor: "rgba(0, 229, 255, 0.4)",
-    maxWidth: 140, // Impede que o botão creça demais e empurre os outros ícones
-  },
-  modeBtnText: {
-    fontSize: 11,
-    fontWeight: "bold",
-    color: "#00e5ff",
-  },
-  headerTitle: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  statusBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "#1c2026",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "bold",
-    textTransform: "uppercase",
-  },
-  cameraContainer: {
-    marginHorizontal: 16,
-    borderRadius: 24,
-    backgroundColor: "#222",
-    overflow: "hidden",
-    position: "relative",
-  },
-  permissionBox: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 16,
-  },
-  warn: {
-    color: "#888",
-    textAlign: "center",
-    fontSize: 14,
-    paddingHorizontal: 20,
-  },
-  // Landmark dot
-  landmarkDot: {
-    position: "absolute",
-  },
-  // Gesto detectado
-  gestureOverlay: {
-    position: "absolute",
-    bottom: 24,
-    alignSelf: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.55)",
-    borderWidth: 1,
-    borderColor: "#00e5ff",
-    borderRadius: 20,
-    paddingVertical: 14,
-    paddingHorizontal: 28,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-  },
-  gestureLabel: {
-    fontSize: 40,
-    fontWeight: "800",
-    color: "#00e5ff",
-    letterSpacing: 2,
-  },
-  confidencePill: {
-    backgroundColor: "rgba(0, 229, 255, 0.15)",
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  confidenceText: {
-    fontSize: 14,
-    color: "#00e5ff",
-    fontWeight: "bold",
-  },
-  // Edge computing badge
-  edgeBadge: {
-    position: "absolute",
-    top: 12,
-    right: 12,
-    backgroundColor: "rgba(0, 229, 255, 0.10)",
-    borderWidth: 1,
-    borderColor: "rgba(0, 229, 255, 0.3)",
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  edgeBadgeText: {
-    fontSize: 10,
-    fontWeight: "bold",
-    color: "#00e5ff",
-    textTransform: "uppercase",
-  },
-  // Erro da API
-  errorBanner: {
-    position: "absolute",
-    top: 16,
-    left: 16,
-    right: 16,
-    backgroundColor: "rgba(255, 50, 50, 0.15)",
-    borderWidth: 1,
-    borderColor: "#ff6b6b",
-    borderRadius: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  errorText: {
-    color: "#ff6b6b",
-    fontSize: 12,
-    flex: 1,
-    fontWeight: "500",
-  },
-  // Sem mão
-  noHandBadge: {
-    position: "absolute",
-    bottom: 72,
-    alignSelf: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  noHandText: {
-    color: "#888",
-    fontSize: 12,
-  },
-  // Badge modelo ativo
-  modelBadge: {
-    position: "absolute",
-    top: 12,
-    left: 12,
-    backgroundColor: "rgba(179, 136, 255, 0.12)",
-    borderWidth: 1,
-    borderColor: "rgba(179, 136, 255, 0.35)",
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    maxWidth: 140,
-  },
-  modelBadgeText: {
-    fontSize: 10,
-    fontWeight: "bold",
-    color: "#b388ff",
-  },
-  // Erro do modelo Edge
-  modelErrorBanner: {
-    position: "absolute",
-    top: 44,
-    left: 12,
-    right: 12,
-    backgroundColor: "rgba(255, 50, 50, 0.12)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 107, 107, 0.4)",
-    borderRadius: 14,
-    padding: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  modelErrorTitle: {
-    color: "#ff6b6b",
-    fontSize: 13,
-    fontWeight: "700",
-  },
-  modelErrorDesc: {
-    color: "#aa6666",
-    fontSize: 11,
-    marginTop: 2,
-  },
-  // ── MODAL ──
-  modalBg: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.85)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  modalCard: {
-    width: "100%",
-    maxWidth: 380,
-    backgroundColor: "#14171d",
-    borderRadius: 24,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: "#00e5ff",
-    shadowColor: "#00e5ff",
-    shadowOpacity: 0.3,
-    shadowRadius: 30,
-    shadowOffset: { width: 0, height: 10 },
-  },
-  modalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 8,
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#fff",
-  },
-  modalSubtitle: {
-    fontSize: 13,
-    color: "#888",
-    marginBottom: 20,
-    lineHeight: 18,
-  },
-  modeOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#1c2026",
-    padding: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "transparent",
-    marginBottom: 10,
-  },
-  modeOptionActive: {
-    backgroundColor: "rgba(0, 229, 255, 0.12)",
-    borderColor: "#00e5ff",
-    shadowColor: "#00e5ff",
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 0 },
-  },
-  modeOptionLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    flex: 1,
-  },
-  modeLabel: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#aaa",
-  },
-  modeLabelActive: {
-    color: "#00e5ff",
-  },
-  modeDesc: {
-    fontSize: 11,
-    color: "#666",
-    marginTop: 2,
-  },
-  activeDotOuter: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: "rgba(0, 229, 255, 0.2)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  activeDotInner: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#00e5ff",
-  },
-  modalCloseBtn: {
-    marginTop: 10,
-    alignItems: "center",
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: "#1c2026",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-  },
-  modalCloseBtnText: {
-    color: "#888",
-    fontSize: 15,
-    fontWeight: "600",
-  },
-});
