@@ -111,7 +111,7 @@ export default function LearnTabScreen() {
         {isAdmin && (
           <TouchableOpacity
             style={styles.adminBtn}
-            onPress={() => router.push("/screens/manage-learning")}
+            onPress={() => router.push("./screens/manage-learning")}
             activeOpacity={0.8}
           >
             <MaterialIcons name="admin-panel-settings" size={20} color="#081018" />
@@ -153,7 +153,7 @@ export default function LearnTabScreen() {
                       activeOpacity={0.8}
                       onPress={() =>
                         router.push({
-                          pathname: "/screens/gesture-detail",
+                          pathname: "./screens/gesture-detail",
                           params: { level, category: cat },
                         })
                       }

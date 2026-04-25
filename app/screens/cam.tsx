@@ -57,7 +57,7 @@ export default function CameraScreen() {
   const [confidence, setConfidence] = useState<number>(0);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("disconnected");
   const [apiError, setApiError] = useState<string | null>(null);
-  const [landmarks, setLandmarks] = useState<LandmarkPoint[]>([]);
+  const [landmarks, setLandmarks] = useState<LandmarkPoint[][]>([]);
   const [showLandmarks, setShowLandmarks] = useState<boolean>(true);
   const [detectionMode, setDetectionMode] = useState<DetectionMode>("hybrid");
   const [showModeModal, setShowModeModal] = useState<boolean>(false);
@@ -197,7 +197,7 @@ export default function CameraScreen() {
   const onLandmarksDetected = Worklets.createRunOnJS((hands: LandmarkPoint[][]) => {
     if (hands.length > 0) {
       const transformedHands = hands.map(handLms => handLms.map(transformPoint));
-      setLandmarks(transformedHands[0]);
+      setLandmarks(transformedHands);
       if (gestureWS.isConnected()) gestureWS.sendLandmarks(transformedHands);
     } else {
       setLandmarks([]);
@@ -344,56 +344,69 @@ export default function CameraScreen() {
           </View>
         )}
 
-        {showLandmarks && landmarks.length === 21 && (
+        {showLandmarks && landmarks.length > 0 && (
           <View style={StyleSheet.absoluteFill} pointerEvents="none">
-            {landmarks.map((lm, idx) => {
-              const dotX = lm.x * CAM_WIDTH - 5;
-              const dotY = lm.y * CAM_HEIGHT - 5;
-              const isTip = [4, 8, 12, 16, 20].includes(idx);
-              const isWrist = idx === 0;
-              return (
-                <View
-                  key={idx}
-                  style={[
-                    styles.landmarkDot,
-                    {
-                      left: dotX,
-                      top: dotY,
-                      backgroundColor: isWrist ? "#ff6b6b" : isTip ? "#00e5ff" : "rgba(255,255,255,0.7)",
-                      width: isTip || isWrist ? 10 : 7,
-                      height: isTip || isWrist ? 10 : 7,
-                      borderRadius: isTip || isWrist ? 5 : 3.5,
-                    },
-                  ]}
-                />
-              );
-            })}
+            {landmarks.map((hand, handIdx) => {
+              if (!hand || hand.length !== 21) return null;
+              const HAND_COLORS = [
+                { tip: "#00e5ff", bone: "rgba(0, 229, 255, 0.4)", dot: "rgba(255,255,255,0.7)", wrist: "#ff6b6b" },
+                { tip: "#b388ff", bone: "rgba(179, 136, 255, 0.4)", dot: "rgba(220,200,255,0.7)", wrist: "#ff9800" },
+              ];
+              const colors = HAND_COLORS[handIdx % HAND_COLORS.length];
 
-            {SKELETON_CONNECTIONS.map(([a, b], idx) => {
-              if (landmarks.length !== 21 || a >= landmarks.length || b >= landmarks.length) return null;
-              const ax = landmarks[a].x * CAM_WIDTH;
-              const ay = landmarks[a].y * CAM_HEIGHT;
-              const bx = landmarks[b].x * CAM_WIDTH;
-              const by = landmarks[b].y * CAM_HEIGHT;
-              const length = Math.hypot(bx - ax, by - ay);
-              const angle = (Math.atan2(by - ay, bx - ax) * 180) / Math.PI;
               return (
-                <View
-                  key={`bone-${idx}`}
-                  style={{
-                    position: "absolute",
-                    left: ax - length / 2,
-                    top: ay - 0.75,
-                    width: length,
-                    height: 1.5,
-                    backgroundColor: "rgba(0, 229, 255, 0.4)",
-                    transform: [
-                      { translateX: length / 2 },
-                      { rotate: `${angle}deg` },
-                      { translateX: -(length / 2) },
-                    ],
-                  }}
-                />
+                <View key={`hand-${handIdx}`}>
+                  {hand.map((lm, idx) => {
+                    const dotX = lm.x * CAM_WIDTH - 5;
+                    const dotY = lm.y * CAM_HEIGHT - 5;
+                    const isTip = [4, 8, 12, 16, 20].includes(idx);
+                    const isWrist = idx === 0;
+                    return (
+                      <View
+                        key={`h${handIdx}-lm${idx}`}
+                        style={[
+                          styles.landmarkDot,
+                          {
+                            left: dotX,
+                            top: dotY,
+                            backgroundColor: isWrist ? colors.wrist : isTip ? colors.tip : colors.dot,
+                            width: isTip || isWrist ? 10 : 7,
+                            height: isTip || isWrist ? 10 : 7,
+                            borderRadius: isTip || isWrist ? 5 : 3.5,
+                          },
+                        ]}
+                      />
+                    );
+                  })}
+
+                  {SKELETON_CONNECTIONS.map(([a, b], idx) => {
+                    if (a >= hand.length || b >= hand.length) return null;
+                    const ax = hand[a].x * CAM_WIDTH;
+                    const ay = hand[a].y * CAM_HEIGHT;
+                    const bx = hand[b].x * CAM_WIDTH;
+                    const by = hand[b].y * CAM_HEIGHT;
+                    const length = Math.hypot(bx - ax, by - ay);
+                    const angle = (Math.atan2(by - ay, bx - ax) * 180) / Math.PI;
+                    return (
+                      <View
+                        key={`h${handIdx}-bone-${idx}`}
+                        style={{
+                          position: "absolute",
+                          left: ax - length / 2,
+                          top: ay - 0.75,
+                          width: length,
+                          height: 1.5,
+                          backgroundColor: colors.bone,
+                          transform: [
+                            { translateX: length / 2 },
+                            { rotate: `${angle}deg` },
+                            { translateX: -(length / 2) },
+                          ],
+                        }}
+                      />
+                    );
+                  })}
+                </View>
               );
             })}
           </View>
