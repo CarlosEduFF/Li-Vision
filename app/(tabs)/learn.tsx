@@ -8,14 +8,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { TouchableOpacity, ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type LevelProgress = { total: number; learned: number; percent: number };
 
@@ -95,8 +89,7 @@ export default function LearnTabScreen() {
   }, [gestures]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <View>
@@ -111,7 +104,7 @@ export default function LearnTabScreen() {
         {isAdmin && (
           <TouchableOpacity
             style={styles.adminBtn}
-            onPress={() => router.push('./screens/manage-learning')}
+            onPress={() => router.push('/screens/manage-learning' as any)}
             activeOpacity={0.8}
           >
             <MaterialIcons name="admin-panel-settings" size={20} color="#081018" />
@@ -153,7 +146,7 @@ export default function LearnTabScreen() {
                       activeOpacity={0.8}
                       onPress={() =>
                         router.push({
-                          pathname: "./screens/gesture-detail",
+                          pathname: "/screens/gesture-detail" as any,
                           params: { level, category: cat },
                         })
                       }
@@ -182,7 +175,6 @@ export default function LearnTabScreen() {
           </Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
   );
 }
 
