@@ -189,8 +189,19 @@ function mapApiGesture(item: LearningGestureApi): Gesture {
 export async function getAllGestures(): Promise<Gesture[]> {
   try {
     const response = await getLearningGestures();
-    if (response.ok && Array.isArray(response.items) && response.items.length > 0) {
-      return response.items.map(mapApiGesture);
+    if (response.ok && Array.isArray(response.items)) {
+      const apiGestures = response.items.map(mapApiGesture);
+      
+      // Mescla os gestos locais (Alfabeto, etc) com os gestos criados na API (Admin)
+      const gestureMap = new Map<string, Gesture>();
+      
+      // 1. Adiciona os fallbacks básicos primeiro
+      FALLBACK_GESTURES.forEach(g => gestureMap.set(g.id, g));
+      
+      // 2. Sobrescreve ou adiciona os da API
+      apiGestures.forEach(g => gestureMap.set(g.id, g));
+      
+      return Array.from(gestureMap.values());
     }
     return FALLBACK_GESTURES;
   } catch (error) {
