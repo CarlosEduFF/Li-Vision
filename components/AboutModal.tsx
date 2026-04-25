@@ -300,10 +300,6 @@ export default function AboutModal({ visible, slide, onClose }: AboutModalProps)
               />
             ))}
           </View>
-
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
         </View>
       </View>
     </Modal>
@@ -318,12 +314,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalContent: {
-    width: "100%",
-    height: "100%",
+    width: "92%",
+    maxHeight: "85%",
     backgroundColor: "#10141a",
+    borderRadius: 24,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(0, 229, 255, 0.15)",
+    elevation: 10,
+    shadowColor: "#00e5ff",
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
   },
   header: {
-    paddingTop: 60,
+    paddingTop: 24,
     paddingHorizontal: 20,
     paddingBottom: 20,
     backgroundColor: "#1c2026",
@@ -332,7 +337,7 @@ const styles = StyleSheet.create({
   },
   closeBtn: {
     position: "absolute",
-    top: 60,
+    top: 20,
     right: 20,
     zIndex: 10,
     padding: 8,
@@ -342,6 +347,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     marginTop: 8,
+    paddingRight: 40,
   },
   title: {
     fontSize: 24,
@@ -426,17 +432,8 @@ const styles = StyleSheet.create({
     width: 20,
     backgroundColor: "#00e5ff",
   },
-  closeButton: {
+  dotActive: {
+    width: 20,
     backgroundColor: "#00e5ff",
-    marginHorizontal: 20,
-    marginBottom: 40,
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  closeButtonText: {
-    color: "#000",
-    fontSize: 16,
-    fontWeight: "bold",
   },
 });
