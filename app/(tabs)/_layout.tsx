@@ -28,7 +28,7 @@ export default function TabLayout() {
         name="learn"
         options={{
           title: 'Aprender',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="book.closed.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="book.fill" color={color} />,
         }}
       />
 
