@@ -31,6 +31,9 @@ const MAPPING = {
 
   // ✅ Sobre
   'info.circle.fill': 'info',
+
+  // ✅ Aprender
+  'book.fill': 'menu-book', 
 } as Partial<IconMapping>;
 
 /**

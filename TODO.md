@@ -1,16 +1,20 @@
-# TODO: Implementação de Testes Automatizados - ✅ CONCLUÍDO
+# Implementação Seção Aprendizagem + API CRUD
 
-## Etapas do Plano:
+## Status Geral
+- [x] Plano aprovado
+- [x] 1. Criar learningService.ts
+- [x] 2. Criar app/(tabs)/learn.tsx (níveis)
+- [x] 3. Editar app/(tabs)/_layout.tsx (adicionar tab)
+- [x] 4. Criar app/screens/gesture-detail.tsx
+- [x] 5. Corrigir build nativo (worklets compatível)
 
-- [x] 1. Atualizar package.json (adicionar dependências de teste e script "test")
-- [x] 2. Instalar dependências (`npm install --legacy-peer-deps`)
-- [x] 3. Criar jest.config.js
-- [x] 4. Criar testes de exemplo:
-  - [x] app/__tests__/_layout.test.tsx (testa auth redirect)
-  - [x] services/__tests__/api.test.ts (testa API calls)
-- [x] 5. Criar .github/workflows/ci.yml (GitHub Actions)
-- [ ] 6. Atualizar README.md com tutorial em Português
-- [ ] 7. Testar localmente (`npm test`)
-- [ ] 8. Push para GitHub para testar Actions
+## Nova Etapa (Backend + Integração)
+- [ ] 6. Criar rota backend `learning_routes.py` (CRUD + admin)
+- [ ] 7. Registrar rota em `server.py`
+- [ ] 8. Atualizar `services/api.ts` com endpoints de aprendizagem
+- [ ] 9. Atualizar `services/learningService.ts` (alfabeto iniciante + outros níveis + API/fallback)
+- [ ] 10. Atualizar `app/(tabs)/learn.tsx` para dados da API
+- [ ] 11. Atualizar `app/screens/gesture-detail.tsx` para dados da API
+- [ ] 12. Validar fluxo mínimo (sem testes completos, conforme pedido)
 
-**Status:** Testes implementados! Execute `npm test` para testar localmente e push para ativar GitHub Actions.
+**Notas:** Público crianças-adultos, foco alfabeto no iniciante, sem vídeo, sem integração câmera/ranking.

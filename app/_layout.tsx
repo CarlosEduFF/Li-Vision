@@ -1,9 +1,9 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
 import { useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -40,6 +40,7 @@ export default function RootLayout() {
         <Stack.Screen name="screens/manage-datasets" options={{ headerShown: false }} />
         <Stack.Screen name="screens/edit-profile" options={{ headerShown: false }} />
         <Stack.Screen name="screens/select-model" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/gesture-detail" options={{ headerShown: false }} />
         <Stack.Screen name="screens/models" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />

@@ -23,7 +23,15 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
-      
+
+      <Tabs.Screen
+        name="learn"
+        options={{
+          title: 'Aprender',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="book.closed.fill" color={color} />,
+        }}
+      />
+
       <Tabs.Screen
         name="studio"
         options={{
@@ -33,7 +41,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      
+
       <Tabs.Screen
         name="ranking"
         options={{
@@ -43,6 +51,7 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="profile"
         options={{
@@ -52,6 +61,7 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="about"
         options={{
