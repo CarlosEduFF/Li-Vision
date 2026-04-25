@@ -7,7 +7,6 @@
     "icon": "./assets/images/li-vision-logo-icon.png",
     "scheme": "livisionapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
@@ -16,7 +15,6 @@
         "backgroundColor": "#10141a",
         "foregroundImage": "./assets/images/li-vision-logo-icon.png"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.livision"
     },
