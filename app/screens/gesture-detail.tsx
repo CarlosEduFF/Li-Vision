@@ -22,7 +22,7 @@ function isLearningLevel(value: string): value is LearningLevel {
 
 export default function GestureDetailScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ level?: string }>();
+  const params = useLocalSearchParams<{ level?: string; category?: string }>();
   const level: LearningLevel = isLearningLevel(params.level || "")
     ? (params.level as LearningLevel)
     : "iniciante";
@@ -37,7 +37,11 @@ export default function GestureDetailScreen() {
       try {
         const items = await getGesturesByLevel(level);
         if (mounted) {
-          setGestures(items);
+          if (params.category) {
+            setGestures(items.filter(g => g.category === params.category));
+          } else {
+            setGestures(items);
+          }
         }
       } catch (error) {
         console.log("Erro ao carregar gestos do nível:", error);
@@ -53,7 +57,7 @@ export default function GestureDetailScreen() {
     return () => {
       mounted = false;
     };
-  }, [level]);
+  }, [level, params.category]);
 
   const meta = useMemo(() => LEVEL_META[level], [level]);
 
@@ -63,7 +67,7 @@ export default function GestureDetailScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <MaterialIcons name="arrow-back" size={20} color="#d8dee9" />
         </TouchableOpacity>
-        <Text style={styles.title}>{meta.title}</Text>
+        <Text style={styles.title}>{params.category ? `${params.category}` : meta.title}</Text>
         <View style={{ width: 38 }} />
       </View>
 
