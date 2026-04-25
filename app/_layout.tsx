@@ -11,6 +11,24 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
+const originalFetch = global.fetch;
+global.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+  const response = await originalFetch(input, init);
+  if (response.status === 401) {
+    console.log("401 Unauthorized detectado. Sessão expirada. Deslogando...");
+    await AsyncStorage.removeItem("userToken");
+    
+    // Fallback para tentar usar o router global ou aguardar a montagem
+    try {
+      const { router } = require("expo-router");
+      router.replace("/screens/login");
+    } catch (e) {
+      console.log("Erro ao redirecionar para login:", e);
+    }
+  }
+  return response;
+};
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
