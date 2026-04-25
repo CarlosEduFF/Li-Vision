@@ -1,7 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
-import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Dimensions, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 
 const { width } = Dimensions.get("window");
@@ -234,71 +233,93 @@ const modalsData: Record<string, ModalContent> = {
   },
 };
 
-export default function ModalScreen() {
-  const { slide } = useLocalSearchParams<{ slide: string }>();
+type AboutModalProps = {
+  visible: boolean;
+  slide: number;
+  onClose: () => void;
+};
+
+export default function AboutModal({ visible, slide, onClose }: AboutModalProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const modalData = modalsData[slide] || modalsData["1"];
+  const modalData = modalsData[String(slide)] || modalsData["1"];
+
+  useEffect(() => {
+    if (visible) {
+      setActiveIndex(0);
+    }
+  }, [visible, slide]);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn}>
-          <MaterialIcons name="close" size={28} color="#fff" />
-        </TouchableOpacity>
-        <View style={styles.titleRow}>
-          <MaterialIcons name={modalData.icon} size={32} color="#00e5ff" />
-          <Text style={styles.title}>{modalData.title}</Text>
+    <Modal visible={visible} transparent={true} animationType="fade" onRequestClose={onClose}>
+      <View style={styles.overlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              <MaterialIcons name="close" size={28} color="#fff" />
+            </TouchableOpacity>
+            <View style={styles.titleRow}>
+              <MaterialIcons name={modalData.icon} size={32} color="#00e5ff" />
+              <Text style={styles.title}>{modalData.title}</Text>
+            </View>
+          </View>
+
+          <Image source={modalData.image} style={styles.image} resizeMode="contain" />
+
+          <View style={styles.carouselContainer}>
+            <Carousel
+              width={CAROUSEL_WIDTH}
+              height={380}
+              data={modalData.slides}
+              onSnapToItem={(index) => setActiveIndex(index)}
+              renderItem={({ item, index }) => (
+                <View style={styles.slideCard}>
+                  <View style={styles.slideHeader}>
+                    <View style={styles.slideNumber}>
+                      <Text style={styles.slideNumberText}>{index + 1}</Text>
+                    </View>
+                    <Text style={styles.slideTitle}>{item.title}</Text>
+                  </View>
+                  <View style={styles.itemsContainer}>
+                    {item.items.map((text, idx) => (
+                      <View key={idx} style={styles.itemRow}>
+                        <MaterialIcons name="check-circle" size={18} color="#4caf50" />
+                        <Text style={styles.itemText}>{text}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )}
+            />
+          </View>
+
+          <View style={styles.dotsContainer}>
+            {modalData.slides.map((_, index) => (
+              <View
+                key={index}
+                style={[styles.dot, activeIndex === index && styles.dotActive]}
+              />
+            ))}
+          </View>
+
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <Text style={styles.closeButtonText}>Fechar</Text>
+          </TouchableOpacity>
         </View>
       </View>
-
-      <Image source={modalData.image} style={styles.image} resizeMode="contain" />
-
-      <View style={styles.carouselContainer}>
-        <Carousel
-          width={CAROUSEL_WIDTH}
-          height={380}
-          data={modalData.slides}
-          onSnapToItem={(index) => setActiveIndex(index)}
-          renderItem={({ item, index }) => (
-            <View style={styles.slideCard}>
-              <View style={styles.slideHeader}>
-                <View style={styles.slideNumber}>
-                  <Text style={styles.slideNumberText}>{index + 1}</Text>
-                </View>
-                <Text style={styles.slideTitle}>{item.title}</Text>
-              </View>
-              <View style={styles.itemsContainer}>
-                {item.items.map((text, idx) => (
-                  <View key={idx} style={styles.itemRow}>
-                    <MaterialIcons name="check-circle" size={18} color="#4caf50" />
-                    <Text style={styles.itemText}>{text}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
-        />
-      </View>
-
-      <View style={styles.dotsContainer}>
-        {modalData.slides.map((_, index) => (
-          <View
-            key={index}
-            style={[styles.dot, activeIndex === index && styles.dotActive]}
-          />
-        ))}
-      </View>
-
-      <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-        <Text style={styles.closeButtonText}>Fechar</Text>
-      </TouchableOpacity>
-    </View>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  overlay: {
     flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "100%",
+    height: "100%",
     backgroundColor: "#10141a",
   },
   header: {
@@ -408,7 +429,7 @@ const styles = StyleSheet.create({
   closeButton: {
     backgroundColor: "#00e5ff",
     marginHorizontal: 20,
-    marginBottom: 30,
+    marginBottom: 40,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",

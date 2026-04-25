@@ -1,131 +1,144 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import AboutModal from "../../components/AboutModal";
 
 export default function AboutScreen() {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(1);
+
   const openModal = (slide: number) => {
-    router.push(`/modal?slide=${slide}`);
+    setActiveSlide(slide);
+    setModalVisible(true);
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
-      {/* HEADER */}
-      <View style={styles.header}>
-        <MaterialIcons name="tune" size={28} color="#00e5ff" />
-        <Text style={styles.title}>Sobre</Text>
-      </View>
-
-      <Text style={styles.subtitle}>
-        Informações sobre o Li-Vision.
-      </Text>
-
-      {/* CARD INFO ARQUITETURA */}
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <MaterialIcons name="cloud-done" size={20} color="#4caf50" />
-          <Text style={styles.sectionTitle}>Modo Multi-Sessão</Text>
+    <>
+      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
+        {/* HEADER */}
+        <View style={styles.header}>
+          <MaterialIcons name="tune" size={28} color="#00e5ff" />
+          <Text style={styles.title}>Sobre</Text>
         </View>
-        <Text style={styles.infoText}>
-          Cada usuário possui sua própria sessão isolada no servidor. 
-          As configurações de detecção (Híbrido, Regras, ML Estático, ML Dinâmico) 
-          são escolhidas diretamente na tela da câmera e não afetam outros usuários.
+
+        <Text style={styles.subtitle}>
+          Informações sobre o Li-Vision.
         </Text>
-        <View style={styles.tipBox}>
-          <MaterialIcons name="lightbulb-outline" size={18} color="#ffab00" />
-          <Text style={styles.tipText}>
-            Abra a câmera e toque no botão de modo no header para selecionar o cérebro de reconhecimento.
+
+        {/* CARD INFO ARQUITETURA */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <MaterialIcons name="cloud-done" size={20} color="#4caf50" />
+            <Text style={styles.sectionTitle}>Modo Multi-Sessão</Text>
+          </View>
+          <Text style={styles.infoText}>
+            Cada usuário possui sua própria sessão isolada no servidor. 
+            As configurações de detecção (Híbrido, Regras, ML Estático, ML Dinâmico) 
+            são escolhidas diretamente na tela da câmera e não afetam outros usuários.
           </Text>
-        </View>
-      </View>
-
-      {/* CARD AÇÕES RÁPIDAS - 4 BOTÕES COM MODAIS */}
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <MaterialIcons name="flash-on" size={20} color="#fff" />
-          <Text style={styles.sectionTitle}>Guia do Aplicativo</Text>
-        </View>
-
-        <TouchableOpacity
-          style={styles.actionBtn}
-          onPress={() => openModal(1)}
-          activeOpacity={0.7}
-        >
-          <View style={styles.actionLeft}>
-            <MaterialIcons name="dashboard" size={22} color="#00e5ff" />
-            <View>
-              <Text style={styles.actionLabel}>Apresentação do App</Text>
-              <Text style={styles.actionDesc}>Conheça todas as funcionalidades e abas</Text>
-            </View>
+          <View style={styles.tipBox}>
+            <MaterialIcons name="lightbulb-outline" size={18} color="#ffab00" />
+            <Text style={styles.tipText}>
+              Abra a câmera e toque no botão de modo no header para selecionar o cérebro de reconhecimento.
+            </Text>
           </View>
-          <MaterialIcons name="chevron-right" size={22} color="#555" />
-        </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity
-          style={styles.actionBtn}
-          onPress={() => openModal(2)}
-          activeOpacity={0.7}
-        >
-          <View style={styles.actionLeft}>
-            <MaterialIcons name="videocam" size={22} color="#00e5ff" />
-            <View>
-              <Text style={styles.actionLabel}>Como Fazer Inferência</Text>
-              <Text style={styles.actionDesc}>Use a câmera para reconhecimento em tempo real</Text>
-            </View>
+        {/* CARD AÇÕES RÁPIDAS - 4 BOTÕES COM MODAIS */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <MaterialIcons name="flash-on" size={20} color="#fff" />
+            <Text style={styles.sectionTitle}>Guia do Aplicativo</Text>
           </View>
-          <MaterialIcons name="chevron-right" size={22} color="#555" />
-        </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.actionBtn}
-          onPress={() => openModal(3)}
-          activeOpacity={0.7}
-        >
-          <View style={styles.actionLeft}>
-            <MaterialIcons name="science" size={22} color="#00e5ff" />
-            <View>
-              <Text style={styles.actionLabel}>Como Treinar Modelos</Text>
-              <Text style={styles.actionDesc}>Coleta de dados e treinamento no ML Studio</Text>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => openModal(1)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.actionLeft}>
+              <MaterialIcons name="dashboard" size={22} color="#00e5ff" />
+              <View>
+                <Text style={styles.actionLabel}>Apresentação do App</Text>
+                <Text style={styles.actionDesc}>Conheça todas as funcionalidades e abas</Text>
+              </View>
             </View>
-          </View>
-          <MaterialIcons name="chevron-right" size={22} color="#555" />
-        </TouchableOpacity>
+            <MaterialIcons name="chevron-right" size={22} color="#555" />
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.actionBtn}
-          onPress={() => openModal(4)}
-          activeOpacity={0.7}
-        >
-          <View style={styles.actionLeft}>
-            <MaterialIcons name="leaderboard" size={22} color="#00e5ff" />
-            <View>
-              <Text style={styles.actionLabel}>Pontuação e Ranking</Text>
-              <Text style={styles.actionDesc}>Entenda como funciona o sistema de pontos</Text>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => openModal(2)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.actionLeft}>
+              <MaterialIcons name="videocam" size={22} color="#00e5ff" />
+              <View>
+                <Text style={styles.actionLabel}>Como Fazer Inferência</Text>
+                <Text style={styles.actionDesc}>Use a câmera para reconhecimento em tempo real</Text>
+              </View>
             </View>
-          </View>
-          <MaterialIcons name="chevron-right" size={22} color="#555" />
-        </TouchableOpacity>
-      </View>
+            <MaterialIcons name="chevron-right" size={22} color="#555" />
+          </TouchableOpacity>
 
-      {/* CARD VERSÃO */}
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <MaterialIcons name="info-outline" size={20} color="#fff" />
-          <Text style={styles.sectionTitle}>Sobre</Text>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => openModal(3)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.actionLeft}>
+              <MaterialIcons name="science" size={22} color="#00e5ff" />
+              <View>
+                <Text style={styles.actionLabel}>Como Treinar Modelos</Text>
+                <Text style={styles.actionDesc}>Coleta de dados e treinamento no ML Studio</Text>
+              </View>
+            </View>
+            <MaterialIcons name="chevron-right" size={22} color="#555" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => openModal(4)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.actionLeft}>
+              <MaterialIcons name="leaderboard" size={22} color="#00e5ff" />
+              <View>
+                <Text style={styles.actionLabel}>Pontuação e Ranking</Text>
+                <Text style={styles.actionDesc}>Entenda como funciona o sistema de pontos</Text>
+              </View>
+            </View>
+            <MaterialIcons name="chevron-right" size={22} color="#555" />
+          </TouchableOpacity>
         </View>
-        <View style={styles.versionRow}>
-          <Text style={styles.versionLabel}>Versão do App</Text>
-          <Text style={styles.versionValue}>1.0.0 — Multi-Tenant</Text>
+
+        {/* CARD VERSÃO */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <MaterialIcons name="info-outline" size={20} color="#fff" />
+            <Text style={styles.sectionTitle}>Sobre</Text>
+          </View>
+          <View style={styles.versionRow}>
+            <Text style={styles.versionLabel}>Versão do App</Text>
+            <Text style={styles.versionValue}>1.0.0 — Multi-Tenant</Text>
+          </View>
+          <View style={styles.versionRow}>
+            <Text style={styles.versionLabel}>API Backend</Text>
+            <Text style={styles.versionValue}>Li-Vision · Render</Text>
+          </View>
+          <View style={[styles.versionRow, { borderBottomWidth: 0 }]}>
+            <Text style={styles.versionLabel}>Arquitetura</Text>
+            <Text style={styles.versionValue}>Edge + Cloud Hybrid</Text>
+          </View>
         </View>
-        <View style={styles.versionRow}>
-          <Text style={styles.versionLabel}>API Backend</Text>
-          <Text style={styles.versionValue}>Li-Vision · Render</Text>
-        </View>
-        <View style={[styles.versionRow, { borderBottomWidth: 0 }]}>
-          <Text style={styles.versionLabel}>Arquitetura</Text>
-          <Text style={styles.versionValue}>Edge + Cloud Hybrid</Text>
-        </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+
+      <AboutModal
+        visible={modalVisible}
+        slide={activeSlide}
+        onClose={() => setModalVisible(false)}
+      />
+    </>
   );
 }
 

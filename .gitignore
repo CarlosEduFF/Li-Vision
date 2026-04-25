@@ -40,6 +40,7 @@ app-example
 
 # generated native folders
 /ios
+/android
 
 # Modelo extraído (desnecessário — o .task já é empacotado pelo plugin)
 assets/hand_landmarker.zip
