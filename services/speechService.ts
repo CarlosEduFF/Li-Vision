@@ -64,7 +64,7 @@ export const DEFAULT_PREFERENCES: SpeechPreferences = {
   rate: DEFAULT_RATE,
   pitch: DEFAULT_PITCH,
   spellingIdleMs: 2500,
-  letterStableMs: 600,
+  letterStableMs: 1200,
   minConfidence: 0.7,
 };
 
@@ -166,8 +166,8 @@ class SpeechService {
     if (!this.prefs.enabled || !this.prefs.speakGestures) return;
 
     const now = Date.now();
-    if (this.lastText === label && now - this.lastTimestamp < 800) {
-      return; // debounce: mesmo gesto recentemente falado
+    if (this.lastText === label && now - this.lastTimestamp < 2000) {
+      return; // debounce: mesmo gesto recentemente falado (2s intervalo)
     }
     this.lastText = label;
     this.lastTimestamp = now;

@@ -1,9 +1,9 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
-import { Dimensions, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 
-const { width } = Dimensions.get("window");
+const { width, height: screenHeight } = Dimensions.get("window");
 const CAROUSEL_WIDTH = width - 60;
 
 type CarouselSlide = {
@@ -315,7 +315,8 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: "92%",
-    maxHeight: "85%",
+    maxHeight: "95%",
+    minHeight: screenHeight * 0.88,
     backgroundColor: "#10141a",
     borderRadius: 24,
     overflow: "hidden",
@@ -427,10 +428,6 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 999,
     backgroundColor: "rgba(255,255,255,0.25)",
-  },
-  dotActive: {
-    width: 20,
-    backgroundColor: "#00e5ff",
   },
   dotActive: {
     width: 20,

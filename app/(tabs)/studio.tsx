@@ -26,12 +26,19 @@ export default function StudioScreen() {
         Coleta de dados e gerenciamento de modelos do Li-Vision Edge.
       </Text>
 
-      {/* CARD NAVIGATION */}
+      {/* CARD — Coleta de Dados */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <MaterialIcons name="backup" size={20} color="#fff" />
-          <Text style={styles.sectionTitle}>Aquisição de Datasets</Text>
+          <Text style={styles.sectionTitle}>
+            {isAdmin ? "Aquisição de Datasets" : "Contribuir com Dados"}
+          </Text>
         </View>
+        {!isAdmin && (
+          <Text style={styles.collaboratorHint}>
+            Contribua coletando amostras para datasets e movimentos já cadastrados pelo administrador.
+          </Text>
+        )}
         <View style={styles.optionsGrid}>
           <TouchableOpacity
             style={styles.optionBtn}
@@ -51,16 +58,17 @@ export default function StudioScreen() {
               <Text style={styles.optionText}>Gravar Sequência Múltipla (Sinais)</Text>
             </View>
           </TouchableOpacity>
-         
-            <TouchableOpacity
-              style={styles.optionBtn}
-              onPress={() => router.push("/screens/manage-datasets")}
-            >
-              <View style={styles.optionContent}>
-                <MaterialIcons name="folder-open" size={22} color="#00e5ff" />
-                <Text style={[styles.optionText, { color: "#00e5ff" }]}>Gerenciar Gestos e Datasets</Text>
-              </View>
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.optionBtn}
+            onPress={() => router.push("/screens/manage-datasets")}
+          >
+            <View style={styles.optionContent}>
+              <MaterialIcons name="folder-open" size={22} color={isAdmin ? "#00e5ff" : "#888"} />
+              <Text style={[styles.optionText, isAdmin && { color: "#00e5ff" }]}>
+                {isAdmin ? "Gerenciar Gestos e Datasets" : "Visualizar Datasets"}
+              </Text>
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -102,6 +110,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 8 },
   title: { fontSize: 32, fontWeight: "800", color: "#ffffff", letterSpacing: -0.5 },
   subtitle: { fontSize: 14, color: "#888", marginBottom: 32, lineHeight: 20 },
+  collaboratorHint: { fontSize: 13, color: "#9cadc3", marginBottom: 14, lineHeight: 19 },
   card: { backgroundColor: "#1c2026", borderRadius: 20, padding: 20, marginBottom: 24, borderWidth: 1, borderColor: "rgba(0, 229, 255, 0.15)", shadowColor: "#00e5ff", shadowOpacity: 0.1, shadowRadius: 15, shadowOffset: { width: 0, height: 4 }, elevation: 5 },
   cardHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: "rgba(255, 255, 255, 0.05)" },
   sectionTitle: { fontSize: 16, fontWeight: "700", color: "#ffffff", letterSpacing: 0.5 },
