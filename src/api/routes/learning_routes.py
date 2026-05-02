@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, UploadFile, File
 from pydantic import BaseModel
 from typing import Optional, List, Literal
 
@@ -113,5 +113,40 @@ def delete_learning_gesture(gesture_id: str, admin: dict = Depends(require_admin
     try:
         res = supabase_admin.table("learning_gestures").delete().eq("id", gesture_id).execute()
         return {"ok": True, "deleted": len(res.data)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/gestures/upload-image")
+async def upload_learning_image(file: UploadFile = File(...), admin: dict = Depends(require_admin)):
+    try:
+        import time
+        contents = await file.read()
+        
+        # Garante que o bucket exista (ignora se já existir)
+        try:
+            supabase_admin.storage.create_bucket("learning_images", {"public": True})
+        except:
+            pass
+            
+        file_ext = file.filename.split(".")[-1] if file.filename else "jpg"
+        timestamp = int(time.time())
+        # Cria um nome unico no formato: learning_TIMESTAMP.ext
+        storage_path = f"learning_{timestamp}.{file_ext}"
+        content_type = file.content_type or "image/jpeg"
+        
+        res = supabase_admin.storage.from_("learning_images").upload(
+            path=storage_path,
+            file=contents,
+            file_options={"content-type": content_type}
+        )
+        
+        if hasattr(res, 'status_code') and res.status_code >= 400:
+            raise Exception(f"Falha no upload: {res.text if hasattr(res, 'text') else str(res)}")
+        elif isinstance(res, dict) and res.get("error"):
+            raise Exception(f"Falha no upload: {res.get('error')}")
+            
+        public_url = supabase_admin.storage.from_("learning_images").get_public_url(storage_path)
+        
+        return {"ok": True, "url": public_url}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
