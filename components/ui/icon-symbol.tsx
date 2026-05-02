@@ -34,6 +34,7 @@ const MAPPING = {
 
   // ✅ Aprender
   'book.fill': 'menu-book', 
+  'arrow.triangle.2.circlepath': 'autorenew'
 } as Partial<IconMapping>;
 
 /**
