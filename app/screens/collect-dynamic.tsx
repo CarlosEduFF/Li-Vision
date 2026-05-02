@@ -268,40 +268,34 @@ export default function CollectDynamicScreen() {
             </ScrollView>
           )}
 
-          {isAdmin ? (
-            <>
-              <TextInput
-                style={[
-                  styles.input,
-                  labelHint && { borderColor: 'rgba(255, 171, 0, 0.5)' },
-                ]}
-                placeholderTextColor="#666"
-                placeholder="EX: OI"
-                value={label}
-                autoCapitalize="characters"
-                autoCorrect={false}
-                onChangeText={(v) => {
-                  setLabel(v);
-                  const normalized = v.toUpperCase();
-                  if (normalized && gestureLabels.includes(normalized)) {
-                    setLabelHint(
-                      `O gesto "${normalized}" já existe neste dataset. ` +
-                      `Gravar adicionará mais sequências a ele.`
-                    );
-                  } else {
-                    setLabelHint(null);
-                  }
-                }}
-              />
-              {labelHint && (
-                <View style={styles.labelHint}>
-                  <MaterialIcons name="info-outline" size={16} color="#ffab00" />
-                  <Text style={styles.labelHintText}>{labelHint}</Text>
-                </View>
-              )}
-            </>
-          ) : (
-            gestureLabels.length === 0 && datasetName && <Text style={{ color: "#888" }}>Nenhum gesto cadastrado pelo Admin para este dataset.</Text>
+          <TextInput
+            style={[
+              styles.input,
+              labelHint && { borderColor: 'rgba(255, 171, 0, 0.5)' },
+            ]}
+            placeholderTextColor="#666"
+            placeholder="EX: OI"
+            value={label}
+            autoCapitalize="characters"
+            autoCorrect={false}
+            onChangeText={(v) => {
+              setLabel(v);
+              const normalized = v.toUpperCase();
+              if (normalized && gestureLabels.includes(normalized)) {
+                setLabelHint(
+                  `O gesto "${normalized}" já existe neste dataset. ` +
+                  `Gravar adicionará mais sequências a ele.`
+                );
+              } else {
+                setLabelHint(null);
+              }
+            }}
+          />
+          {labelHint && (
+            <View style={styles.labelHint}>
+              <MaterialIcons name="info-outline" size={16} color="#ffab00" />
+              <Text style={styles.labelHintText}>{labelHint}</Text>
+            </View>
           )}
 
           <View style={styles.buttonRow}>
