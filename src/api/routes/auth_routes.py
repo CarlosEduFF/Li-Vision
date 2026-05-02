@@ -150,54 +150,42 @@ async def upload_avatar_file(file: UploadFile = File(...), user: dict = Depends(
         import time
         user_id = user["user_id"]
         
+        # Pega a URL antiga para podermos apagar o arquivo antigo e evitar lixo no storage
+        old_profile = supabase_admin.table("profiles").select("avatar_url").eq("id", user_id).execute()
+        old_url = old_profile.data[0].get("avatar_url") if old_profile.data else None
+        
+        if old_url and "/avatars/" in old_url:
+            # A URL publica costuma ser: .../storage/v1/object/public/avatars/ID_NOME.jpg
+            old_filename = old_url.split("/avatars/")[-1].split("?")[0]
+            try:
+                supabase_admin.storage.from_("avatars").remove([old_filename])
+            except:
+                pass
+        
         # Ler o conteúdo do arquivo
         contents = await file.read()
         
-        # Definir o caminho no storage
+        # Definir o caminho no storage COM TIMESTAMP para garantir URL nova (burlar cache)
         file_ext = file.filename.split(".")[-1] if file.filename else "jpg"
-        storage_path = f"{user_id}.{file_ext}"
+        timestamp = int(time.time())
+        storage_path = f"{user_id}_{timestamp}.{file_ext}"
         content_type = file.content_type or "image/jpeg"
         
-        # Estratégia: tenta upload com upsert
+        # Faz o upload do novo arquivo
         res = supabase_admin.storage.from_("avatars").upload(
             path=storage_path,
             file=contents,
-            file_options={"content-type": content_type, "x-upsert": "true"}
+            file_options={"content-type": content_type}
         )
         
-        # storage3 em versões recentes pode retornar o erro sem lançar exceção
+        # Verifica erros de upload
         if hasattr(res, 'status_code') and res.status_code >= 400:
-            err_msg = res.text if hasattr(res, 'text') else str(res)
-            err_str = err_msg.lower()
-            
-            # Se for duplicação, tenta update explicitamente
-            if "duplicate" in err_str or "already exists" in err_str or "409" in err_str or res.status_code == 400:
-                res = supabase_admin.storage.from_("avatars").update(
-                    path=storage_path,
-                    file=contents,
-                    file_options={"content-type": content_type}
-                )
-                if hasattr(res, 'status_code') and res.status_code >= 400:
-                    raise Exception(f"Falha ao fazer update da imagem: {res.text if hasattr(res, 'text') else str(res)}")
-            else:
-                raise Exception(f"Falha no upload: {err_msg}")
+            raise Exception(f"Falha no upload: {res.text if hasattr(res, 'text') else str(res)}")
         elif isinstance(res, dict) and res.get("error"):
-            # storage3 antigo retorna dict
-            err_msg = str(res.get("error")).lower()
-            if "duplicate" in err_msg or "already exists" in err_msg:
-                res = supabase_admin.storage.from_("avatars").update(
-                    path=storage_path,
-                    file=contents,
-                    file_options={"content-type": content_type}
-                )
-                if isinstance(res, dict) and res.get("error"):
-                    raise Exception(f"Falha ao fazer update da imagem: {res.get('error')}")
-            else:
-                raise Exception(f"Falha no upload: {res.get('error')}")
+            raise Exception(f"Falha no upload: {res.get('error')}")
         
-        # Montar a URL pública com cache-buster para forçar atualização no client
-        base_url = supabase_admin.storage.from_("avatars").get_public_url(storage_path)
-        public_url = f"{base_url}?t={int(time.time())}"
+        # Montar a URL pública (não precisamos de cache-buster pq o nome já é único)
+        public_url = supabase_admin.storage.from_("avatars").get_public_url(storage_path)
         
         # Atualizar a tabela profiles com a URL do avatar
         supabase_admin.table("profiles").update({
