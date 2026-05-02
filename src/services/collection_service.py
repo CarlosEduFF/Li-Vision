@@ -1,6 +1,6 @@
 import logging
 from typing import Optional, Dict, Any, List
-from src.core.supabase_client import supabase
+from src.core.supabase_client import supabase, supabase_admin
 from src.data_collection.static_collector import StaticCollector
 
 logger = logging.getLogger(__name__)
@@ -180,16 +180,35 @@ class CollectionService:
 
     def delete_dataset(self, dataset_id: str) -> dict:
         try:
-            supabase.table("datasets").delete().eq("id", dataset_id).execute()
+            # Deleta samples primeiro (redundante com CASCADE, mas garante limpeza)
+            supabase.table("samples").delete().eq("dataset_id", dataset_id).execute()
+            # Depois deleta o dataset
+            res = supabase.table("datasets").delete().eq("id", dataset_id).execute()
+            logger.info("[delete_dataset] Dataset %s deletado. Resultado: %s", dataset_id, res.data)
             return {"ok": True}
         except Exception as e:
+            logger.error("[delete_dataset] Erro: %s", str(e))
             return {"ok": False, "error": str(e)}
 
     def delete_label(self, dataset_id: str, label: str) -> dict:
         try:
-            supabase.table("samples").delete().eq("dataset_id", dataset_id).eq("label", label.upper()).execute()
-            return {"ok": True}
+            target_label = label.upper()
+            logger.info("[delete_label] Deletando label='%s' do dataset='%s'", target_label, dataset_id)
+            
+            # Verifica quantas samples existem antes
+            check = supabase.table("samples").select("id", count="exact").eq("dataset_id", dataset_id).eq("label", target_label).execute()
+            count_before = check.count if hasattr(check, 'count') and check.count is not None else len(check.data)
+            logger.info("[delete_label] Encontradas %d amostras para deletar", count_before)
+            
+            if count_before == 0:
+                return {"ok": True, "deleted": 0, "message": "Nenhuma amostra encontrada para este gesto."}
+            
+            res = supabase.table("samples").delete().eq("dataset_id", dataset_id).eq("label", target_label).execute()
+            deleted_count = len(res.data) if res.data else 0
+            logger.info("[delete_label] Deletadas %d amostras", deleted_count)
+            return {"ok": True, "deleted": deleted_count}
         except Exception as e:
+            logger.error("[delete_label] Erro: %s", str(e))
             return {"ok": False, "error": str(e)}
 
     def rename_dataset(self, dataset_id: str, new_name: str) -> dict:

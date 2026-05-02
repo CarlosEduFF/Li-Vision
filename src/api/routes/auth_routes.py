@@ -147,6 +147,7 @@ async def update_profile(payload: ProfileUpdatePayload, user: dict = Depends(ver
 async def upload_avatar_file(file: UploadFile = File(...), user: dict = Depends(verify_token)):
     """Upload de avatar para Supabase Storage bucket 'avatars'."""
     try:
+        import time
         user_id = user["user_id"]
         
         # Ler o conteúdo do arquivo
@@ -155,22 +156,33 @@ async def upload_avatar_file(file: UploadFile = File(...), user: dict = Depends(
         # Definir o caminho no storage
         file_ext = file.filename.split(".")[-1] if file.filename else "jpg"
         storage_path = f"{user_id}.{file_ext}"
+        content_type = file.content_type or "image/jpeg"
         
-        # Tentar remover o arquivo antigo (se existir)
+        # Estratégia: tenta upload (novo arquivo), se falhar com duplicação, usa update
+        uploaded = False
         try:
-            supabase_admin.storage.from_("avatars").remove([storage_path])
-        except:
-            pass
+            supabase_admin.storage.from_("avatars").upload(
+                path=storage_path,
+                file=contents,
+                file_options={"content-type": content_type}
+            )
+            uploaded = True
+        except Exception as upload_err:
+            err_str = str(upload_err).lower()
+            if "duplicate" in err_str or "already exists" in err_str or "409" in err_str:
+                # Arquivo já existe — usa update para substituir
+                supabase_admin.storage.from_("avatars").update(
+                    path=storage_path,
+                    file=contents,
+                    file_options={"content-type": content_type}
+                )
+                uploaded = True
+            else:
+                raise upload_err
         
-        # Upload do novo avatar
-        supabase_admin.storage.from_("avatars").upload(
-            path=storage_path,
-            file=contents,
-            file_options={"content-type": file.content_type or "image/jpeg", "upsert": "true"}
-        )
-        
-        # Montar a URL pública
-        public_url = supabase_admin.storage.from_("avatars").get_public_url(storage_path)
+        # Montar a URL pública com cache-buster para forçar atualização no client
+        base_url = supabase_admin.storage.from_("avatars").get_public_url(storage_path)
+        public_url = f"{base_url}?t={int(time.time())}"
         
         # Atualizar a tabela profiles com a URL do avatar
         supabase_admin.table("profiles").update({
