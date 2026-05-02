@@ -39,6 +39,7 @@ export type GestureResult = {
   action?: string;
   detectors?: number;
   status?: string;
+  sequences?: number;
 };
 
 type GestureCallback = (result: GestureResult) => void;

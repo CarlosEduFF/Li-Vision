@@ -14,7 +14,7 @@ export default function CollectDynamicScreen() {
   const [datasetName, setDatasetName] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const isRecordingRef = useRef(isRecording);
-  const recordingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const recordingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [sequences, setSequences] = useState(0);
   const [landmarks, setLandmarks] = useState<LandmarkPoint[]>([]);
   const [datasets, setDatasets] = useState<any[]>([]);
