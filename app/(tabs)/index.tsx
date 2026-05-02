@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
@@ -130,18 +131,65 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
 
-            {ranking.map((item, index) => (
-              <View key={index} style={styles.rankRow}>
-                <View style={styles.rankLeft}>
-                  <Text style={styles.rankNum}>{index + 1}</Text>
-                  <View style={styles.avatarMini}>
-                    <MaterialIcons name="person" size={14} color="#00e5ff" />
+            {/* Triade (Podium) */}
+            {ranking.length > 0 && (
+              <View style={styles.podiumRow}>
+                {/* Silver - 2nd */}
+                {ranking[1] && (
+                  <View style={styles.podiumItem}>
+                    <View style={[styles.avatarMini, { borderColor: "#c0c0c0", borderWidth: 2 }]}>
+                      <MaterialIcons name="person" size={16} color="#c0c0c0" />
+                    </View>
+                    <Text style={styles.podiumName} numberOfLines={1}>{ranking[1].name}</Text>
+                    <LinearGradient colors={["#c0c0c0", "#8e8e8e"]} style={[styles.podiumBox, { height: 40 }]}>
+                      <Text style={styles.podiumRank}>2</Text>
+                    </LinearGradient>
                   </View>
-                  <Text style={styles.rankName} numberOfLines={1}>{item.name}</Text>
-                </View>
-                <Text style={styles.rankPoints}>{item.samples} pts</Text>
+                )}
+
+                {/* Gold - 1st */}
+                {ranking[0] && (
+                  <View style={styles.podiumItem}>
+                    <View style={[styles.avatarMini, { borderColor: "#ffd700", borderWidth: 2, width: 36, height: 36, borderRadius: 18 }]}>
+                      <MaterialIcons name="emoji-events" size={20} color="#ffd700" />
+                    </View>
+                    <Text style={[styles.podiumName, { fontWeight: "800", color: "#ffd700" }]} numberOfLines={1}>{ranking[0].name}</Text>
+                    <LinearGradient colors={["#ffd700", "#b8860b"]} style={[styles.podiumBox, { height: 60 }]}>
+                      <Text style={styles.podiumRank}>1</Text>
+                    </LinearGradient>
+                  </View>
+                )}
+
+                {/* Bronze - 3rd */}
+                {ranking[2] && (
+                  <View style={styles.podiumItem}>
+                    <View style={[styles.avatarMini, { borderColor: "#cd7f32", borderWidth: 2 }]}>
+                      <MaterialIcons name="person" size={16} color="#cd7f32" />
+                    </View>
+                    <Text style={styles.podiumName} numberOfLines={1}>{ranking[2].name}</Text>
+                    <LinearGradient colors={["#cd7f32", "#8b4513"]} style={[styles.podiumBox, { height: 30 }]}>
+                      <Text style={styles.podiumRank}>3</Text>
+                    </LinearGradient>
+                  </View>
+                )}
               </View>
-            ))}
+            )}
+
+            {/* Demais (4th and 5th) */}
+            <View style={styles.othersList}>
+              {ranking.slice(3, 5).map((item, index) => (
+                <View key={index} style={styles.rankRow}>
+                  <View style={styles.rankLeft}>
+                    <Text style={styles.rankNum}>{index + 4}</Text>
+                    <View style={styles.avatarMini}>
+                      <MaterialIcons name="person" size={14} color="#00e5ff" />
+                    </View>
+                    <Text style={styles.rankName} numberOfLines={1}>{item.name}</Text>
+                  </View>
+                  <Text style={styles.rankPoints}>{item.samples} pts</Text>
+                </View>
+              ))}
+            </View>
           </View>
         </View>
 
@@ -410,5 +458,41 @@ const styles = StyleSheet.create({
     color: "#00e5ff",
     fontSize: 13,
     fontWeight: "bold",
+  },
+  podiumRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "center",
+    gap: 12,
+    marginTop: 8,
+    marginBottom: 20,
+  },
+  podiumItem: {
+    alignItems: "center",
+    width: "28%",
+  },
+  podiumName: {
+    color: "#dfe2eb",
+    fontSize: 11,
+    fontWeight: "600",
+    marginBottom: 6,
+    textAlign: "center",
+  },
+  podiumBox: {
+    width: "100%",
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  podiumRank: {
+    color: "#fff",
+    fontWeight: "900",
+    fontSize: 16,
+  },
+  othersList: {
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.05)",
+    paddingTop: 16,
   },
 });

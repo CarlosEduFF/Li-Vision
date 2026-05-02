@@ -43,11 +43,11 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="ranking"
+        name="transcription"
         options={{
           title: 'Transcrição',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="chart.bar.fill" color={color} />
+            <IconSymbol size={28} name="arrow.triangle.2.circlepath" color={color} />
           ),
         }}
       />
