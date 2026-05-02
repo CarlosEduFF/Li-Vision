@@ -150,13 +150,25 @@ export const trainingService = {
       type: "image/jpeg"
     } as any);
 
-    const response = await fetch(`${API_URL}/auth/profile/upload-avatar`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-      },
-      body: form,
-    });
-    return response.json();
+    try {
+      const response = await fetch(`${API_URL}/auth/profile/upload-avatar`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+        body: form,
+      });
+      
+      const data = await response.json();
+      if (!response.ok) {
+        data.ok = false;
+        if (!data.detail && !data.error) {
+          data.detail = `Erro do Servidor (${response.status})`;
+        }
+      }
+      return data;
+    } catch (e: any) {
+      return { ok: false, detail: "Erro de conexão: " + e.message };
+    }
   }
 };
