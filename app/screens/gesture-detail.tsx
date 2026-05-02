@@ -3,12 +3,14 @@ import {
   getGesturesByLevel,
   LearningLevel,
   LEVEL_META,
+  markGestureProgress,
+  getProgressMap,
+  GestureProgress,
 } from "@/services/learningService";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,6 +18,7 @@ import {
   View,
   Image,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 function isLearningLevel(value: string): value is LearningLevel {
   return value === "iniciante" || value === "intermediario" || value === "avancado";
@@ -30,14 +33,16 @@ export default function GestureDetailScreen() {
 
   const [gestures, setGestures] = useState<Gesture[]>([]);
   const [loading, setLoading] = useState(true);
+  const [progressMap, setProgressMap] = useState<Record<string, GestureProgress>>({});
 
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadGestures() {
+    async function loadData() {
       try {
-        const items = await getGesturesByLevel(level);
+        const [items, pMap] = await Promise.all([
+          getGesturesByLevel(level),
+          getProgressMap(),
+        ]);
         if (mounted) {
+          setProgressMap(pMap);
           if (params.category) {
             setGestures(items.filter(g => g.category === params.category));
           } else {
@@ -45,7 +50,7 @@ export default function GestureDetailScreen() {
           }
         }
       } catch (error) {
-        console.log("Erro ao carregar gestos do nível:", error);
+        console.log("Erro ao carregar dados:", error);
       } finally {
         if (mounted) {
           setLoading(false);
@@ -53,12 +58,21 @@ export default function GestureDetailScreen() {
       }
     }
 
-    loadGestures();
+    loadData();
 
     return () => {
       mounted = false;
     };
   }, [level, params.category]);
+
+  const toggleLearned = async (gestureId: string) => {
+    const currentlyLearned = progressMap[gestureId]?.learned;
+    const newProgress = currentlyLearned ? 0 : 100;
+    
+    await markGestureProgress(gestureId, newProgress);
+    const updatedMap = await getProgressMap();
+    setProgressMap(updatedMap);
+  };
 
   const meta = useMemo(() => LEVEL_META[level], [level]);
 
@@ -84,10 +98,20 @@ export default function GestureDetailScreen() {
           </View>
         ) : (
           gestures.map((gesture: Gesture) => (
-            <View key={gesture.id} style={[styles.card, { borderColor: meta.color }]}>
+            <View key={gesture.id} style={[
+              styles.card,
+              progressMap[gesture.id]?.learned && { borderColor: "#00d084", borderWidth: 1.5 }
+            ]}>
               <View style={styles.cardHeader}>
-                <Text style={styles.letter}>{gesture.name}</Text>
-                <Text style={[styles.levelBadge, { color: meta.color, borderColor: meta.color }]}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text style={styles.letter}>{gesture.name}</Text>
+                  {progressMap[gesture.id]?.learned && (
+                    <View style={styles.checkCircle}>
+                      <MaterialIcons name="check" size={12} color="#fff" />
+                    </View>
+                  )}
+                </View>
+                <Text style={[styles.levelBadge, { borderColor: meta.color, color: meta.color }]}>
                   {meta.title}
                 </Text>
               </View>
@@ -129,6 +153,27 @@ export default function GestureDetailScreen() {
                   </View>
                 </View>
               </View>
+
+              <TouchableOpacity 
+                style={[
+                  styles.learnBtn, 
+                  progressMap[gesture.id]?.learned ? styles.learnedBtn : styles.unlearnedBtn
+                ]}
+                onPress={() => toggleLearned(gesture.id)}
+                activeOpacity={0.7}
+              >
+                <MaterialIcons 
+                  name={progressMap[gesture.id]?.learned ? "undo" : "check-circle"} 
+                  size={18} 
+                  color={progressMap[gesture.id]?.learned ? "#8a92a3" : "#081018"} 
+                />
+                <Text style={[
+                  styles.learnBtnText, 
+                  progressMap[gesture.id]?.learned ? styles.learnedBtnText : styles.unlearnedBtnText
+                ]}>
+                  {progressMap[gesture.id]?.learned ? "Revisar Novamente" : "Concluir Aprendizado"}
+                </Text>
+              </TouchableOpacity>
             </View>
           ))
         )}
@@ -146,7 +191,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#10141a" },
   topBar: {
     paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingTop: 12,
     paddingBottom: 8,
     flexDirection: "row",
     alignItems: "center",
@@ -219,5 +264,40 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     resizeMode: "cover",
+  },
+  checkCircle: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: "#00d084",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  learnBtn: {
+    marginTop: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  unlearnedBtn: {
+    backgroundColor: "#00e5ff",
+  },
+  learnedBtn: {
+    backgroundColor: "rgba(138, 146, 163, 0.1)",
+    borderWidth: 1,
+    borderColor: "#3a475c",
+  },
+  learnBtnText: {
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  unlearnedBtnText: {
+    color: "#081018",
+  },
+  learnedBtnText: {
+    color: "#8a92a3",
   },
 });

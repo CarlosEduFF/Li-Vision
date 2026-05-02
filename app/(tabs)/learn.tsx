@@ -6,8 +6,8 @@ import {
 } from "@/services/learningService";
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import { useRouter, useFocusEffect } from "expo-router";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { TouchableOpacity, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -29,21 +29,24 @@ export default function LearnTabScreen() {
 
   const isAdmin = useMemo(() => role === "admin", [role]);
 
-  useEffect(() => {
-    const load = async () => {
-      const [i, m, a] = await Promise.all([
-        getLevelProgress("iniciante"),
-        getLevelProgress("intermediario"),
-        getLevelProgress("avancado"),
-      ]);
-      setProgress({
-        iniciante: i,
-        intermediario: m,
-        avancado: a,
-      });
-    };
-    load();
+  const loadProgress = useCallback(async () => {
+    const [i, m, a] = await Promise.all([
+      getLevelProgress("iniciante"),
+      getLevelProgress("intermediario"),
+      getLevelProgress("avancado"),
+    ]);
+    setProgress({
+      iniciante: i,
+      intermediario: m,
+      avancado: a,
+    });
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadProgress();
+    }, [loadProgress])
+  );
 
   useEffect(() => {
     const loadRole = async () => {
@@ -89,7 +92,8 @@ export default function LearnTabScreen() {
   }, [gestures]);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#10141a" }}>
+      <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <View>
@@ -175,6 +179,7 @@ export default function LearnTabScreen() {
           </Text>
         </View>
       </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -189,6 +194,7 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: 16,
+    marginTop: 8,
   },
   titleRow: {
     flexDirection: "row",

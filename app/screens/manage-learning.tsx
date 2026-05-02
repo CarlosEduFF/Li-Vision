@@ -12,7 +12,8 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   Modal,
-  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -21,6 +22,7 @@ import {
   View,
   Image,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { uploadLearningImage } from "@/services/api";
 
@@ -235,7 +237,10 @@ export default function ManageLearningScreen() {
       </ScrollView>
 
       <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
-        <View style={styles.modalBg}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.modalBg}
+        >
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>{form.id ? "Editar gesto" : "Novo gesto"}</Text>
 
@@ -319,7 +324,7 @@ export default function ManageLearningScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );
@@ -422,15 +427,16 @@ const styles = StyleSheet.create({
   modalBg: {
     flex: 1,
     backgroundColor: "rgba(5,8,12,0.8)",
-    justifyContent: "flex-end",
+    justifyContent: "center",
+    padding: 20,
   },
   modalCard: {
     backgroundColor: "#121821",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderRadius: 24,
     padding: 24,
     borderWidth: 1,
     borderColor: "#283345",
+    maxHeight: "85%",
   },
   modalTitle: {
     color: "#fff",

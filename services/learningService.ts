@@ -21,130 +21,7 @@ export interface GestureProgress {
 
 const STORAGE_KEY = "learning_progress_v1";
 
-const alphabetLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-
-const ALFABETO_INICIANTE: Gesture[] = alphabetLetters.map((letter) => ({
-  id: `alfabeto-${letter}`,
-  name: letter,
-  level: "iniciante",
-  category: "Alfabeto",
-  description: `Gesto da letra ${letter} em Libras.`,
-  svgInitial: "",
-  svgMovement: "",
-  svgFinal: "",
-}));
-
-const GESTURES_INTERMEDIARIO: Gesture[] = [
-  {
-    id: "inter-oi",
-    name: "Oi",
-    level: "intermediario",
-    category: "Cumprimentos",
-    description: "Saudação informal em Libras.",
-    svgInitial: "",
-    svgMovement: "",
-    svgFinal: "",
-  },
-  {
-    id: "inter-tchau",
-    name: "Tchau",
-    level: "intermediario",
-    category: "Cumprimentos",
-    description: "Despedida em Libras.",
-    svgInitial: "",
-    svgMovement: "",
-    svgFinal: "",
-  },
-  {
-    id: "inter-obrigado",
-    name: "Obrigado",
-    level: "intermediario",
-    category: "Cumprimentos",
-    description: "Expressão de agradecimento.",
-    svgInitial: "",
-    svgMovement: "",
-    svgFinal: "",
-  },
-  {
-    id: "inter-por-favor",
-    name: "Por favor",
-    level: "intermediario",
-    category: "Expressões",
-    description: "Pedido educado em Libras.",
-    svgInitial: "",
-    svgMovement: "",
-    svgFinal: "",
-  },
-  {
-    id: "inter-bom-dia",
-    name: "Bom dia",
-    level: "intermediario",
-    category: "Cumprimentos",
-    description: "Cumprimento matinal.",
-    svgInitial: "",
-    svgMovement: "",
-    svgFinal: "",
-  },
-];
-
-const GESTURES_AVANCADO: Gesture[] = [
-  {
-    id: "ava-como-voce-esta",
-    name: "Como você está?",
-    level: "avancado",
-    category: "Frases",
-    description: "Pergunta de interação social.",
-    svgInitial: "",
-    svgMovement: "",
-    svgFinal: "",
-  },
-  {
-    id: "ava-preciso-ajuda",
-    name: "Preciso de ajuda",
-    level: "avancado",
-    category: "Frases",
-    description: "Solicitação de apoio.",
-    svgInitial: "",
-    svgMovement: "",
-    svgFinal: "",
-  },
-  {
-    id: "ava-onde-banheiro",
-    name: "Onde é o banheiro?",
-    level: "avancado",
-    category: "Frases",
-    description: "Pergunta de localização comum.",
-    svgInitial: "",
-    svgMovement: "",
-    svgFinal: "",
-  },
-  {
-    id: "ava-eu-aprendendo-libras",
-    name: "Eu estou aprendendo Libras",
-    level: "avancado",
-    category: "Frases",
-    description: "Frase de contexto de aprendizagem.",
-    svgInitial: "",
-    svgMovement: "",
-    svgFinal: "",
-  },
-  {
-    id: "ava-ate-logo",
-    name: "Até logo",
-    level: "avancado",
-    category: "Cumprimentos",
-    description: "Despedida amigável.",
-    svgInitial: "",
-    svgMovement: "",
-    svgFinal: "",
-  },
-];
-
-export const FALLBACK_GESTURES: Gesture[] = [
-  ...ALFABETO_INICIANTE,
-  ...GESTURES_INTERMEDIARIO,
-  ...GESTURES_AVANCADO,
-];
+// Removidos os gestos mockados. Agora apenas gestos da API são exibidos.
 
 export const LEVEL_META: Record<
   LearningLevel,
@@ -191,22 +68,12 @@ export async function getAllGestures(): Promise<Gesture[]> {
     const response = await getLearningGestures();
     if (response.ok && Array.isArray(response.items)) {
       const apiGestures = response.items.map(mapApiGesture);
-      
-      // Mescla os gestos locais (Alfabeto, etc) com os gestos criados na API (Admin)
-      const gestureMap = new Map<string, Gesture>();
-      
-      // 1. Adiciona os fallbacks básicos primeiro
-      FALLBACK_GESTURES.forEach(g => gestureMap.set(g.id, g));
-      
-      // 2. Sobrescreve ou adiciona os da API
-      apiGestures.forEach(g => gestureMap.set(g.id, g));
-      
-      return Array.from(gestureMap.values());
+      return apiGestures;
     }
-    return FALLBACK_GESTURES;
+    return [];
   } catch (error) {
-    console.log("Falha ao carregar gestos da API, usando fallback local:", error);
-    return FALLBACK_GESTURES;
+    console.log("Falha ao carregar gestos da API:", error);
+    return [];
   }
 }
 
