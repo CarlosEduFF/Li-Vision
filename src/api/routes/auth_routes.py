@@ -158,27 +158,42 @@ async def upload_avatar_file(file: UploadFile = File(...), user: dict = Depends(
         storage_path = f"{user_id}.{file_ext}"
         content_type = file.content_type or "image/jpeg"
         
-        # Estratégia: tenta upload (novo arquivo), se falhar com duplicação, usa update
-        uploaded = False
-        try:
-            supabase_admin.storage.from_("avatars").upload(
-                path=storage_path,
-                file=contents,
-                file_options={"content-type": content_type}
-            )
-            uploaded = True
-        except Exception as upload_err:
-            err_str = str(upload_err).lower()
-            if "duplicate" in err_str or "already exists" in err_str or "409" in err_str:
-                # Arquivo já existe — usa update para substituir
-                supabase_admin.storage.from_("avatars").update(
+        # Estratégia: tenta upload com upsert
+        res = supabase_admin.storage.from_("avatars").upload(
+            path=storage_path,
+            file=contents,
+            file_options={"content-type": content_type, "x-upsert": "true"}
+        )
+        
+        # storage3 em versões recentes pode retornar o erro sem lançar exceção
+        if hasattr(res, 'status_code') and res.status_code >= 400:
+            err_msg = res.text if hasattr(res, 'text') else str(res)
+            err_str = err_msg.lower()
+            
+            # Se for duplicação, tenta update explicitamente
+            if "duplicate" in err_str or "already exists" in err_str or "409" in err_str or res.status_code == 400:
+                res = supabase_admin.storage.from_("avatars").update(
                     path=storage_path,
                     file=contents,
                     file_options={"content-type": content_type}
                 )
-                uploaded = True
+                if hasattr(res, 'status_code') and res.status_code >= 400:
+                    raise Exception(f"Falha ao fazer update da imagem: {res.text if hasattr(res, 'text') else str(res)}")
             else:
-                raise upload_err
+                raise Exception(f"Falha no upload: {err_msg}")
+        elif isinstance(res, dict) and res.get("error"):
+            # storage3 antigo retorna dict
+            err_msg = str(res.get("error")).lower()
+            if "duplicate" in err_msg or "already exists" in err_msg:
+                res = supabase_admin.storage.from_("avatars").update(
+                    path=storage_path,
+                    file=contents,
+                    file_options={"content-type": content_type}
+                )
+                if isinstance(res, dict) and res.get("error"):
+                    raise Exception(f"Falha ao fazer update da imagem: {res.get('error')}")
+            else:
+                raise Exception(f"Falha no upload: {res.get('error')}")
         
         # Montar a URL pública com cache-buster para forçar atualização no client
         base_url = supabase_admin.storage.from_("avatars").get_public_url(storage_path)
