@@ -52,7 +52,7 @@ export default function HomeScreen() {
         setAvatarUrl(res.profile.avatar_url || null);
       }
 
-      if (rankRes.ok && rankRes.ranking) {
+      if (rankRes && rankRes.ranking) {
         setRanking(rankRes.ranking.slice(0, 5)); // Apenas top 5
       }
     } catch (e) {
@@ -126,7 +126,7 @@ export default function HomeScreen() {
           <View style={styles.rankingContainer}>
             <View style={styles.rankingHeader}>
               <Text style={styles.rankingTitle}>Top Contribuidores</Text>
-              <TouchableOpacity onPress={() => router.push("/ranking")}>
+              <TouchableOpacity onPress={() => router.push("/screens/ranking")}>
                 <Text style={styles.seeAllText}>Ver tudo</Text>
               </TouchableOpacity>
             </View>

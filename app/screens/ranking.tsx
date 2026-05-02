@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from "react-native";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import { trainingService } from "../../services/trainingService";
 
 export default function RankingScreen() {
+  const router = useRouter();
   const [ranking, setRanking] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -67,7 +69,9 @@ export default function RankingScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <MaterialIcons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
         <Text style={styles.title}>Global Leaderboard</Text>
         <View style={{ width: 40 }} />
       </View>
