@@ -1,4 +1,4 @@
-const BASE_URL = "https://li-vision-uyn3.onrender.com";
+const BASE_URL = "https://li-visionv2.onrender.com";
 
 async function getAuthToken(): Promise<string | null> {
   try {
