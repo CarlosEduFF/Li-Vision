@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ import {
 import { Worklets } from "react-native-worklets-core";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   gestureWS,
@@ -157,36 +158,68 @@ export default function CameraScreen() {
     }, []
   );
 
-  useEffect(() => {
-    const autoActivateModel = async () => {
-      const activeId = await AsyncStorage.getItem("activeModelId");
-      const modelName = await AsyncStorage.getItem("activeModelName");
-      let finalModelName = modelName;
-      if (modelName) setActiveModelName(modelName);
+  // Ref para manter referência estável do handleGesture/handleStatusChange
+  const handleGestureRef = useRef(handleGesture);
+  handleGestureRef.current = handleGesture;
+  const handleStatusChangeRef = useRef(handleStatusChange);
+  handleStatusChangeRef.current = handleStatusChange;
 
-      if (!activeId) {
-        try {
-          const res = await trainingService.listModels();
-          if (res.models && res.models.length > 0) {
-            const best = res.models.sort((a: any, b: any) => b.accuracy - a.accuracy)[0];
-            await trainingService.activateModel(best.id);
-            await AsyncStorage.setItem("activeModelId", best.id);
-            await AsyncStorage.setItem("activeModelName", best.name);
-            finalModelName = best.name;
-            setActiveModelName(best.name);
-            console.log(`[AutoActivate] Modelo "${best.name}" ativado automaticamente`);
+  // Conecta/reconecta o WS toda vez que a tela ganha foco
+  // Isso garante que ao voltar de 'select-model', o modelo mais recente é usado
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+
+      const activateAndConnect = async () => {
+        const activeId = await AsyncStorage.getItem("activeModelId");
+        const modelName = await AsyncStorage.getItem("activeModelName");
+        let finalModelName = modelName;
+        if (modelName) setActiveModelName(modelName);
+
+        if (!activeId) {
+          // Nenhum modelo selecionado — tenta auto-ativar o melhor
+          try {
+            const res = await trainingService.listModels();
+            if (res.models && res.models.length > 0) {
+              const best = res.models.sort((a: any, b: any) => (b.accuracy ?? 0) - (a.accuracy ?? 0))[0];
+              await trainingService.activateModel(best.id);
+              await AsyncStorage.setItem("activeModelId", best.id);
+              await AsyncStorage.setItem("activeModelName", best.name);
+              finalModelName = best.name;
+              if (!cancelled) setActiveModelName(best.name);
+              console.log(`[AutoActivate] Modelo "${best.name}" ativado automaticamente`);
+            }
+          } catch (e) {
+            console.log("[AutoActivate] Falha na ativação automática:", e);
           }
-        } catch (e) {
-          console.log("[AutoActivate] Falha na ativação automática:", e);
+        } else {
+          // Modelo já selecionado — garante que está ativado no servidor
+          // (filesystem efêmero do Render pode ter perdido o arquivo)
+          try {
+            await trainingService.activateModel(activeId);
+          } catch (e) {
+            console.log("[ReActivate] Falha ao re-ativar modelo:", e);
+          }
         }
-      }
 
-      gestureWS.connect(handleGesture, handleStatusChange, detectionMode, finalModelName);
-    };
+        if (!cancelled) {
+          gestureWS.connect(
+            (result) => handleGestureRef.current(result),
+            (status, msg) => handleStatusChangeRef.current(status, msg),
+            detectionMode,
+            finalModelName
+          );
+        }
+      };
 
-    autoActivateModel();
-    return () => gestureWS.disconnect();
-  }, []);
+      activateAndConnect();
+
+      return () => {
+        cancelled = true;
+        gestureWS.disconnect();
+      };
+    }, [detectionMode])
+  );
 
   const changeMode = (mode: DetectionMode) => {
     setShowModeModal(false);

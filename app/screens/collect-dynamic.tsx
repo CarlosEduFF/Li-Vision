@@ -243,7 +243,9 @@ export default function CollectDynamicScreen() {
               placeholderTextColor="#666"
               placeholder="EX: LIBRAS_V1"
               value={datasetName}
-              onChangeText={(v) => setDatasetName(v.toUpperCase())}
+              onChangeText={setDatasetName}
+              autoCapitalize="characters"
+              autoCorrect={false}
             />
           ) : (
             datasets.length === 0 && <Text style={{ color: "#888" }}>Nenhum dataset disponível</Text>
@@ -276,9 +278,11 @@ export default function CollectDynamicScreen() {
                 placeholderTextColor="#666"
                 placeholder="EX: OI"
                 value={label}
+                autoCapitalize="characters"
+                autoCorrect={false}
                 onChangeText={(v) => {
+                  setLabel(v);
                   const normalized = v.toUpperCase();
-                  setLabel(normalized);
                   if (normalized && gestureLabels.includes(normalized)) {
                     setLabelHint(
                       `O gesto "${normalized}" já existe neste dataset. ` +

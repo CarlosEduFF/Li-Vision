@@ -64,12 +64,16 @@ export default function ManageDatasetsScreen() {
           text: "Apagar", 
           style: "destructive", 
           onPress: async () => {
-            const res = await trainingService.deleteDataset(dataset.id);
-            if (res.ok) {
-              if (expandedId === dataset.id) setExpandedId(null);
-              loadDatasets();
-            } else {
-              Alert.alert("Erro", res.error);
+            try {
+              const res = await trainingService.deleteDataset(dataset.id);
+              if (res.ok) {
+                if (expandedId === dataset.id) setExpandedId(null);
+                loadDatasets();
+              } else {
+                Alert.alert("Erro", res.error || res.detail || "Falha ao apagar dataset.");
+              }
+            } catch (e) {
+              Alert.alert("Erro de Rede", "Não foi possível conectar ao servidor: " + String(e));
             }
           }
         }
@@ -87,13 +91,18 @@ export default function ManageDatasetsScreen() {
           text: "Apagar", 
           style: "destructive", 
           onPress: async () => {
-            const res = await trainingService.deleteLabel(datasetId, label);
-            if (res.ok) {
-              // Reload stats to update list without closing dataset
-              const statsRes = await trainingService.getDatasetStats(datasetId);
-              if (statsRes && statsRes.stats) setDatasetStats(statsRes.stats);
-            } else {
-              Alert.alert("Erro", res.error);
+            try {
+              const res = await trainingService.deleteLabel(datasetId, label);
+              if (res.ok) {
+                // Reload stats to update list without closing dataset
+                const statsRes = await trainingService.getDatasetStats(datasetId);
+                if (statsRes && statsRes.stats) setDatasetStats(statsRes.stats);
+                else setDatasetStats({});
+              } else {
+                Alert.alert("Erro", res.error || res.detail || "Falha ao apagar gesto.");
+              }
+            } catch (e) {
+              Alert.alert("Erro de Rede", "Não foi possível conectar ao servidor: " + String(e));
             }
           }
         }
@@ -118,22 +127,23 @@ export default function ManageDatasetsScreen() {
   const saveEdit = async () => {
     if (!editValue.trim()) return;
     
+    const normalizedValue = editValue.trim().toUpperCase();
     setModalVisible(false);
     if (editType === "dataset") {
-      const res = await trainingService.renameDataset(editContext.datasetId, editValue);
+      const res = await trainingService.renameDataset(editContext.datasetId, normalizedValue);
       if (res.ok) {
         loadDatasets();
       } else {
-         Alert.alert("Erro ao renomear", res.error);
+         Alert.alert("Erro ao renomear", res.error || res.detail || "Falha ao renomear dataset.");
       }
     } else if (editType === "label") {
-      const res = await trainingService.renameLabel(editContext.datasetId, editContext.oldLabel, editValue);
+      const res = await trainingService.renameLabel(editContext.datasetId, editContext.oldLabel, normalizedValue);
       if (res.ok) {
         // reload current stats
         const statsRes = await trainingService.getDatasetStats(editContext.datasetId);
         if (statsRes && statsRes.stats) setDatasetStats(statsRes.stats);
       } else {
-         Alert.alert("Erro ao renomear", res.error);
+         Alert.alert("Erro ao renomear", res.error || res.detail || "Falha ao renomear gesto.");
       }
     }
   };
@@ -230,7 +240,9 @@ export default function ManageDatasetsScreen() {
               <TextInput 
                 style={styles.modalInput}
                 value={editValue}
-                onChangeText={(v) => setEditValue(v.toUpperCase())}
+                onChangeText={setEditValue}
+                autoCapitalize="characters"
+                autoCorrect={false}
                 autoFocus={true}
               />
               <View style={styles.modalBtns}>

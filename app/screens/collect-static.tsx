@@ -194,7 +194,9 @@ export default function CollectStaticScreen() {
               placeholderTextColor="#666"
               placeholder="EX: ALFABETO_V1"
               value={datasetName}
-              onChangeText={(v) => setDatasetName(v.toUpperCase())}
+              onChangeText={setDatasetName}
+              autoCapitalize="characters"
+              autoCorrect={false}
             />
           ) : (
             datasets.length === 0 && <Text style={{ color: "#888" }}>Nenhum dataset disponível</Text>
@@ -227,10 +229,12 @@ export default function CollectStaticScreen() {
                 placeholderTextColor="#666"
                 placeholder="EX: A"
                 value={label}
+                autoCapitalize="characters"
+                autoCorrect={false}
                 onChangeText={(v) => {
-                  const normalized = v.toUpperCase();
-                  setLabel(normalized);
+                  setLabel(v);
                   // Verifica se o label já existe no dataset atual
+                  const normalized = v.toUpperCase();
                   if (normalized && gestureLabels.includes(normalized)) {
                     setLabelHint(
                       `O gesto "${normalized}" já existe neste dataset. ` +

@@ -14,7 +14,13 @@ const fetchWithAuth = async (endpoint: string, options: RequestInit = {}) => {
     ...options,
     headers
   });
-  return response.json();
+  const data = await response.json();
+  // Se o servidor retornou erro HTTP, mapeia o 'detail' do FastAPI para 'error'
+  if (!response.ok && data.detail && !data.error) {
+    data.error = typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail);
+    data.ok = false;
+  }
+  return data;
 };
 
 export const trainingService = {
@@ -94,11 +100,11 @@ export const trainingService = {
   },
 
   async deleteLabel(datasetId: string, label: string) {
-    return fetchWithAuth(`/collect/datasets/${datasetId}/labels/${label}`, { method: "DELETE" });
+    return fetchWithAuth(`/collect/datasets/${datasetId}/labels/${encodeURIComponent(label)}`, { method: "DELETE" });
   },
 
   async renameLabel(datasetId: string, oldLabel: string, newLabel: string) {
-    return fetchWithAuth(`/collect/datasets/${datasetId}/labels/${oldLabel}`, {
+    return fetchWithAuth(`/collect/datasets/${datasetId}/labels/${encodeURIComponent(oldLabel)}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ new_label: newLabel })
