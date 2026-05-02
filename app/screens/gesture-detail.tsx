@@ -14,6 +14,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Image,
 } from "react-native";
 
 function isLearningLevel(value: string): value is LearningLevel {
@@ -98,21 +99,33 @@ export default function GestureDetailScreen() {
                 <View style={styles.stepBox}>
                   <Text style={styles.stepTitle}>1. Inicial</Text>
                   <View style={styles.placeholder}>
-                    <MaterialIcons name="pan-tool" size={26} color="#9aa4b2" />
+                    {gesture.svgInitial ? (
+                      <Image source={{ uri: gesture.svgInitial }} style={styles.previewImage} />
+                    ) : (
+                      <MaterialIcons name="pan-tool" size={26} color="#9aa4b2" />
+                    )}
                   </View>
                 </View>
 
                 <View style={styles.stepBox}>
                   <Text style={styles.stepTitle}>2. Movimento</Text>
                   <View style={styles.placeholder}>
-                    <MaterialIcons name="gesture" size={26} color="#9aa4b2" />
+                    {gesture.svgMovement ? (
+                      <Image source={{ uri: gesture.svgMovement }} style={styles.previewImage} />
+                    ) : (
+                      <MaterialIcons name="gesture" size={26} color="#9aa4b2" />
+                    )}
                   </View>
                 </View>
 
                 <View style={styles.stepBox}>
                   <Text style={styles.stepTitle}>3. Final</Text>
                   <View style={styles.placeholder}>
-                    <MaterialIcons name="front-hand" size={26} color="#9aa4b2" />
+                    {gesture.svgFinal ? (
+                      <Image source={{ uri: gesture.svgFinal }} style={styles.previewImage} />
+                    ) : (
+                      <MaterialIcons name="front-hand" size={26} color="#9aa4b2" />
+                    )}
                   </View>
                 </View>
               </View>
@@ -202,4 +215,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   footerText: { color: "#8a92a3", fontSize: 12 },
+  previewImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
 });

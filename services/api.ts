@@ -177,3 +177,32 @@ export async function deleteLearningGesture(gestureId: string) {
   }
   return data as { ok: boolean; deleted: number };
 }
+
+export async function uploadLearningImage(uri: string) {
+  const form = new FormData();
+  form.append("file", {
+    uri,
+    name: "image.jpg",
+    type: "image/jpeg",
+  } as any);
+
+  const token = await getAuthToken();
+  const headers: Record<string, string> = {
+    // We let fetch handle the multipart/form-data boundary
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${BASE_URL}/learning/gestures/upload-image`, {
+    method: "POST",
+    headers,
+    body: form,
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data?.detail || "Erro ao fazer upload da imagem");
+  }
+  return data as { ok: boolean; url: string };
+}

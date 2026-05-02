@@ -19,7 +19,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Image,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { uploadLearningImage } from "@/services/api";
 
 type FormState = {
   id?: string;
@@ -27,6 +30,9 @@ type FormState = {
   level: LearningLevel;
   category: string;
   description: string;
+  svg_initial: string;
+  svg_movement: string;
+  svg_final: string;
 };
 
 const initialForm: FormState = {
@@ -34,6 +40,9 @@ const initialForm: FormState = {
   level: "iniciante",
   category: "Alfabeto",
   description: "",
+  svg_initial: "",
+  svg_movement: "",
+  svg_final: "",
 };
 
 export default function ManageLearningScreen() {
@@ -72,6 +81,9 @@ export default function ManageLearningScreen() {
       level: item.level as LearningLevel,
       category: item.category,
       description: item.description,
+      svg_initial: item.svg_initial || "",
+      svg_movement: item.svg_movement || "",
+      svg_final: item.svg_final || "",
     });
     setModalVisible(true);
   };
@@ -88,14 +100,33 @@ export default function ManageLearningScreen() {
 
     try {
       setSaving(true);
+      
+      let finalInitial = form.svg_initial;
+      let finalMovement = form.svg_movement;
+      let finalFinal = form.svg_final;
+      
+      // Se a string contiver 'file://' (ou não for uma URL http), enviamos o upload
+      if (finalInitial && !finalInitial.startsWith("http")) {
+        const up = await uploadLearningImage(finalInitial);
+        if (up.ok) finalInitial = up.url;
+      }
+      if (finalMovement && !finalMovement.startsWith("http")) {
+        const up = await uploadLearningImage(finalMovement);
+        if (up.ok) finalMovement = up.url;
+      }
+      if (finalFinal && !finalFinal.startsWith("http")) {
+        const up = await uploadLearningImage(finalFinal);
+        if (up.ok) finalFinal = up.url;
+      }
+      
       const payload = {
         name: form.name.trim(),
         level: form.level,
         category: form.category.trim(),
         description: form.description.trim(),
-        svg_initial: "",
-        svg_movement: "",
-        svg_final: "",
+        svg_initial: finalInitial,
+        svg_movement: finalMovement,
+        svg_final: finalFinal,
         is_active: true,
       };
 
@@ -113,6 +144,22 @@ export default function ManageLearningScreen() {
       Alert.alert("Erro", error?.message || "Falha ao salvar gesto.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const pickImageFor = async (field: "svg_initial" | "svg_movement" | "svg_final") => {
+    const permResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permResult.granted) {
+      Alert.alert("Permissão", "Precisamos de acesso à galeria.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      quality: 0.7,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setForm((prev) => ({ ...prev, [field]: result.assets[0].uri }));
     }
   };
 
@@ -227,6 +274,36 @@ export default function ManageLearningScreen() {
               <Text style={styles.levelPickerText}>{form.level.toUpperCase()}</Text>
               <MaterialIcons name="swap-horiz" size={20} color="#00e5ff" />
             </TouchableOpacity>
+
+            <Text style={styles.inputLabel}>Imagens (Inicial / Movimento / Final)</Text>
+            <View style={styles.imagesRow}>
+              <TouchableOpacity style={styles.imageBox} onPress={() => pickImageFor("svg_initial")}>
+                {form.svg_initial ? (
+                  <Image source={{ uri: form.svg_initial }} style={styles.previewImage} />
+                ) : (
+                  <MaterialIcons name="pan-tool" size={24} color="#697688" />
+                )}
+                <Text style={styles.imageBoxText}>Inicial</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.imageBox} onPress={() => pickImageFor("svg_movement")}>
+                {form.svg_movement ? (
+                  <Image source={{ uri: form.svg_movement }} style={styles.previewImage} />
+                ) : (
+                  <MaterialIcons name="gesture" size={24} color="#697688" />
+                )}
+                <Text style={styles.imageBoxText}>Movimento</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.imageBox} onPress={() => pickImageFor("svg_final")}>
+                {form.svg_final ? (
+                  <Image source={{ uri: form.svg_final }} style={styles.previewImage} />
+                ) : (
+                  <MaterialIcons name="front-hand" size={24} color="#697688" />
+                )}
+                <Text style={styles.imageBoxText}>Final</Text>
+              </TouchableOpacity>
+            </View>
 
             <View style={styles.modalActions}>
               <TouchableOpacity
@@ -423,5 +500,36 @@ const styles = StyleSheet.create({
     color: "#081018",
     fontWeight: "800",
     fontSize: 15,
+  },
+  imagesRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 4,
+  },
+  imageBox: {
+    flex: 1,
+    height: 80,
+    backgroundColor: "#1a2230",
+    borderWidth: 1,
+    borderColor: "#2a3548",
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  previewImage: {
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+    opacity: 0.8,
+  },
+  imageBoxText: {
+    color: "#eaf0fa",
+    fontSize: 11,
+    marginTop: 4,
+    fontWeight: "bold",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    paddingHorizontal: 4,
+    borderRadius: 4,
   },
 });
