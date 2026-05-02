@@ -21,6 +21,7 @@ export default function HomeScreen() {
   const [fullName, setFullName] = useState("");
   const [activeModelName, setActiveModelName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [ranking, setRanking] = useState<any[]>([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -39,17 +40,24 @@ export default function HomeScreen() {
       if (avatar) setAvatarUrl(avatar);
       if (model) setActiveModelName(model);
 
-      // Depois busca os dados frescos do servidor
-      const res = await trainingService.getProfile();
+      // Busca os dados frescos do servidor
+      const [res, rankRes] = await Promise.all([
+        trainingService.getProfile(),
+        trainingService.getRanking()
+      ]);
+
       if (res.ok && res.profile) {
         setFullName(res.profile.full_name || "");
         setAvatarUrl(res.profile.avatar_url || null);
       }
+
+      if (rankRes.ok && rankRes.ranking) {
+        setRanking(rankRes.ranking.slice(0, 5)); // Apenas top 5
+      }
     } catch (e) {
-      console.log("Erro ao carregar perfil:", e);
+      console.log("Erro ao carregar dados:", e);
     } finally {
       setLoading(false);
-      console.log(loading);
     }
   };
 
@@ -113,33 +121,28 @@ export default function HomeScreen() {
             </View>
           </TouchableOpacity>
 
-          {/* Card ML */}
-          <TouchableOpacity style={styles.cardLarge} activeOpacity={0.8}>
-            <Text style={styles.cardTitle}>
-              Reconhecimento por Machine Learning
-            </Text>
-            <Text style={styles.cardText}>
-              Modelos neurais para identificar gestos com alta precisão.
-            </Text>
-          </TouchableOpacity>
+          {/* Ranking Compacto */}
+          <View style={styles.rankingContainer}>
+            <View style={styles.rankingHeader}>
+              <Text style={styles.rankingTitle}>Top Contribuidores</Text>
+              <TouchableOpacity onPress={() => router.push("/ranking")}>
+                <Text style={styles.seeAllText}>Ver tudo</Text>
+              </TouchableOpacity>
+            </View>
 
-          {/* Card Gestos */}
-          <TouchableOpacity style={styles.card} activeOpacity={0.8}>
-            <MaterialIcons name="gesture" size={30} color="#f2e9ff" />
-            <Text style={styles.cardTitle}>Gestos Dinâmicos</Text>
-            <Text style={styles.cardTextSmall}>
-              Detecção de movimentos e trajetórias.
-            </Text>
-          </TouchableOpacity>
-
-          {/* Card Regras */}
-          <TouchableOpacity style={styles.card} activeOpacity={0.8}>
-            <MaterialIcons name="terminal" size={30} color="#00e5ff" />
-            <Text style={styles.cardTitle}>Baseado em Regras</Text>
-            <Text style={styles.cardTextSmall}>
-              Lógica baseada nos landmarks.
-            </Text>
-          </TouchableOpacity>
+            {ranking.map((item, index) => (
+              <View key={index} style={styles.rankRow}>
+                <View style={styles.rankLeft}>
+                  <Text style={styles.rankNum}>{index + 1}</Text>
+                  <View style={styles.avatarMini}>
+                    <MaterialIcons name="person" size={14} color="#00e5ff" />
+                  </View>
+                  <Text style={styles.rankName} numberOfLines={1}>{item.name}</Text>
+                </View>
+                <Text style={styles.rankPoints}>{item.samples} pts</Text>
+              </View>
+            ))}
+          </View>
         </View>
 
       </ScrollView>
@@ -344,5 +347,68 @@ const styles = StyleSheet.create({
   navTextActive: {
     color: "#00e5ff",
     fontSize: 10,
+  },
+  rankingContainer: {
+    backgroundColor: "#1c2026",
+    borderRadius: 20,
+    padding: 16,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: "rgba(0, 229, 255, 0.1)",
+  },
+  rankingHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  rankingTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  seeAllText: {
+    color: "#00e5ff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  rankRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+    backgroundColor: "rgba(255,255,255,0.03)",
+    padding: 10,
+    borderRadius: 12,
+  },
+  rankLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    flex: 1,
+  },
+  rankNum: {
+    color: "#555",
+    fontWeight: "bold",
+    width: 20,
+  },
+  avatarMini: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(0, 229, 255, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  rankName: {
+    color: "#dfe2eb",
+    fontSize: 14,
+    fontWeight: "600",
+    flex: 1,
+  },
+  rankPoints: {
+    color: "#00e5ff",
+    fontSize: 13,
+    fontWeight: "bold",
   },
 });

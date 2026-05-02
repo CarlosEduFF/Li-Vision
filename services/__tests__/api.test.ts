@@ -20,7 +20,7 @@ describe('API Service', () => {
     const result = await detectGesture(uri);
 
     expect(global.fetch).toHaveBeenCalledWith(
-      'https://li-vision-uyn3.onrender.com/detect/',
+      'https://li-visionv2.onrender.com/detect/',
       expect.objectContaining({
         method: 'POST',
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -51,7 +51,7 @@ describe('API Service', () => {
     const result = await getState();
 
     expect(global.fetch).toHaveBeenCalledWith(
-      'https://li-vision-uyn3.onrender.com/admin/state'
+      'https://li-visionv2.onrender.com/admin/state'
     );
     expect(result).toEqual(mockState);
   });
