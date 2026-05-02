@@ -35,6 +35,9 @@ export default function GestureDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [progressMap, setProgressMap] = useState<Record<string, GestureProgress>>({});
 
+  useEffect(() => {
+    let mounted = true;
+
     async function loadData() {
       try {
         const [items, pMap] = await Promise.all([
@@ -94,7 +97,11 @@ export default function GestureDetailScreen() {
         ) : gestures.length === 0 ? (
           <View style={styles.emptyBox}>
             <MaterialIcons name="search-off" size={24} color="#8a92a3" />
-            <Text style={styles.emptyText}>Nenhum gesto disponível neste nível.</Text>
+            <Text style={styles.emptyText}>
+              {params.category 
+                ? `Nenhum gesto encontrado em "${params.category}"` 
+                : "Nenhum gesto cadastrado neste nível."}
+            </Text>
           </View>
         ) : (
           gestures.map((gesture: Gesture) => (
