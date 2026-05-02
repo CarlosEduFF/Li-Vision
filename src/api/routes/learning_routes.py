@@ -150,3 +150,5 @@ async def upload_learning_image(file: UploadFile = File(...), admin: dict = Depe
         return {"ok": True, "url": public_url}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# Alteracao de feedback e fix cache bust adicionado para render
