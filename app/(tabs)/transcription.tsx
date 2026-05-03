@@ -33,35 +33,61 @@ const VLIBRAS_HTML = `
       text-align: center;
       padding-top: 40%;
     }
-    #text-container {
+    /* Texto para tradução - fica oculto visualmente mas acessível ao DOM */
+    #translate-source {
       position: absolute;
-      bottom: 10px;
-      left: 10px;
-      right: 10px;
-      background: rgba(0,0,0,0.6);
-      border-radius: 10px;
-      padding: 8px 12px;
-      display: none;
+      top: -9999px;
+      left: -9999px;
+      font-size: 16px;
     }
-    #text-container p {
-      color: #dfe2eb;
-      font-family: -apple-system, sans-serif;
-      font-size: 13px;
-      text-align: center;
+    /* Esconde o botão flutuante do VLibras - não precisamos dele */
+    [vw-access-button] {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      width: 1px !important;
+      height: 1px !important;
+      position: fixed !important;
+      top: -100px !important;
     }
-    /* Posicionar o player do VLibras para ocupar toda a tela */
-    [vw] .vw-plugin-wrapper { display: none !important; }
-    [vw] .vw-access-button { display: none !important; }
-    .vpw-header { display: none !important; }
-    .vpw-settings-btn { display: none !important; }
+    /* Força o player VLibras a preencher toda a tela */
+    [vw] {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+    }
+    [vw-plugin-wrapper],
+    .vw-plugin-wrapper,
+    .vpw-wrapper,
+    .vpw-content,
+    .vpw-player-wrapper {
+      width: 100% !important;
+      height: 100% !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+    /* Esconde o cabeçalho e botão fechar do player */
+    .vpw-header,
+    .vpw-settings-btn,
+    .vpw-close-btn {
+      display: none !important;
+    }
+    /* Canvas do avatar ocupa tudo */
+    canvas, .vpw-player canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
   </style>
 </head>
 <body>
   <p id="status">Carregando avatar VLibras...</p>
-
-  <div id="text-container">
-    <p id="translated-text"></p>
-  </div>
+  <p id="translate-source"></p>
 
   <div vw class="enabled">
     <div vw-access-button class="active"></div>
@@ -73,36 +99,81 @@ const VLIBRAS_HTML = `
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
   <script>
     var widget = new window.VLibras.Widget('https://vlibras.gov.br/app');
+    var playerReady = false;
 
-    // Espera o widget carregar
+    // Auto-abre o player assim que estiver carregado
     var checkReady = setInterval(function() {
-      if (window.VLibras && window.VLibras.Player) {
+      var accessBtn = document.querySelector('[vw-access-button]');
+      if (accessBtn) {
         clearInterval(checkReady);
         document.getElementById('status').style.display = 'none';
-        // Notifica o React Native que está pronto
-        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ready' }));
+
+        // Clica para abrir o player automaticamente
+        setTimeout(function() {
+          accessBtn.click();
+          playerReady = true;
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ready' }));
+        }, 1500);
       }
     }, 500);
 
     // Timeout de segurança
     setTimeout(function() {
-      clearInterval(checkReady);
-      document.getElementById('status').style.display = 'none';
-      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ready' }));
-    }, 8000);
+      if (!playerReady) {
+        clearInterval(checkReady);
+        document.getElementById('status').style.display = 'none';
+        // Tenta abrir mesmo assim
+        var btn = document.querySelector('[vw-access-button]');
+        if (btn) btn.click();
+        playerReady = true;
+        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ready' }));
+      }
+    }, 12000);
 
-    // Função chamada pelo React Native
+    // Função chamada pelo React Native para traduzir
     function translateText(text) {
       try {
-        document.getElementById('text-container').style.display = 'block';
-        document.getElementById('translated-text').innerText = text;
+        // Coloca o texto num elemento da página
+        var el = document.getElementById('translate-source');
+        el.innerText = text;
+        el.style.position = 'absolute';
+        el.style.top = '0';
+        el.style.left = '0';
 
-        // Tenta traduzir via player
-        if (window.VLibras && window.VLibras.Player) {
-          window.VLibras.Player.translate(text);
-        }
+        // Seleciona o texto programaticamente
+        var range = document.createRange();
+        range.selectNodeContents(el);
+        var selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
 
-        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'translating', text: text }));
+        // Dispara evento de mouseup para que o VLibras detecte a seleção
+        var mouseupEvent = new MouseEvent('mouseup', {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        });
+        el.dispatchEvent(mouseupEvent);
+
+        // Busca o botão de traduzir que o VLibras cria ao selecionar texto
+        setTimeout(function() {
+          var translateBtn = document.querySelector('.vw-text-widget-button') ||
+                             document.querySelector('[class*="translate"]') ||
+                             document.querySelector('.vw-btn-translate');
+          if (translateBtn) {
+            translateBtn.click();
+          }
+
+          // Esconde o texto novamente após seleção
+          setTimeout(function() {
+            el.style.position = 'absolute';
+            el.style.top = '-9999px';
+            el.style.left = '-9999px';
+            window.getSelection().removeAllRanges();
+          }, 500);
+
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'translating', text: text }));
+        }, 800);
       } catch(e) {
         window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'error', message: e.message }));
       }
