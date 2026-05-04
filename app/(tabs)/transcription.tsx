@@ -21,39 +21,60 @@ const VLIBRAS_HTML = `
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <style>
     body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #10141a; overflow: hidden; }
-    #status { color: #8a92a3; font-family: sans-serif; text-align: center; margin-top: 40%; }
-    
-    /* Quando o player estiver ativo, força a ocupar a tela inteira */
-    .fullscreen-player [vw-plugin-wrapper],
-    .fullscreen-player .vpw-box,
-    .fullscreen-player .vpw-player {
-      width: 100vw !important;
-      height: 100vh !important;
-      max-width: none !important;
-      max-height: none !important;
-      position: fixed !important;
+    #status { color: #8a92a3; font-family: sans-serif; text-align: center; margin-top: 40%; position: absolute; width: 100%; z-index: 9999; }
+    #translate-source { position: absolute; left: -9999px; top: -9999px; }
+
+    /* Contêiner principal para o VLibras */
+    #vlibras-container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Força os elementos principais a preencherem o contêiner */
+    #vlibras-container [vw] {
+      position: absolute !important;
+      width: 100% !important;
+      height: 100% !important;
       top: 0 !important;
       left: 0 !important;
       right: 0 !important;
       bottom: 0 !important;
+      margin: 0 !important;
+    }
+
+    /* Ocultar elementos desnecessários da interface do player */
+    .vpw-header, .vpw-close-btn, .vpw-settings-btn { display: none !important; }
+
+    /* Força o player (avatar) a usar 100% do espaço, mas só quando ele estiver dentro do wrapper aberto */
+    .player-opened [vw-plugin-wrapper],
+    .player-opened .vpw-box,
+    .player-opened .vpw-player,
+    .player-opened canvas {
+      width: 100% !important;
+      height: 100% !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
       border-radius: 0 !important;
     }
-    
-    .fullscreen-player .vpw-header { display: none !important; }
-    .fullscreen-player [vw-access-button] { display: none !important; }
-    
-    /* Esconder elementos de texto do fallback */
-    #translate-source { position: absolute; left: -9999px; top: -9999px; }
+
+    .player-opened [vw-access-button] { display: none !important; }
   </style>
 </head>
 <body>
   <p id="status">Carregando avatar VLibras...</p>
   <div id="translate-source"></div>
 
-  <div vw class="enabled">
-    <div vw-access-button class="active"></div>
-    <div vw-plugin-wrapper>
-      <div class="vw-plugin-top-wrapper"></div>
+  <div id="vlibras-container">
+    <div vw class="enabled">
+      <div vw-access-button class="active"></div>
+      <div vw-plugin-wrapper>
+        <div class="vw-plugin-top-wrapper"></div>
+      </div>
     </div>
   </div>
 
@@ -67,14 +88,14 @@ const VLIBRAS_HTML = `
         clearInterval(checkReady);
         document.getElementById('status').style.display = 'none';
         
-        // Simula o clique no botão para abrir o player
+        // Simula o clique para abrir o player
         accessBtn.click();
         
-        // Aplica o CSS de tela cheia após abrir
+        // Ativa o CSS de expansão e notifica o app
         setTimeout(function() {
-          document.body.classList.add('fullscreen-player');
+          document.body.classList.add('player-opened');
           window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ready' }));
-        }, 1000);
+        }, 1200);
       }
     }, 500);
 
@@ -84,7 +105,7 @@ const VLIBRAS_HTML = `
           window.plugin.player.translate(text);
           window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'translating', text: text }));
         } else {
-          // Fallback de clique
+          // Fallback
           var el = document.getElementById('translate-source');
           el.innerText = text;
           
@@ -97,7 +118,7 @@ const VLIBRAS_HTML = `
           el.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
           
           setTimeout(function() {
-            var btn = document.querySelector('.vw-text-widget-button');
+            var btn = document.querySelector('.vw-text-widget-button') || document.querySelector('[class*="translate"]');
             if (btn) btn.click();
             window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'translating', text: text }));
           }, 500);
