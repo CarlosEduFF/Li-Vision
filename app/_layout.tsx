@@ -58,7 +58,6 @@ export default function RootLayout() {
         <Stack.Screen name="screens/edit-profile" options={{ headerShown: false }} />
         <Stack.Screen name="screens/select-model" options={{ headerShown: false }} />
         <Stack.Screen name="screens/gesture-detail" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/models" options={{ headerShown: false }} />
         <Stack.Screen name="screens/manage-learning" options={{ headerShown: false }} />
         <Stack.Screen name="screens/ranking" options={{ headerShown: false }} />
       </Stack>
