@@ -134,11 +134,18 @@ export default function ProfileScreen() {
                 <Text style={styles.statLabel}>Frames Doados</Text>
               </View>
               <View style={styles.divider} />
-              <View style={styles.statBox}>
+              <TouchableOpacity 
+                style={styles.statBox} 
+                onPress={() => router.push("/screens/levels-info")}
+                activeOpacity={0.7}
+              >
                 <FontAwesome5 name={levelInfo.icon} size={24} color={levelInfo.color} style={{marginBottom: 5}} />
-                <Text style={[styles.statValue, { color: levelInfo.color, fontSize: 18 }]}>{levelInfo.title}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                  <Text style={[styles.statValue, { color: levelInfo.color, fontSize: 18 }]}>{levelInfo.title}</Text>
+                  <MaterialIcons name="info-outline" size={12} color={levelInfo.color} style={{ opacity: 0.6 }} />
+                </View>
                 <Text style={styles.statLabel}>Seu Nível Atual</Text>
-              </View>
+              </TouchableOpacity>
             </View>
             
             <TouchableOpacity style={styles.rankingBtn} onPress={() => router.push("/screens/ranking")}>

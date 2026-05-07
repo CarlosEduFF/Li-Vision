@@ -35,7 +35,7 @@ import speechService, { SpeechPreferences } from "@/services/speechService";
 import { useSpellingDetector } from "@/hooks/useSpellingDetector";
 import SpellingPanel from "@/components/voice/SpellingPanel";
 import VoiceSettingsModal from "@/components/voice/VoiceSettingsModal";
-import { camStyles as styles } from "./_cam.styles";
+import { camStyles as styles } from "@/styles/cam.styles";
 
 const DETECTION_MODES: { key: DetectionMode; label: string; desc: string; icon: string }[] = [
   { key: "hybrid",     label: "Híbrido",        desc: "Combina regras + ML estático + ML dinâmico",   icon: "merge-type" },
