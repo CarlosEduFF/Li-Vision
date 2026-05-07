@@ -69,6 +69,23 @@ const VLIBRAS_HTML = `
 
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
   <script>
+    // Suprime popups de erro do Unity/WebGL que são irrelevantes
+    (function() {
+      var oldAlert = window.alert;
+      window.alert = function(msg) {
+        if (msg.indexOf('Unity') !== -1 || msg.indexOf('Script error') !== -1) {
+          console.log('Suprimindo erro Unity:', msg);
+          return;
+        }
+        oldAlert(msg);
+      };
+      window.onerror = function(msg) {
+        if (msg.indexOf('Unity') !== -1 || msg.indexOf('Script error') !== -1) {
+          return true;
+        }
+      };
+    })();
+
     var widget = new window.VLibras.Widget('https://vlibras.gov.br/app');
 
     // Abre o player manipulando as classes internas do VLibras
@@ -108,7 +125,7 @@ const VLIBRAS_HTML = `
               clearInterval(waitCanvas);
               setTimeout(function() {
                 window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ready' }));
-              }, 2000);
+              }, 3000);
             }
           }, 500);
         }
