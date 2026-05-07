@@ -1,7 +1,8 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import AboutModal from "../../components/AboutModal";
+import { router } from "expo-router";
+import AboutModal from "@/components/AboutModal";
 
 export default function AboutScreen() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -17,6 +18,9 @@ export default function AboutScreen() {
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
         {/* HEADER */}
         <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <MaterialIcons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
           <MaterialIcons name="tune" size={28} color="#00e5ff" />
           <Text style={styles.title}>Sobre</Text>
         </View>
@@ -152,8 +156,12 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 12,
     marginBottom: 8,
+  },
+  backBtn: {
+    padding: 4,
+    marginRight: 4,
   },
   title: {
     fontSize: 32,

@@ -141,9 +141,17 @@ export default function ProfileScreen() {
               </View>
             </View>
             
-            <TouchableOpacity style={styles.rankingBtn} onPress={() => router.push("/(tabs)/ranking")}>
+            <TouchableOpacity style={styles.rankingBtn} onPress={() => router.push("/screens/ranking")}>
                <Text style={styles.rankingBtnText}>Ver Ranking Geral</Text>
                <MaterialIcons name="chevron-right" size={20} color="#00e5ff" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.aboutBtn} onPress={() => router.push("/screens/about")}>
+               <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                 <MaterialIcons name="info-outline" size={20} color="#888" />
+                 <Text style={styles.aboutBtnText}>Sobre o Aplicativo</Text>
+               </View>
+               <MaterialIcons name="chevron-right" size={20} color="#555" />
             </TouchableOpacity>
           </View>
 
@@ -179,8 +187,10 @@ const styles = StyleSheet.create({
   statValue: { color: "#00e5ff", fontSize: 32, fontWeight: "800", marginBottom: 5 },
   statLabel: { color: "#888", fontSize: 12, fontWeight: "600", textTransform: "uppercase" },
   divider: { width: 1, height: 50, backgroundColor: "rgba(255,255,255,0.05)" },
-  rankingBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0, 229, 255, 0.1)", padding: 15, borderRadius: 12, gap: 5 },
+  rankingBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0, 229, 255, 0.1)", padding: 15, borderRadius: 12, gap: 5, marginBottom: 12 },
   rankingBtnText: { color: "#00e5ff", fontWeight: "bold" },
+  aboutBtn: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: "rgba(255, 255, 255, 0.03)", padding: 15, borderRadius: 12, borderWidth: 1, borderColor: "rgba(255, 255, 255, 0.05)" },
+  aboutBtnText: { color: "#888", fontWeight: "600", fontSize: 14 },
   logoutBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 16, borderRadius: 15, backgroundColor: "rgba(255, 68, 68, 0.1)", gap: 10, alignSelf:"center", width:"100%", marginBottom: 30, borderWidth: 1, borderColor: "rgba(255, 68, 68, 0.3)" },
   logoutText: { color: "#ff4444", fontWeight: "bold", fontSize: 16 }
 });
