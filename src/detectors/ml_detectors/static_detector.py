@@ -70,15 +70,22 @@ class MLGestureDetector:
             Array numpy de shape (1, N) pronto para predição
         """
 
-        # Usa o pulso (landmark 0) como referência para normalizar coordenadas
-        wrist = landmarks[0]
+        x_calc = []
+        y_calc = []
+        for landmark in landmarks:
+            x_calc.append(landmark.x)
+            y_calc.append(landmark.y)
+
+        x_min, x_max = min(x_calc), max(x_calc)
+        y_min, y_max = min(y_calc), max(y_calc)
+        width, height = x_max - x_min, y_max - y_min
 
         features = []
-
-        for lm in landmarks:
-            # Calcula posição relativa ao pulso
-            features.append(lm.x - wrist.x)
-            features.append(lm.y - wrist.y)
+        for landmark in landmarks:
+            # relative x and y
+            rel_x = (landmark.x - x_min) / width if width > 0 else 0
+            rel_y = (landmark.y - y_min) / height if height > 0 else 0
+            features.extend([rel_x, rel_y])
 
         # Retorna array 2D (1 amostra, N features)
         return np.array(features).reshape(1, -1)
