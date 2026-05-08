@@ -256,7 +256,7 @@ class TrainingService:
             criterion = nn.CrossEntropyLoss()
             optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-4)
             scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-                optimizer, mode='min', factor=0.5, patience=15, verbose=False
+                optimizer, mode='min', factor=0.5, patience=15
             )
 
             # Training loop
@@ -408,7 +408,7 @@ class TrainingService:
 
         return {"models": list(grouped.values())}
 
-    def activate_model(self, model_name: str) -> dict:
+    def activate_model(self, model_id_or_name: str) -> dict:
         import yaml
         config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "config.yaml")
         with open(config_path, "r") as f:
@@ -420,9 +420,13 @@ class TrainingService:
         os.makedirs(static_dir, exist_ok=True)
         os.makedirs(dynamic_dir, exist_ok=True)
 
-        mod_res = supabase.table("models").select("*").eq("name", model_name).execute()
+        # Tenta buscar por ID ou por Nome (case insensitive)
+        mod_res = supabase.table("models").select("*").or_(f"id.eq.{model_id_or_name},name.eq.{model_id_or_name.upper()}").execute()
         if len(mod_res.data) == 0:
+            logger.error("[TrainingService] Modelo '%s' nao encontrado no banco de dados", model_id_or_name)
             return {"error": "Model not found"}
+
+        actual_model_name = mod_res.data[0]["name"].upper()
 
         try:
             for model in mod_res.data:
@@ -431,14 +435,14 @@ class TrainingService:
                     continue
 
                 if model["type"] == "static":
-                    target_path = os.path.join(static_dir, f"{model_name}.joblib")
+                    target_path = os.path.join(static_dir, f"{actual_model_name}.joblib")
                 else:
                     # Dinamico: extensao depende do formato (.pt para LSTM, .joblib para MLP antigo)
                     ext = ".pt" if storage_path.endswith(".pt") else ".joblib"
-                    target_path = os.path.join(dynamic_dir, f"{model_name}{ext}")
+                    target_path = os.path.join(dynamic_dir, f"{actual_model_name}{ext}")
                     # Remove formato antigo se existir
                     old_ext = ".joblib" if ext == ".pt" else ".pt"
-                    old_path = os.path.join(dynamic_dir, f"{model_name}{old_ext}")
+                    old_path = os.path.join(dynamic_dir, f"{actual_model_name}{old_ext}")
                     if os.path.exists(old_path):
                         os.remove(old_path)
 
@@ -446,9 +450,9 @@ class TrainingService:
                 with open(target_path, 'wb') as f:
                     f.write(data)
 
-                logger.info("[TrainingService] Modelo '%s' (%s) salvo em: %s", model_name, model["type"], target_path)
+                logger.info("[TrainingService] Modelo '%s' (%s) salvo em: %s", actual_model_name, model["type"], target_path)
 
-            return {"ok": True, "active_model": model_name, "type": "hybrid"}
+            return {"ok": True, "active_model": actual_model_name, "type": "hybrid"}
         except Exception as e:
-            logger.error("[TrainingService] Falha ao ativar modelo '%s': %s", model_name, e)
+            logger.error("[TrainingService] Falha ao ativar modelo '%s': %s", model_id_or_name, e)
             return {"ok": False, "error": str(e)}

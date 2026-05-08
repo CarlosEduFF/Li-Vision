@@ -102,13 +102,19 @@ class UserSession:
         threshold = config["ml"]["confidence_threshold"]
         all_models = ModelCache.get_static_models()
 
-        # Filtra pelo modelo ativo
-        if self.active_model_name and self.active_model_name in all_models:
-            filtered = {self.active_model_name: all_models[self.active_model_name]}
-        else:
-            if self.active_model_name:
+        # Filtra pelo modelo ativo (tenta match exato ou case-insensitive)
+        if self.active_model_name:
+            target = self.active_model_name.upper()
+            # Encontra a chave real no cache que bate com o target
+            matching_key = next((k for k in all_models.keys() if k.upper() == target), None)
+            
+            if matching_key:
+                filtered = {matching_key: all_models[matching_key]}
+            else:
                 logger.warning("[UserSession] Modelo estatico '%s' nao encontrado no cache. Carregando todos (%d).",
                                self.active_model_name, len(all_models))
+                filtered = all_models
+        else:
             filtered = all_models
 
         detectors = []
@@ -127,13 +133,19 @@ class UserSession:
         window_size = config["dynamic_ml"]["window_size"]
         all_models = ModelCache.get_dynamic_models()
 
-        # Filtra pelo modelo ativo
-        if self.active_model_name and self.active_model_name in all_models:
-            filtered = {self.active_model_name: all_models[self.active_model_name]}
-        else:
-            if self.active_model_name:
+        # Filtra pelo modelo ativo (tenta match exato ou case-insensitive)
+        if self.active_model_name:
+            target = self.active_model_name.upper()
+            # Encontra a chave real no cache que bate com o target
+            matching_key = next((k for k in all_models.keys() if k.upper() == target), None)
+            
+            if matching_key:
+                filtered = {matching_key: all_models[matching_key]}
+            else:
                 logger.warning("[UserSession] Modelo dinamico '%s' nao encontrado no cache. Carregando todos (%d).",
                                self.active_model_name, len(all_models))
+                filtered = all_models
+        else:
             filtered = all_models
 
         detectors = []
