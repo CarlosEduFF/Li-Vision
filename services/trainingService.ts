@@ -30,7 +30,12 @@ export const trainingService = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
     });
-    return response.json();
+    const data = await response.json();
+    if (data.ok && data.token && data.refresh_token) {
+      await AsyncStorage.setItem("userToken", data.token);
+      await AsyncStorage.setItem("refreshToken", data.refresh_token);
+    }
+    return data;
   },
 
   async register(full_name: string, email: string, password: string) {
@@ -39,7 +44,12 @@ export const trainingService = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ full_name, email, password })
     });
-    return response.json();
+    const data = await response.json();
+    if (data.ok && data.token && data.refresh_token) {
+      await AsyncStorage.setItem("userToken", data.token);
+      await AsyncStorage.setItem("refreshToken", data.refresh_token);
+    }
+    return data;
   },
 
   async getDatasets() {
