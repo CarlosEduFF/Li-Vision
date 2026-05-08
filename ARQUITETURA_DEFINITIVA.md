@@ -2,7 +2,7 @@
 
 Este documento foi elaborado para fins acadêmicos e técnicos, de modo a explicar detalhadamente a transição de um aplicativo transmissor de imagem estática, para um motor de rede neural rápida baseada em Edge-Computing.
 
-## 1. O Paradigma de Transmissão (Problema Resolveido)
+## 1. O Paradigma de Transmissão (Problema Resolvido)
 
 Na versão antiga, o aplicativo era um **Streaming Burro**. A câmera lia o mundo, transformava as cores em uma `String Base64` gigantesca e despachava tudo isso pela internet (via WebSocket) para bater numa API que rodava as Redes Neurais localmente em um servidor gratuito.
 
