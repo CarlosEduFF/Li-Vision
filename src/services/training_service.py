@@ -420,15 +420,18 @@ class TrainingService:
         os.makedirs(static_dir, exist_ok=True)
         os.makedirs(dynamic_dir, exist_ok=True)
 
-        # Tenta buscar por ID ou por Nome (case insensitive)
-        mod_res = supabase.table("models").select("*").or_(f"id.eq.{model_id_or_name},name.eq.{model_id_or_name.upper()}").execute()
-        if len(mod_res.data) == 0:
-            logger.error("[TrainingService] Modelo '%s' nao encontrado no banco de dados", model_id_or_name)
-            return {"error": "Model not found"}
-
-        actual_model_name = mod_res.data[0]["name"].upper()
-
         try:
+            # Tenta buscar por Nome (seguro contra caracteres especiais)
+            mod_res = supabase.table("models").select("*").eq("name", model_id_or_name.upper()).execute()
+            if not mod_res.data:
+                # Tenta buscar por ID
+                mod_res = supabase.table("models").select("*").eq("id", model_id_or_name).execute()
+
+            if not mod_res.data:
+                logger.error("[TrainingService] Modelo '%s' nao encontrado no banco de dados", model_id_or_name)
+                return {"error": "Model not found"}
+
+            actual_model_name = mod_res.data[0]["name"].upper()
             for model in mod_res.data:
                 storage_path = model.get("storage_path")
                 if not storage_path:
