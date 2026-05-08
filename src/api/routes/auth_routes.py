@@ -19,6 +19,9 @@ class RegisterPayload(AuthPayload):
 class ProfileUpdatePayload(BaseModel):
     full_name: str
 
+class RefreshPayload(BaseModel):
+    refresh_token: str
+
 
 # ── Auth Helpers ──────────────────────────────────────
 
@@ -66,7 +69,12 @@ async def register(payload: RegisterPayload):
                 "role": "member"
             }).execute()
             
-        return {"ok": True, "token": res.session.access_token if res.session else None, "user": res.user.id if res.user else None}
+        return {
+            "ok": True, 
+            "token": res.session.access_token if res.session else None, 
+            "refresh_token": res.session.refresh_token if res.session else None,
+            "user": res.user.id if res.user else None
+        }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -94,6 +102,7 @@ async def login(payload: AuthPayload):
         return {
            "ok": True, 
            "token": res.session.access_token, 
+           "refresh_token": res.session.refresh_token,
            "user_id": user_id,
            "email": res.user.email,
            "role": role,
@@ -102,6 +111,20 @@ async def login(payload: AuthPayload):
         }
     except Exception as e:
         raise HTTPException(status_code=401, detail="Credenciais inválidas ou erro no Supabase: " + str(e))
+
+@router.post("/refresh")
+async def refresh_token(payload: RefreshPayload):
+    """Renova o access_token usando um refresh_token do Supabase."""
+    try:
+        res = supabase.auth.refresh_session(payload.refresh_token)
+        return {
+            "ok": True,
+            "token": res.session.access_token,
+            "refresh_token": res.session.refresh_token,
+            "user_id": res.user.id
+        }
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Falha ao renovar token: " + str(e))
 
 
 # ── Profile Routes ──────────────────────────────────
