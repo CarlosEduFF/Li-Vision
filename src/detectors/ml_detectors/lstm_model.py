@@ -107,32 +107,67 @@ class LSTMGestureDetector:
 
     def landmarks_to_vector(self, hands):
         """
-        Converte landmarks para vetor de 130 features (identico ao formato de coleta).
+        Converte landmarks para o mesmo tamanho por frame usado no treinamento.
         """
-        vec = []
-
         if len(hands) > 0 and hasattr(hands[0], "__len__") and not hasattr(hands[0], "x"):
             hands_list = hands
         else:
             hands_list = [hands]
 
-        for i in range(2):
+        if self.input_size in (42, 63, 65):
+            max_hands = 1
+            hand_size = self.input_size
+        elif self.input_size % 2 == 0 and self.input_size // 2 in (42, 63, 65):
+            max_hands = 2
+            hand_size = self.input_size // 2
+        else:
+            max_hands = 2
+            hand_size = 65
+
+        vec = []
+        for i in range(max_hands):
             if i < len(hands_list):
                 hand = hands_list[i]
-                base_x = hand[0].x
-                base_y = hand[0].y
-
-                vec.append(base_x)
-                vec.append(base_y)
-
-                for lm in hand:
-                    vec.append(lm.x - base_x)
-                    vec.append(lm.y - base_y)
-                    vec.append(getattr(lm, "z", 0.0))
+                vec.extend(self._hand_to_vector(hand, hand_size))
             else:
-                vec.extend([0.0] * 65)
+                vec.extend([0.0] * hand_size)
 
-        return vec
+        if len(vec) < self.input_size:
+            vec.extend([0.0] * (self.input_size - len(vec)))
+
+        return vec[:self.input_size]
+
+    def _hand_to_vector(self, hand, hand_size):
+        if hand_size == 42:
+            xs = [lm.x for lm in hand]
+            ys = [lm.y for lm in hand]
+            x_min, x_max = min(xs), max(xs)
+            y_min, y_max = min(ys), max(ys)
+            width = x_max - x_min
+            height = y_max - y_min
+
+            vec = []
+            for lm in hand:
+                rel_x = (lm.x - x_min) / width if width > 0 else 0.0
+                rel_y = (lm.y - y_min) / height if height > 0 else 0.0
+                vec.extend([rel_x, rel_y])
+            return vec
+
+        base_x = hand[0].x
+        base_y = hand[0].y
+        vec = []
+
+        if hand_size == 65:
+            vec.extend([base_x, base_y])
+
+        for lm in hand:
+            vec.append(lm.x - base_x)
+            vec.append(lm.y - base_y)
+            vec.append(getattr(lm, "z", 0.0))
+
+        if len(vec) < hand_size:
+            vec.extend([0.0] * (hand_size - len(vec)))
+        return vec[:hand_size]
 
     def detect(self, hands):
         """
@@ -151,7 +186,10 @@ class LSTMGestureDetector:
 
         # Monta tensor 3D: (1, seq_len, features)
         sequence = np.array(list(self.buffer), dtype=np.float32)
-        tensor = torch.from_numpy(sequence).unsqueeze(0)  # (1, 15, 130)
+        if sequence.shape[1] != self.input_size:
+            return None, 0.0
+
+        tensor = torch.from_numpy(sequence).unsqueeze(0)  # (1, window, features)
 
         with torch.no_grad():
             logits = self.model(tensor)

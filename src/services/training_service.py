@@ -202,25 +202,30 @@ class TrainingService:
             features_list = df['features'].to_list()
             total_features = len(features_list[0])
 
-            # Detecta features_per_frame e window_size
-            # O padrao e 130 features/frame, window=15 => 1950 total
-            features_per_frame = 130
-            window_size = total_features // features_per_frame
+            # Detecta features_per_frame e window_size.
+            # Formatos historicos:
+            # 130/65 = atual, com pulso absoluto + xyz relativo;
+            # 126/63 = xyz relativo antigo; 84/42 = xy antigo.
+            supported_frame_sizes = (130, 126, 65, 63, 84, 42)
+            features_per_frame = None
+            window_size = None
 
-            if window_size * features_per_frame != total_features:
-                # Fallback: tenta 42 features/frame (formato antigo)
-                features_per_frame_alt = 42
-                window_size_alt = total_features // features_per_frame_alt
-                if window_size_alt * features_per_frame_alt == total_features:
-                    features_per_frame = features_per_frame_alt
-                    window_size = window_size_alt
-                    logger.warning("[Dynamic] Dataset no formato antigo (%d features/frame). "
-                                   "Recomendado regravar com formato novo.", features_per_frame)
-                else:
-                    raise ValueError(
-                        f"Formato de features invalido: {total_features} total. "
-                        f"Esperado multiplo de 130 (novo) ou 42 (antigo)."
-                    )
+            for frame_size in supported_frame_sizes:
+                candidate_window = total_features // frame_size
+                if candidate_window > 0 and candidate_window * frame_size == total_features:
+                    features_per_frame = frame_size
+                    window_size = candidate_window
+                    break
+
+            if features_per_frame is None:
+                raise ValueError(
+                    f"Formato de features invalido: {total_features} total. "
+                    f"Esperado multiplo de um destes tamanhos por frame: {supported_frame_sizes}."
+                )
+
+            if features_per_frame != 130:
+                logger.warning("[Dynamic] Dataset no formato legado (%d features/frame). "
+                               "Recomendado regravar com formato novo.", features_per_frame)
 
             logger.info("[Dynamic] Dados: %d amostras, %d classes, %d frames x %d features",
                         len(df), len(labels_unique), window_size, features_per_frame)
