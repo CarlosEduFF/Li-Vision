@@ -85,7 +85,7 @@ class GestureWebSocket {
     // Envia o modo de detecção e o modelo ativo como query parameter
     let wsUrl = `${WS_BASE_URL}?mode=${this.currentMode}`;
     if (this.activeModelName) {
-      wsUrl += `&model=${this.activeModelName}`;
+      wsUrl += `&model=${encodeURIComponent(this.activeModelName)}`;
     }
     
     const ws = new WebSocket(wsUrl);
