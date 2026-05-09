@@ -68,11 +68,20 @@ class UserSession:
 
         if mode == "hybrid":
             if config["dynamic_ml"]["enabled"]:
-                detectors.extend(self._create_dynamic_detectors(config))
+                try:
+                    detectors.extend(self._create_dynamic_detectors(config))
+                except Exception as e:
+                    logger.error("[UserSession] Falha ao criar detectores dinamicos: %s", e)
             if config["ml"]["enabled"]:
-                detectors.extend(self._create_static_detectors(config))
+                try:
+                    detectors.extend(self._create_static_detectors(config))
+                except Exception as e:
+                    logger.error("[UserSession] Falha ao criar detectores estaticos: %s", e)
             if config["rules"]["enabled"]:
-                detectors.extend(self._create_rule_detectors(config))
+                try:
+                    detectors.extend(self._create_rule_detectors(config))
+                except Exception as e:
+                    logger.error("[UserSession] Falha ao criar detectores de regras: %s", e)
 
         elif mode == "rules":
             if config["rules"]["enabled"]:
