@@ -93,6 +93,10 @@ export const trainingService = {
     return fetchWithAuth(`/train/status/${jobId}`);
   },
 
+  async getTrainingStatusByModel(modelName: string) {
+    return fetchWithAuth(`/train/status/by-model/${encodeURIComponent(modelName)}`);
+  },
+
   async getDatasetStats(datasetId: string) {
     return fetchWithAuth(`/collect/datasets/${datasetId}/stats`);
   },

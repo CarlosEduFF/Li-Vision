@@ -218,12 +218,17 @@ export default function CameraScreen() {
         cancelled = true;
         gestureWS.disconnect();
       };
-    }, [detectionMode])
+    }, [])  // Sem dependência em detectionMode: troca de modo é feita in-session via sendAction
   );
 
   const changeMode = (mode: DetectionMode) => {
     setShowModeModal(false);
-    setDetectionMode(mode);
+    // Apenas envia a ação para o servidor trocar o modo na sessão existente.
+    // NÃO altere o state detectionMode aqui — isso acionaria o useFocusEffect
+    // que desconecta e reconecta o WS, criando uma condição de corrida
+    // onde a ação é enviada na conexão antiga que morre em seguida.
+    // O state será atualizado pelo callback handleGesture quando o servidor
+    // confirmar o novo modo na próxima resposta (result.mode).
     gestureWS.sendAction({ action: "set_mode", mode });
   };
 

@@ -52,7 +52,45 @@ export default function TrainScreen() {
     try {
       setStatus({ status: "running" });
       const res = await trainingService.startTraining(selectedDatasetIds, modelName);
-      setStatus(res);
+
+      if (res.status === "failed") {
+        setStatus(res);
+        return;
+      }
+
+      // Treinamento iniciado em background — faz polling por nome do modelo
+      const targetName = res.model_name || modelName.toUpperCase();
+      setStatus({ status: "running", message: "Treinando modelo(s)... aguarde." });
+
+      // Aguarda 2s para os jobs serem criados no backend
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      const pollByModel = async (): Promise<any> => {
+        try {
+          const pollRes = await trainingService.getTrainingStatusByModel(targetName);
+          
+          if (pollRes.status === "completed" || pollRes.status === "failed") {
+            return {
+              status: pollRes.status,
+              details: (pollRes.jobs || []).map((j: any) => ({
+                type: j.type,
+                accuracy: j.accuracy,
+                error: j.error,
+                status: j.status,
+              })),
+            };
+          }
+        } catch (e) {
+          console.log("[Poll] Erro ao verificar status:", e);
+        }
+
+        // Aguarda 3 segundos e tenta novamente
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        return pollByModel();
+      };
+
+      const finalResult = await pollByModel();
+      setStatus(finalResult);
     } catch (e) {
       setStatus({ status: "failed", error: String(e) });
     }
@@ -163,10 +201,12 @@ export default function TrainScreen() {
                 {status.details && status.details.map((d: any, idx: number) => (
                    <View key={idx} style={{ marginBottom: 10, paddingBottom: 10, borderBottomWidth: 1, borderColor: "#333" }}>
                      <Text style={{color:"#00e5ff", fontWeight:"bold"}}>[{d.type.toUpperCase()}] Model</Text>
-                     {d.accuracy !== undefined ? (
+                     {d.accuracy != null && d.accuracy !== undefined ? (
                        <Text style={{color:"#ccc"}}>Precisão: {(d.accuracy * 100).toFixed(2)}%</Text>
-                     ) : (
+                     ) : d.error ? (
                        <Text style={{color:"red"}}>{d.error}</Text>
+                     ) : (
+                       <Text style={{color:"#888"}}>Sem dados</Text>
                      )}
                    </View>
                 ))}
