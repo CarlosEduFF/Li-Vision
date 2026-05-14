@@ -137,6 +137,12 @@ class DetectorManager:
             self.cooldown_counter = self.cooldown_frames
             self.history.clear()
 
+            # Evita o "ghosting" de gestos dinâmicos: limpa os buffers para 
+            # não ficarem "presos" prevendo a mesma sequência de frames passados
+            for det in self.detectors:
+                if self._is_sequence_detector(det):
+                    det.buffer.clear()
+
             return label, best_score
 
         return self.last_label, self.last_score

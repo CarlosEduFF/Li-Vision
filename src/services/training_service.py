@@ -74,6 +74,9 @@ class TrainingService:
         job_id = self.create_job(model_id, dataset_name_grouped)
         
         try:
+            # ── Etapa 1: Carregando dados ──────────────────────────────
+            self._update_job(job_id, {"progress": 10, "current_epoch": 0, "total_epochs": 0, "stage": "loading_data"})
+
             samples_res = supabase.table("samples").select("label, features").in_("dataset_id", dataset_ids).execute()
             data = samples_res.data
             
@@ -86,6 +89,9 @@ class TrainingService:
             
             total_samples = len(df)
             n_classes = y.nunique()
+
+            # ── Etapa 2: Preparando modelo ─────────────────────────────
+            self._update_job(job_id, {"progress": 30, "stage": "preparing_model"})
 
             # ── MLP Otimizado ──────────────────────────────────────────
             # Camadas proporcionais ao numero de features e classes
@@ -109,6 +115,9 @@ class TrainingService:
                 batch_size=min(64, max(16, total_samples // 4)),
             )
             clf.fit(X, y)
+
+            # ── Etapa 3: Avaliando ─────────────────────────────────────
+            self._update_job(job_id, {"progress": 80, "stage": "evaluating"})
             
             y_pred = clf.predict(X)
             acc = accuracy_score(y, y_pred)
@@ -271,6 +280,12 @@ class TrainingService:
             patience_counter = 0
             best_state = None
 
+            # Reporta inicio do treinamento
+            self._update_job(job_id, {
+                "progress": 0, "current_epoch": 0, "total_epochs": num_epochs,
+                "stage": "training"
+            })
+
             model.train()
             for epoch in range(num_epochs):
                 total_loss = 0.0
@@ -303,7 +318,22 @@ class TrainingService:
                     patience_counter += 1
                     if patience_counter >= patience:
                         logger.info("[Dynamic] Early stopping na epoch %d (loss: %.4f)", epoch, best_loss)
+                        # Reporta 100% no early stopping
+                        self._update_job(job_id, {
+                            "progress": 100, "current_epoch": epoch + 1,
+                            "total_epochs": num_epochs, "stage": "evaluating"
+                        })
                         break
+
+                # Reporta progresso a cada 5 epochs (evita spam no banco)
+                if (epoch + 1) % 5 == 0 or epoch == 0:
+                    progress_pct = int((epoch + 1) / num_epochs * 100)
+                    self._update_job(job_id, {
+                        "progress": progress_pct,
+                        "current_epoch": epoch + 1,
+                        "total_epochs": num_epochs,
+                        "stage": "training"
+                    })
 
                 if (epoch + 1) % 50 == 0:
                     logger.info("[Dynamic] Epoch %d/%d - Loss: %.4f - Acc: %.2f%%",

@@ -102,6 +102,10 @@ async def get_training_status_by_model(model_name: str):
             "status": job["status"],
             "accuracy": job.get("accuracy"),
             "error": job.get("error"),
+            "progress": job.get("progress", 0),
+            "current_epoch": job.get("current_epoch", 0),
+            "total_epochs": job.get("total_epochs", 0),
+            "stage": job.get("stage", ""),
         })
 
     all_done = all(j["status"] in ("completed", "failed") for j in jobs)
@@ -109,10 +113,14 @@ async def get_training_status_by_model(model_name: str):
 
     if all_done:
         overall = "failed" if any_failed else "completed"
+        overall_progress = 100
     else:
         overall = "running"
+        # Media ponderada do progresso dos sub-jobs
+        progress_values = [j.get("progress", 0) or 0 for j in jobs]
+        overall_progress = int(sum(progress_values) / len(progress_values)) if progress_values else 0
 
-    return {"status": overall, "jobs": jobs}
+    return {"status": overall, "jobs": jobs, "progress": overall_progress}
 
 
 @router.get("/status/{job_id}")
