@@ -1,8 +1,9 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, ActivityIndicator, Alert } from "react-native";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { trainingService } from "../../services/trainingService";
 import { router } from "expo-router";
+import TrainingProgressModal from "../../components/TrainingProgressModal";
 
 export default function TrainScreen() {
   const [datasets, setDatasets] = useState<any[]>([]);
@@ -14,6 +15,13 @@ export default function TrainScreen() {
   
   const [isLoading, setIsLoading] = useState(true);
   const [status, setStatus] = useState<any>(null);
+
+  // ── Modal de progresso ──────────────────────────────────
+  const [modalVisible, setModalVisible] = useState(false);
+  const [trainingStatus, setTrainingStatus] = useState<"running" | "completed" | "failed" | "pending">("pending");
+  const [trainingProgress, setTrainingProgress] = useState(0);
+  const [trainingJobs, setTrainingJobs] = useState<any[]>([]);
+  const pollingRef = useRef<boolean>(false);
 
   useEffect(() => {
     loadData();
@@ -44,32 +52,58 @@ export default function TrainScreen() {
     setModelName(name);
   };
 
+  const closeModal = useCallback(() => {
+    setModalVisible(false);
+    pollingRef.current = false;
+    // Se concluiu com sucesso, atualiza a lista de modelos
+    if (trainingStatus === "completed") {
+      loadData();
+    }
+  }, [trainingStatus]);
+
   const startTraining = async () => {
     if (!modelName || selectedDatasetIds.length === 0) {
       Alert.alert("Aviso", "Preencha o nome do modelo e selecione pelo menos um dataset.");
       return;
     }
     try {
+      // Abre modal imediatamente
+      setTrainingStatus("running");
+      setTrainingProgress(0);
+      setTrainingJobs([]);
+      setModalVisible(true);
+      pollingRef.current = true;
       setStatus({ status: "running" });
+
       const res = await trainingService.startTraining(selectedDatasetIds, modelName);
 
       if (res.status === "failed") {
+        setTrainingStatus("failed");
+        setTrainingProgress(100);
+        setTrainingJobs([{ type: "unknown", status: "failed", error: res.error || "Erro desconhecido" }]);
         setStatus(res);
         return;
       }
 
       // Treinamento iniciado em background — faz polling por nome do modelo
       const targetName = res.model_name || modelName.toUpperCase();
-      setStatus({ status: "running", message: "Treinando modelo(s)... aguarde." });
 
       // Aguarda 2s para os jobs serem criados no backend
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const pollByModel = async (): Promise<any> => {
+        if (!pollingRef.current) return null;
+
         try {
           const pollRes = await trainingService.getTrainingStatusByModel(targetName);
           
+          // Atualiza progresso no modal
+          setTrainingProgress(pollRes.progress || 0);
+          setTrainingJobs(pollRes.jobs || []);
+
           if (pollRes.status === "completed" || pollRes.status === "failed") {
+            setTrainingStatus(pollRes.status as "completed" | "failed");
+            setTrainingProgress(100);
             return {
               status: pollRes.status,
               details: (pollRes.jobs || []).map((j: any) => ({
@@ -84,20 +118,34 @@ export default function TrainScreen() {
           console.log("[Poll] Erro ao verificar status:", e);
         }
 
-        // Aguarda 3 segundos e tenta novamente
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+        // Aguarda 2 segundos e tenta novamente (mais frequente para progresso suave)
+        await new Promise((resolve) => setTimeout(resolve, 2000));
         return pollByModel();
       };
 
       const finalResult = await pollByModel();
-      setStatus(finalResult);
+      if (finalResult) {
+        setStatus(finalResult);
+      }
     } catch (e) {
+      setTrainingStatus("failed");
+      setTrainingProgress(100);
+      setTrainingJobs([]);
       setStatus({ status: "failed", error: String(e) });
     }
   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+      {/* ── Modal de Progresso ────────────── */}
+      <TrainingProgressModal
+        visible={modalVisible}
+        status={trainingStatus}
+        progress={trainingProgress}
+        jobs={trainingJobs}
+        onClose={closeModal}
+      />
+
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <MaterialIcons name="arrow-back" size={28} color="#00e5ff" />
@@ -182,14 +230,8 @@ export default function TrainScreen() {
             })}
 
             <TouchableOpacity style={styles.captureBtn} onPress={startTraining} disabled={status?.status === "running"}>
-              {status?.status === "running" ? (
-                <ActivityIndicator size="small" color="#000" />
-              ) : (
-                <>
-                  <MaterialIcons name="bolt" size={24} color="#000" />
-                  <Text style={styles.captureBtnText}>Iniciar Treinamento Mestre</Text>
-                </>
-              )}
+              <MaterialIcons name="bolt" size={24} color="#000" />
+              <Text style={styles.captureBtnText}>Iniciar Treinamento Mestre</Text>
             </TouchableOpacity>
 
             {status && status.status !== "running" && (
