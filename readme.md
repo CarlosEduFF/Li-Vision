@@ -137,14 +137,13 @@ O workflow `.github/workflows/ci.yml` executa automaticamente em push e PRs para
 
 ## Roadmap
 
-**3º Trimestre 2026 (fase atual)**
+**1º Semestre 2026**
 - [x] Aplicativo mobile completo
 - [x] Backend e endpoints REST + WebSocket em produção
 - [x] Pipeline completa de Edge Computing (MediaPipe on-device → WebSocket → classificação)
 - [x] Alimentar o sistema com movimentos e datasets via módulo de coleta
-- [ ] Atingir volume de amostras suficiente para treinamento dos modelos
 
-**4º Trimestre 2026**
+**(fase atual)**
 - [ ] Treinamento e validação dos modelos com dados reais
 - [ ] Testes heurísticos com usuários da comunidade surda
 - [ ] Empacotamento e publicação nas lojas (App Store / Google Play)
