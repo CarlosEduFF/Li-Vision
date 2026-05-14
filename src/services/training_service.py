@@ -16,7 +16,16 @@ class TrainingService:
         self.active_jobs = {}
 
     def _update_job(self, job_id: str, updates: dict):
-        supabase.table("training_jobs").update(updates).eq("id", job_id).execute()
+        try:
+            supabase.table("training_jobs").update(updates).eq("id", job_id).execute()
+        except Exception as e:
+            logger.warning(f"Falha ao atualizar job {job_id} (colunas faltantes?). Fallback: {e}")
+            basic_updates = {k: v for k, v in updates.items() if k in ["status", "accuracy", "report", "error", "completed_at"]}
+            if basic_updates:
+                try:
+                    supabase.table("training_jobs").update(basic_updates).eq("id", job_id).execute()
+                except Exception as e2:
+                    logger.error(f"Falha no fallback de update do job {job_id}: {e2}")
 
     def create_job(self, model_id: str, dataset_name: str) -> str:
         res = supabase.table("training_jobs").insert({
