@@ -141,7 +141,7 @@ O workflow `.github/workflows/ci.yml` executa automaticamente em push e PRs para
 - [x] Aplicativo mobile completo
 - [x] Backend e endpoints REST + WebSocket em produção
 - [x] Pipeline completa de Edge Computing (MediaPipe on-device → WebSocket → classificação)
-- [ ] Alimentar o sistema com movimentos e datasets via módulo de coleta
+- [x] Alimentar o sistema com movimentos e datasets via módulo de coleta
 - [ ] Atingir volume de amostras suficiente para treinamento dos modelos
 
 **4º Trimestre 2026**
