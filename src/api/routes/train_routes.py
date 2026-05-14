@@ -29,8 +29,13 @@ def _run_training_in_background(dataset_ids: list, model_name: str):
         logger.info("[Train BG] Iniciando treinamento em background: %s", model_name)
         result = get_service().train_model(dataset_ids, model_name)
         logger.info("[Train BG] Treinamento concluido: %s -> %s", model_name, result.get("status"))
+        
+        if result.get("status") == "failed":
+            get_service().report_fatal_error(model_name, result.get("error", "Erro desconhecido"), dataset_ids)
+            
     except Exception as e:
         logger.error("[Train BG] Erro fatal no treinamento em background: %s", e, exc_info=True)
+        get_service().report_fatal_error(model_name, f"Erro fatal do servidor: {str(e)}", dataset_ids)
 
 
 @router.post("/start")

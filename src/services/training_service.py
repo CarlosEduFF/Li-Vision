@@ -503,3 +503,34 @@ class TrainingService:
         except Exception as e:
             logger.error("[TrainingService] Falha ao ativar modelo '%s': %s", model_id_or_name, e)
             return {"ok": False, "error": str(e)}
+
+    def report_fatal_error(self, model_name: str, error_msg: str, dataset_ids: list):
+        model_name = model_name.upper()
+        dataset_id = dataset_ids[0] if dataset_ids else None
+        
+        mod_res = supabase.table("models").select("id").eq("name", model_name).execute()
+        if len(mod_res.data) > 0:
+            model_id = mod_res.data[0]["id"]
+        else:
+            try:
+                mod_ins = supabase.table("models").insert({
+                    "name": model_name,
+                    "type": "unknown",
+                    "dataset_id": dataset_id,
+                    "total_samples_trained": 0
+                }).execute()
+                model_id = mod_ins.data[0]["id"]
+            except Exception as e:
+                logger.error(f"Failed to create dummy model for fatal error: {e}")
+                return
+                
+        try:
+            supabase.table("training_jobs").insert({
+                "model_id": model_id,
+                "status": "failed",
+                "error": error_msg,
+                "dataset_name": "Error",
+                "completed_at": "now()"
+            }).execute()
+        except Exception as e:
+            logger.error(f"Failed to create fatal error job: {e}")
