@@ -1,22 +1,23 @@
 # Li-Vision
 
-> Plataforma móvel de tradução autônoma de LIBRAS para texto em tempo real. Aplicativo concluído — fase atual: coleta de movimentos e datasets para treinamento dos modelos.
+> Plataforma móvel de tradução autônoma de LIBRAS para texto em tempo real.
 
 O Li-Vision converte gestos da Língua Brasileira de Sinais diretamente em texto, eliminando a dependência de intérpretes em ambientes públicos e corporativos. A detecção de landmarks ocorre **no próprio dispositivo** via MediaPipe; a classificação dos gestos é feita em nuvem via WebSocket com latência de milissegundos.
+
+**Fase atual:** aplicativo concluído — alimentando o sistema com movimentos e datasets para treinamento dos modelos.
 
 ---
 
 ## Sumário
 
 - [Visão Geral](#visão-geral)
-- [Arquitetura](#arquitetura)
 - [Stack Técnica](#stack-técnica)
-- [Evolução do Motor de IA](#evolução-do-motor-de-ia)
 - [Estrutura do Projeto](#estrutura-do-projeto)
 - [Instalação e Execução](#instalação-e-execução)
 - [Testes](#testes)
 - [Funcionalidades](#funcionalidades)
 - [Roadmap](#roadmap)
+- [Documentação](#documentação)
 
 ---
 
@@ -25,42 +26,6 @@ O Li-Vision converte gestos da Língua Brasileira de Sinais diretamente em texto
 Mais de 10 milhões de brasileiros possuem algum grau de deficiência auditiva. A ausência de ferramentas que traduzam LIBRAS para texto em tempo real força dependência constante de intérpretes — em consultas médicas, ambientes corporativos e serviços públicos.
 
 O Li-Vision resolve o caminho inverso ao que soluções como Hand Talk e VLibras fazem: em vez de converter texto em sinais via avatar, **lê os sinais do usuário e os converte em texto**, de forma autônoma, por câmera convencional e sem hardware especial.
-
----
-
-## Arquitetura
-
-O sistema opera em três camadas desacopladas:
-
-```
-┌─────────────────────────────────────────────┐
-│              Aplicativo Mobile              │
-│         React Native + Expo (TypeScript)    │
-│                                             │
-│  ┌──────────────────────────────────────┐   │
-│  │   MediaPipe Hand Landmarker          │   │
-│  │   (on-device · ~7.8 MB · sem rede)   │   │
-│  │   21 landmarks (x, y, z) por mão     │   │
-│  └──────────────┬───────────────────────┘   │
-└─────────────────┼───────────────────────────┘
-                  │ WebSocket · ~1 KB/frame
-                  │ (vs. ~300 KB/frame antigo)
-┌─────────────────▼───────────────────────────┐
-│              Backend Python (Render)        │
-│                                             │
-│  ┌─────────────────┐  ┌──────────────────┐  │
-│  │ MLP Scikit-     │  │  GRU Bidirecional│  │
-│  │ Learn           │  │  PyTorch         │  │
-│  │ Sinais estáticos│  │  Sinais dinâmicos│  │
-│  └─────────────────┘  └──────────────────┘  │
-└─────────────────────────────────────────────┘
-```
-
-### Por que Edge Computing?
-
-A arquitetura anterior enviava cada frame de câmera convertido em Base64 (~300 KB) para o servidor processar. A 30 FPS, isso representava ~10 MB/s contínuos — inviável em 4G. Frames eram descartados e gestos como "Obrigado" (que dependem de 15–20 frames consecutivos) se tornavam irreconhecíveis.
-
-A solução foi mover a etapa de visão computacional para o dispositivo: o MediaPipe extrai os 21 landmarks da mão localmente e envia apenas o array de coordenadas (~1 KB). A redução é de **~300×** no volume de dados transmitidos.
 
 ---
 
@@ -87,103 +52,6 @@ A solução foi mover a etapa de visão computacional para o dispositivo: o Medi
 | Cérebro estático | MLP — Scikit-Learn | Classificação de sinais sem movimento |
 | Cérebro dinâmico | GRU Bidirecional — PyTorch | Classificação de sinais com trajetória temporal |
 | Modelo on-device | MediaPipe Hand Landmarker (TFLite) | Extração de landmarks no dispositivo |
-
----
-
-## Evolução do Motor de IA
-
-O motor de reconhecimento passou por três fases. Entender essa evolução explica as decisões técnicas atuais.
-
-### Fase 1 — Regras e Árvores de Decisão *(descartada)*
-
-Distâncias fixas entre landmarks + `RandomForestClassifier`. Descartada porque regras baseadas em distâncias absolutas falhavam ao mudar a distância focal da câmera ou o tamanho da mão.
-
-### Fase 2 — MLP Scikit-Learn *(ativo para sinais estáticos)*
-
-`MLPClassifier` com camadas de 128 e 64 neurônios, recebendo coordenadas normalizadas pelo pulso.
-
-Para sinais dinâmicos, 15 frames eram achatados em um único vetor. O problema: o modelo aprendia a posição do vetor, não o movimento de A para B. Gestos executados ao contrário geravam vetores similares, causando confusões. Sem Early Stopping, a rede memorizava os dados de treino e falhava com câmeras desconhecidas.
-
-**Permanece ativo** para letras e sinais estáticos — consumo de memória próximo a zero no servidor é crítico para planos gratuitos com limite de 512 MB de RAM.
-
-### Fase 3 — Arquitetura Híbrida com GRU Bidirecional *(estado atual)*
-
-**Cérebro estático (MLP otimizado):**
-- **Early Stopping**: 15% das amostras são reservadas como validação oculta. O treino para automaticamente ao detectar overfitting.
-- **Regularização L2 (Alpha)**: penaliza coeficientes grandes, forçando generalização para mãos e câmeras diferentes.
-
-**Cérebro dinâmico (GRU Bidirecional — PyTorch):**
-
-A GRU (Gated Recurrent Unit) possui memória seletiva: lê os frames em sequência, decidindo a cada passo o que lembrar e o que descartar. A configuração bidirecional percorre a sequência em ambas as direções — do primeiro ao último frame e do último ao primeiro — combinando as representações na classificação final.
-
-O resultado: gestos que se distinguem pela direção (varredura para a esquerda vs. direita) geram padrões inconfundíveis. O mesmo sinal executado rápido ou devagar ainda dispara o mesmo classificador, porque a GRU mapeou a trajetória, não a velocidade absoluta.
-
-**Por que GRU e não LSTM?** A GRU tem menos parâmetros internos (2 gates vs. 3 da LSTM), reduzindo consumo de CPU/RAM no servidor. Para janelas de 15 frames, os ganhos estatísticos são equivalentes.
-
-### Engenharia de Features
-
-Cada frame enviado ao backend contém dois tipos de vetores:
-
-- **Relativos** (forma da mão): coordenadas normalizadas pelo pulso → alimentam o MLP.
-- **Absolutos + delta temporal** (movimento): posição bruta do pulso na tela + `Δx = x_atual − x_anterior` e `Δy = y_atual − y_anterior` → alimentam a GRU.
-
-Os deltas codificam velocidade e direção — informação que o MLP da Fase 2 era incapaz de capturar.
-
----
-
-## Estrutura do Projeto
-
-```
-li-vision/
-├── app/
-│   ├── _layout.tsx              # Auth guard + navegação raiz
-│   ├── (tabs)/
-│   │   ├── index.tsx            # Home
-│   │   ├── learn.tsx            # Aprender LIBRAS
-│   │   ├── studio.tsx           # ML Studio
-│   │   ├── ranking.tsx          # Ranking de contribuidores
-│   │   ├── profile.tsx          # Minha conta
-│   │   └── about.tsx            # Sobre
-│   └── screens/
-│       ├── cam.tsx              # Tradução em tempo real
-│       ├── collect-static.tsx   # Coleta de sinais estáticos
-│       ├── collect-dynamic.tsx  # Coleta de sinais dinâmicos
-│       ├── train.tsx            # Disparo de treinamento
-│       ├── models.tsx           # Listagem de modelos
-│       ├── select-model.tsx     # Seleção do modelo ativo
-│       ├── manage-datasets.tsx  # Gerenciamento de datasets
-│       ├── manage-learning.tsx  # CRUD do catálogo de gestos
-│       ├── gesture-detail.tsx   # Detalhe de um gesto
-│       ├── login.tsx
-│       ├── register.tsx
-│       └── edit-profile.tsx
-│
-├── services/
-│   ├── api.ts                   # Cliente REST (auth + endpoints)
-│   ├── gestureWebSocket.ts      # WebSocket de inferência em tempo real
-│   ├── handLandmarkerPlugin.ts  # Integração MediaPipe on-device
-│   ├── speechService.ts         # Text-to-Speech
-│   ├── learningService.ts       # Módulo de aprendizado
-│   ├── gestureService.ts        # Operações de gestos
-│   └── trainingService.ts       # Disparo e polling de treinamento
-│
-├── hooks/
-│   ├── useSpellingDetector.ts   # Buffer de soletramento com debounce
-│   ├── useModelStatus.ts        # Status do modelo ativo
-│   └── useCamera.ts             # Abstração da câmera
-│
-├── components/
-│   ├── voice/
-│   │   ├── VoiceSettingsModal.tsx
-│   │   └── SpellingPanel.tsx
-│   └── ui/
-│
-├── assets/
-│   └── hand_landmarker.task     # Modelo MediaPipe (~7.8 MB)
-│
-└── plugins/
-    └── withHandLandmarker.js    # Expo Config Plugin
-```
 
 ---
 
@@ -238,28 +106,12 @@ npm test
 npm test -- --coverage
 ```
 
-### Testes existentes
-
 | Arquivo | Cobertura |
 |---------|-----------|
 | `services/__tests__/api.test.ts` | `detectGesture`, `setRunMode`, `getState` |
 | `app/__tests__/_layout.test.tsx` | Auth redirect no layout raiz |
 
-### CI/CD
-
-O workflow `.github/workflows/ci.yml` executa automaticamente em push e PRs para `main` e `develop`:
-1. Instala dependências
-2. Executa os testes
-3. Gera relatório de cobertura (Codecov)
-
-### Expandir a cobertura
-
-```
-# Sugestões de próximos testes:
-app/screens/cam.tsx          → pipeline de detecção
-services/gestureWebSocket.ts → reconexão e timeout
-hooks/useSpellingDetector.ts → lógica de debounce
-```
+O workflow `.github/workflows/ci.yml` executa automaticamente em push e PRs para `main` e `develop`.
 
 ---
 
@@ -293,9 +145,19 @@ hooks/useSpellingDetector.ts → lógica de debounce
 - [ ] Atingir volume de amostras suficiente para treinamento dos modelos
 
 **4º Trimestre 2026**
+- [ ] Treinamento e validação dos modelos com dados reais
 - [ ] Testes heurísticos com usuários da comunidade surda
-- [ ] Validação do módulo de crowdsourcing com usuários beta
 - [ ] Empacotamento e publicação nas lojas (App Store / Google Play)
+
+---
+
+## Documentação
+
+| Documento | Conteúdo |
+|-----------|----------|
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Diagrama do sistema, paradigma de transmissão, Edge Computing |
+| [docs/AI_ENGINE.md](docs/AI_ENGINE.md) | Evolução do motor de IA, GRU Bidirecional, engenharia de features |
+| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Como coletar amostras e alimentar o dataset — **leia antes de contribuir** |
 
 ---
 
