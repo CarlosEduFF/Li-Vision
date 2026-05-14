@@ -337,22 +337,20 @@ export default function TrainingProgressModal({
           )}
 
           {/* ── Close Button ─────────────────── */}
-          {isDone && (
-            <TouchableOpacity
-              style={[styles.closeBtn, isSuccess && styles.closeBtnSuccess]}
-              onPress={onClose}
-              activeOpacity={0.7}
-            >
-              <MaterialIcons
-                name={isSuccess ? "done" : "close"}
-                size={20}
-                color={isSuccess ? "#000" : "#fff"}
-              />
-              <Text style={[styles.closeBtnText, isSuccess && { color: "#000" }]}>
-                {isSuccess ? "Concluído" : "Fechar"}
-              </Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            style={[styles.closeBtn, isSuccess && styles.closeBtnSuccess]}
+            onPress={onClose}
+            activeOpacity={0.7}
+          >
+            <MaterialIcons
+              name={isSuccess ? "done" : "close"}
+              size={20}
+              color={isSuccess ? "#000" : "#fff"}
+            />
+            <Text style={[styles.closeBtnText, isSuccess && { color: "#000" }]}>
+              {isSuccess ? "Concluído" : isDone ? "Fechar" : "Ocultar / Cancelar"}
+            </Text>
+          </TouchableOpacity>
         </Animated.View>
       </View>
     </Modal>
