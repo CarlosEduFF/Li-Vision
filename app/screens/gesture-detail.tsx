@@ -8,8 +8,8 @@ import {
   GestureProgress,
 } from "@/services/learningService";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ScrollView,
@@ -37,38 +37,31 @@ export default function GestureDetailScreen() {
   const [progressMap, setProgressMap] = useState<Record<string, GestureProgress>>({});
   const { t } = useTranslation();
 
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadData() {
-      try {
-        const [items, pMap] = await Promise.all([
-          getGesturesByLevel(level),
-          getProgressMap(),
-        ]);
-        if (mounted) {
-          setProgressMap(pMap);
-          if (params.category) {
-            setGestures(items.filter(g => g.category === params.category));
-          } else {
-            setGestures(items);
-          }
-        }
-      } catch (error) {
-        console.log("Error loading data:", error);
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [items, pMap] = await Promise.all([
+        getGesturesByLevel(level),
+        getProgressMap(),
+      ]);
+      setProgressMap(pMap);
+      if (params.category) {
+        setGestures(items.filter(g => g.category === params.category));
+      } else {
+        setGestures(items);
       }
+    } catch (error) {
+      console.log("Error loading data:", error);
+    } finally {
+      setLoading(false);
     }
-
-    loadData();
-
-    return () => {
-      mounted = false;
-    };
   }, [level, params.category]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData])
+  );
 
   const toggleLearned = async (gestureId: string) => {
     const currentlyLearned = progressMap[gestureId]?.learned;

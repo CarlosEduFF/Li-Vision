@@ -7,8 +7,8 @@ import {
 } from "@/services/api";
 import { LearningLevel } from "@/services/learningService";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useRouter, useFocusEffect } from "expo-router";
+import React, { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Alert,
@@ -57,9 +57,11 @@ export default function ManageLearningScreen() {
   const [form, setForm] = useState<FormState>(initialForm);
   const { t } = useTranslation();
 
-  useEffect(() => {
-    loadCrudList();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadCrudList();
+    }, [])
+  );
 
   const loadCrudList = async () => {
     try {

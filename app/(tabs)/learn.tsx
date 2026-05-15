@@ -44,10 +44,23 @@ export default function LearnTabScreen() {
     });
   }, []);
 
+  const loadGestures = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await getLearningGestures();
+      setGestures(res.items || []);
+    } catch (error) {
+      console.log("Erro ao carregar gestos", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       loadProgress();
-    }, [loadProgress])
+      loadGestures();
+    }, [loadProgress, loadGestures])
   );
 
   useEffect(() => {
@@ -58,21 +71,7 @@ export default function LearnTabScreen() {
     loadRole();
   }, []);
 
-  useEffect(() => {
-    // Load gestures to group them by categories
-    const loadGestures = async () => {
-      try {
-        setLoading(true);
-        const res = await getLearningGestures();
-        setGestures(res.items || []);
-      } catch (error) {
-        console.log("Erro ao carregar gestos", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadGestures();
-  }, []);
+
 
   // Group gestures: level -> category -> count
   const groupedGestures = useMemo(() => {
