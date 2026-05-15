@@ -43,7 +43,8 @@
           }
         }
       ],
-      "./plugins/withHandLandmarker"
+      "./plugins/withHandLandmarker",
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,

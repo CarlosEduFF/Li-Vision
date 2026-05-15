@@ -10,6 +10,7 @@ import { useRouter, useFocusEffect } from "expo-router";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { TouchableOpacity, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 type LevelProgress = { total: number; learned: number; percent: number };
 
@@ -26,6 +27,7 @@ export default function LearnTabScreen() {
   const [role, setRole] = useState<string>("member");
   const [gestures, setGestures] = useState<LearningGestureApi[]>([]);
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   const isAdmin = useMemo(() => role === "admin", [role]);
 
@@ -97,9 +99,9 @@ export default function LearnTabScreen() {
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <View>
-              <Text style={styles.title}>Aprendizagem</Text>
+              <Text style={styles.title}>{t('learn.title')}</Text>
               <Text style={styles.subtitle}>
-                Aprenda Libras progressivamente por módulos e categorias.
+                {t('learn.subtitle')}
               </Text>
             </View>
           </View>
@@ -112,7 +114,7 @@ export default function LearnTabScreen() {
             activeOpacity={0.8}
           >
             <MaterialIcons name="admin-panel-settings" size={20} color="#081018" />
-            <Text style={styles.adminBtnText}>Gerenciar Módulos</Text>
+            <Text style={styles.adminBtnText}>{t('learn.admin_btn')}</Text>
           </TouchableOpacity>
         )}
 
@@ -124,13 +126,24 @@ export default function LearnTabScreen() {
           return (
             <View key={level} style={styles.levelSection}>
               <View style={styles.levelHeader}>
-                <View style={[styles.iconCircle, { backgroundColor: `${meta.color}20`, borderColor: meta.color }]}>
-                  <MaterialIcons name={meta.icon as any} size={20} color={meta.color} />
+                <View style={styles.levelTitleContainer}>
+                  <MaterialIcons name={meta.icon as any} size={24} color={meta.color} />
+                  <Text style={[styles.levelTitle, { color: meta.color }]}>
+                    {t(`learn.levels.${level}.title`)}
+                  </Text>
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.levelTitle}>{meta.title}</Text>
-                  <Text style={styles.levelSubtitle}>{p.learned}/{p.total} gestos aprendidos ({p.percent}%)</Text>
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{t(`learn.levels.${level}.range`)}</Text>
                 </View>
+              </View>
+
+              <Text style={styles.levelSubtitle}>{t(`learn.levels.${level}.subtitle`)}</Text>
+
+              <View style={styles.progressRow}>
+                <Text style={styles.progressText}>{p.percent}%</Text>
+                <Text style={styles.progressDetail}>
+                  {t('learn.learned_count', { count: p.learned })}
+                </Text>
               </View>
 
               <View style={styles.barBg}>
@@ -138,9 +151,9 @@ export default function LearnTabScreen() {
               </View>
 
               {loading ? (
-                <Text style={styles.loadingText}>Carregando categorias...</Text>
+                <Text style={styles.loadingText}>{t('learn.loading')}</Text>
               ) : categories.length === 0 ? (
-                <Text style={styles.emptyText}>Nenhuma categoria disponível neste nível.</Text>
+                <Text style={styles.emptyText}>{t('learn.empty')}</Text>
               ) : (
                 <View style={styles.categoriesContainer}>
                   {categories.map((cat) => (
@@ -158,7 +171,7 @@ export default function LearnTabScreen() {
                       <View style={{ flex: 1 }}>
                         <Text style={styles.categoryTitle}>{cat}</Text>
                         <Text style={styles.categoryCount}>
-                          {groupedGestures[level][cat]} {groupedGestures[level][cat] === 1 ? 'gesto' : 'gestos'}
+                          {t(groupedGestures[level][cat] === 1 ? 'learn.gesture_count_one' : 'learn.gesture_count_other', { count: groupedGestures[level][cat] })}
                         </Text>
                       </View>
                       <View style={styles.playBtn}>
@@ -175,7 +188,7 @@ export default function LearnTabScreen() {
         <View style={styles.note}>
           <MaterialIcons name="info-outline" size={18} color="#8a92a3" />
           <Text style={styles.noteText}>
-            Esta seção é independente da câmera e foca no aprendizado direto do vocabulário de Libras.
+            {t('learn.note')}
           </Text>
         </View>
       </ScrollView>
@@ -238,8 +251,44 @@ const styles = StyleSheet.create({
   levelHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    marginBottom: 12,
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  levelTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  badge: {
+    backgroundColor: "rgba(255,255,255,0.05)",
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  badgeText: {
+    color: "#8a92a3",
+    fontSize: 10,
+    fontWeight: "800",
+  },
+  progressRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    marginBottom: 4,
+    marginTop: 8,
+  },
+  progressText: {
+    color: "#fff",
+    fontSize: 22,
+    fontWeight: "900",
+  },
+  progressDetail: {
+    color: "#8a92a3",
+    fontSize: 12,
+    fontWeight: "600",
+    marginBottom: 2,
   },
   iconCircle: {
     width: 36,

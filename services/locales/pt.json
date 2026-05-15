@@ -1,0 +1,50 @@
+{
+  "profile": {
+    "title": "Minha Conta",
+    "default_user": "Usuário",
+    "role_admin": "Chefe / Administrador",
+    "role_member": "Colaborador",
+    "edit_profile": "Editar Perfil",
+    "contributions": "Suas Contribuições",
+    "donated_frames": "Frames Doados",
+    "current_level": "Seu Nível Atual",
+    "view_ranking": "Ver Ranking Geral",
+    "about_app": "Sobre o Aplicativo",
+    "logout": "Encerrar Sessão",
+    "language": "Idioma",
+    "levels": {
+      "master": "Mestre",
+      "fluent": "Fluente",
+      "apprentice": "Aprendiz",
+      "beginner": "Iniciante"
+    }
+  },
+  "learn": {
+    "title": "Aprendizagem",
+    "subtitle": "Aprenda Libras progressivamente por módulos e categorias.",
+    "admin_btn": "Gerenciar Módulos",
+    "note": "Esta seção é independente da câmera e foca no aprendizado direto do vocabulário de Libras.",
+    "loading": "Carregando categorias...",
+    "empty": "Nenhuma categoria disponível neste nível.",
+    "learned_count": "{{count}} aprendidos",
+    "gesture_count_one": "{{count}} gesto",
+    "gesture_count_other": "{{count}} gestos",
+    "levels": {
+      "iniciante": {
+        "title": "Iniciante",
+        "subtitle": "Alfabeto completo de A até Z",
+        "range": "A-Z"
+      },
+      "intermediario": {
+        "title": "Intermediário",
+        "subtitle": "Cumprimentos e expressões do dia a dia",
+        "range": "Gestos funcionais"
+      },
+      "avancado": {
+        "title": "Avançado",
+        "subtitle": "Frases completas e contexto de uso",
+        "range": "Conversação"
+      }
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "profile": {
+    "title": "My Account",
+    "default_user": "User",
+    "role_admin": "Admin / Boss",
+    "role_member": "Contributor",
+    "edit_profile": "Edit Profile",
+    "contributions": "Your Contributions",
+    "donated_frames": "Donated Frames",
+    "current_level": "Current Level",
+    "view_ranking": "View Global Ranking",
+    "about_app": "About the App",
+    "logout": "Sign Out",
+    "language": "Language",
+    "levels": {
+      "master": "Master",
+      "fluent": "Fluent",
+      "apprentice": "Apprentice",
+      "beginner": "Beginner"
+    }
+  },
+  "learn": {
+    "title": "Learning",
+    "subtitle": "Learn Sign Language progressively by modules and categories.",
+    "admin_btn": "Manage Modules",
+    "note": "This section is camera-independent and focuses on direct sign language vocabulary learning.",
+    "loading": "Loading categories...",
+    "empty": "No categories available for this level.",
+    "learned_count": "{{count}} learned",
+    "gesture_count_one": "{{count}} sign",
+    "gesture_count_other": "{{count}} signs",
+    "levels": {
+      "iniciante": {
+        "title": "Beginner",
+        "subtitle": "Complete alphabet from A to Z",
+        "range": "A-Z"
+      },
+      "intermediario": {
+        "title": "Intermediate",
+        "subtitle": "Daily greetings and common expressions",
+        "range": "Functional signs"
+      },
+      "avancado": {
+        "title": "Advanced",
+        "subtitle": "Full sentences and usage context",
+        "range": "Conversation"
+      }
+    }
+  }
+}
