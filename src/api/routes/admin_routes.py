@@ -4,16 +4,18 @@ from typing import Optional
 
 from src.api.app_state import state
 from src.core.model_cache import ModelCache
+from src.core.supabase_client import supabase
 
 class ModePayload(BaseModel):
     run_mode: str  # "collect" | "train" | "inference"
 
 class DetectionPayload(BaseModel):
-    mode: str = None           # "rules" | "ml" | "dynamic_ml" | "hybrid"
-    ml_model_path: str = None
-    dynamic_model_path: str = None
     confidence_threshold: float = None
     window_size: int = None
+
+class ImportPayload(BaseModel):
+    datasets: list
+    samples: list
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -85,3 +87,77 @@ def train_background(background_tasks: BackgroundTasks):
         trainer.main()   # ajuste seu trainer para aceitar paths/params
     background_tasks.add_task(background_train)
     return {"ok": True, "status": "training_started"}
+
+@router.get("/export-samples")
+def export_samples():
+    """Retorna todas as amostras do banco de dados para backup."""
+    try:
+        # Busca todas as amostras com label, features e timestamp
+        res = supabase.table("samples").select("id, dataset_id, label, features, created_at").execute()
+        
+        # Busca também os nomes dos datasets para contextualizar o backup
+        ds_res = supabase.table("datasets").select("id, name, type").execute()
+        
+        return {
+            "ok": True,
+            "samples_count": len(res.data),
+            "datasets": ds_res.data,
+            "samples": res.data
+        }
+    except Exception as e:
+        raise HTTPException(500, f"Falha ao exportar dados: {e}")
+
+@router.post("/import-samples")
+def import_samples(payload: ImportPayload):
+    """Importa amostras e datasets de um arquivo de backup."""
+    try:
+        # 1. Mapeia IDs antigos para novos IDs para manter integridade
+        id_map = {}
+        
+        # 2. Restaura Datasets
+        for ds in payload.datasets:
+            old_id = ds["id"]
+            # Tenta encontrar dataset existente com mesmo nome ou cria novo
+            existing = supabase.table("datasets").select("id").eq("name", ds["name"]).execute()
+            
+            if existing.data:
+                id_map[old_id] = existing.data[0]["id"]
+            else:
+                new_ds = supabase.table("datasets").insert({
+                    "name": ds["name"],
+                    "type": ds["type"]
+                }).execute()
+                id_map[old_id] = new_ds.data[0]["id"]
+
+        # 3. Restaura Samples (em lotes de 100 para não estourar payload)
+        total_imported = 0
+        batch = []
+        for s in payload.samples:
+            new_dataset_id = id_map.get(s["dataset_id"])
+            if not new_dataset_id:
+                continue
+                
+            batch.append({
+                "dataset_id": new_dataset_id,
+                "label": s["label"],
+                "features": s["features"]
+            })
+            
+            if len(batch) >= 100:
+                supabase.table("samples").insert(batch).execute()
+                total_imported += len(batch)
+                batch = []
+        
+        if batch:
+            supabase.table("samples").insert(batch).execute()
+            total_imported += len(batch)
+
+        return {
+            "ok": True,
+            "message": f"Importação concluída com sucesso. {total_imported} amostras restauradas.",
+            "datasets_processed": len(payload.datasets)
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(500, f"Falha na importação: {str(e)}")
