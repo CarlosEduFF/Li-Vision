@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text as RNText, TextProps, TouchableOpacity } from 'react-native';
+import { Text as RNText, TextProps } from 'react-native';
 import { VLibrasController } from './GlobalVLibras';
 
 export default function TranslatableText({ children, ...props }: TextProps) {

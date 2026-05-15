@@ -242,8 +242,6 @@ export default function GlobalVLibras() {
               domStorageEnabled={true}
               onMessage={handleMessage}
               scrollEnabled={false}
-              transparent={true}
-              backgroundColor="#10141a"
             />
             {!isReady && (
               <View style={styles.loadingOverlay}>
