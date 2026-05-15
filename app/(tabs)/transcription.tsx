@@ -1,20 +1,18 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     ActivityIndicator,
-    Dimensions,
     KeyboardAvoidingView,
     Platform,
-    ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
-import { useTranslation } from "react-i18next";
 
 // VLibras renderiza internamente em tamanho fixo.
 // Não tentamos redimensionar — o WebView preenche o espaço e o VLibras renderiza dentro.
@@ -72,19 +70,10 @@ const VLIBRAS_HTML = `
   <script>
     // Suprime popups de erro do Unity/WebGL que são irrelevantes
     (function() {
-      var oldAlert = window.alert;
-      window.alert = function(msg) {
-        if (msg.indexOf('Unity') !== -1 || msg.indexOf('Script error') !== -1) {
-          console.log('Suprimindo erro Unity:', msg);
-          return;
-        }
-        oldAlert(msg);
-      };
-      window.onerror = function(msg) {
-        if (msg.indexOf('Unity') !== -1 || msg.indexOf('Script error') !== -1) {
-          return true;
-        }
-      };
+      window.alert = function() {};
+      window.onerror = function() { return true; };
+      console.error = function() {};
+      console.warn = function() {};
     })();
 
     var widget = new window.VLibras.Widget('https://vlibras.gov.br/app');

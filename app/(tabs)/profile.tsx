@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from "react-native";
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from "react-native";
+import Text from "@/components/TranslatableText";
 import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";

@@ -8,7 +8,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter, useFocusEffect } from "expo-router";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { TouchableOpacity, ScrollView, StyleSheet, Text, View } from "react-native";
+import { TouchableOpacity, ScrollView, StyleSheet, View } from "react-native";
+import Text from "@/components/TranslatableText";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 

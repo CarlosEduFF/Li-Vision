@@ -71,6 +71,8 @@ global.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   return response;
 };
 
+import GlobalVLibras from '@/components/GlobalVLibras';
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
@@ -106,6 +108,7 @@ export default function RootLayout() {
         <Stack.Screen name="screens/levels-info" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
+      <GlobalVLibras />
     </ThemeProvider>
   );
 }

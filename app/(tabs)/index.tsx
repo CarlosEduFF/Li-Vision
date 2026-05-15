@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Image,
   ScrollView,
 } from "react-native";
+import Text from "@/components/TranslatableText";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
