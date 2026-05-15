@@ -12,6 +12,11 @@
     "about_app": "À propos de l'application",
     "logout": "Se déconnecter",
     "language": "Langue",
+    "admin": {
+      "title": "Paramètres d'Admin",
+      "rules_toggle": "Mode Règles Logiques",
+      "rules_desc": "Active les détecteurs manuels (A-E)"
+    },
     "levels": {
       "champion": "Champion",
       "champion_desc": "Le summum absolu de la contribution ! Vous êtes une légende dans le monde de l'IA accessible.",
@@ -201,8 +206,8 @@
     "mode_rules_desc": "Uniquement les détecteurs basés sur la logique (A–E)",
     "mode_ml": "ML Statique",
     "mode_ml_desc": "Uniquement les modèles de gestes sans mouvement",
-    "mode_dynamic": "ML Dynamique",
-    "mode_dynamic_desc": "Uniquement les modèles de gestes avec mouvement"
+    "mode_dynamic_ml": "ML Dynamique",
+    "mode_dynamic_ml_desc": "Uniquement les modèles de gestes avec mouvement"
   },
   "train": {
     "warning": "Avertissement",

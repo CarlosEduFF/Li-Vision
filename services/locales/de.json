@@ -12,6 +12,11 @@
     "about_app": "Über die App",
     "logout": "Abmelden",
     "language": "Sprache",
+    "admin": {
+      "title": "Admin-Einstellungen",
+      "rules_toggle": "Logik-Regeln Modus",
+      "rules_desc": "Manuelle Detektoren (A-E) aktivieren"
+    },
     "levels": {
       "champion": "Champion",
       "champion_desc": "Der absolute Höhepunkt des Beitrags! Du bist eine Legende in der Welt der barrierefreien KI.",
@@ -201,8 +206,8 @@
     "mode_rules_desc": "Nur logikbasierte Detektoren (A–E)",
     "mode_ml": "Statisches ML",
     "mode_ml_desc": "Nur Modelle für Gesten ohne Bewegung",
-    "mode_dynamic": "Dynamisches ML",
-    "mode_dynamic_desc": "Nur Modelle für Gesten mit Bewegung"
+    "mode_dynamic_ml": "Dynamisches ML",
+    "mode_dynamic_ml_desc": "Nur Modelle für Gesten mit Bewegung"
   },
   "train": {
     "warning": "Warnung",

@@ -64,6 +64,7 @@ export default function CameraScreen() {
   const [detectionMode, setDetectionMode] = useState<DetectionMode>("hybrid");
   const [showModeModal, setShowModeModal] = useState<boolean>(false);
   const [activeModelName, setActiveModelName] = useState<string | null>(null);
+  const [availableModes, setAvailableModes] = useState(DETECTION_MODES);
   const { t } = useTranslation();
 
   // Voz / Soletração
@@ -98,6 +99,32 @@ export default function CameraScreen() {
   useEffect(() => {
     let mounted = true;
     speechService.init().then((prefs) => { if (mounted) setSpeechPrefs(prefs); });
+
+    const checkRulesConfig = async () => {
+      const rulesStored = await AsyncStorage.getItem("config_rules_enabled");
+      const userRole = await AsyncStorage.getItem("userRole");
+      const rulesEnabled = rulesStored !== "false";
+      
+      // Filtra os modos baseados no papel do usuário e config global
+      const filtered = DETECTION_MODES.filter(m => {
+        if (m.key === "rules") {
+          // Só admin vê modo rules, e só se estiver habilitado
+          return userRole === "admin" && rulesEnabled;
+        }
+        // Híbrido, ML e Dinâmico sempre aparecem
+        return true;
+      });
+
+      if (mounted) {
+        setAvailableModes(filtered);
+        // Se o modo atual sumiu, reseta para hybrid
+        if (!filtered.find(m => m.key === detectionMode)) {
+          setDetectionMode("hybrid");
+        }
+      }
+    };
+    checkRulesConfig();
+
     const unsubscribe = speechService.subscribe((prefs) => { if (mounted) setSpeechPrefs(prefs); });
     return () => { mounted = false; unsubscribe(); speechService.stop(); };
   }, []);
@@ -205,11 +232,15 @@ export default function CameraScreen() {
         }
 
         if (!cancelled) {
+          const rulesStored = await AsyncStorage.getItem("config_rules_enabled");
+          const rulesEnabled = rulesStored !== "false";
+
           gestureWS.connect(
             (result) => handleGestureRef.current(result),
             (status, msg) => handleStatusChangeRef.current(status, msg),
             detectionMode,
-            finalModelName
+            finalModelName,
+            rulesEnabled
           );
         }
       };
@@ -525,7 +556,7 @@ export default function CameraScreen() {
               {t('cam.mode_subtitle')}
             </Text>
 
-            {DETECTION_MODES.map((mode) => {
+            {availableModes.map((mode) => {
               const isActive = detectionMode === mode.key;
               return (
                 <TouchableOpacity

@@ -53,6 +53,7 @@ class GestureWebSocket {
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private intentionalClose = false;
   private currentMode: DetectionMode = "hybrid";
+  private useRules = true;
 
   private activeModelName: string | null = null;
 
@@ -62,14 +63,16 @@ class GestureWebSocket {
    * @param onStatusChange - callback chamado quando o status da conexão muda
    * @param mode - modo de detecção (hybrid/rules/ml/dynamic_ml)
    * @param activeModelName - nome do idioma de IA principal selecionado
+   * @param useRules - flag global para habilitar/desabilitar regras lógicas
    */
-  connect(onGesture: GestureCallback, onStatusChange?: StatusCallback, mode?: DetectionMode, activeModelName?: string | null): void {
+  connect(onGesture: GestureCallback, onStatusChange?: StatusCallback, mode?: DetectionMode, activeModelName?: string | null, useRules?: boolean): void {
     this.onGesture = onGesture;
     this.onStatusChange = onStatusChange ?? null;
     this.intentionalClose = false;
     this.reconnectAttempts = 0;
     if (mode) this.currentMode = mode;
     if (activeModelName !== undefined) this.activeModelName = activeModelName;
+    if (useRules !== undefined) this.useRules = useRules;
     this._connect();
   }
 
@@ -83,7 +86,7 @@ class GestureWebSocket {
     this._setStatus(this.reconnectAttempts > 0 ? "reconnecting" : "connecting");
 
     // Envia o modo de detecção e o modelo ativo como query parameter
-    let wsUrl = `${WS_BASE_URL}?mode=${this.currentMode}`;
+    let wsUrl = `${WS_BASE_URL}?mode=${this.currentMode}&use_rules=${this.useRules}`;
     if (this.activeModelName) {
       wsUrl += `&model=${encodeURIComponent(this.activeModelName)}`;
     }
@@ -128,8 +131,9 @@ class GestureWebSocket {
    * Reconecta com um novo modo de detecção.
    * Fecha a conexão atual e reconecta com o modo especificado.
    */
-  reconnectWithMode(mode: DetectionMode): void {
+  reconnectWithMode(mode: DetectionMode, useRules?: boolean): void {
     this.currentMode = mode;
+    if (useRules !== undefined) this.useRules = useRules;
     this.intentionalClose = true; // Evita reconexão automática durante a troca
 
     if (this.reconnectTimer) {

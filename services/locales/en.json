@@ -12,6 +12,11 @@
     "about_app": "About the App",
     "logout": "Sign Out",
     "language": "Language",
+    "admin": {
+      "title": "Admin Settings",
+      "rules_toggle": "Logical Rules Mode",
+      "rules_desc": "Enables manual detectors (A-E)"
+    },
     "levels": {
       "champion": "Champion",
       "champion_desc": "The absolute pinnacle of contribution! You are a legend in the world of accessible AI.",
@@ -201,8 +206,8 @@
     "mode_rules_desc": "Only logic-based detectors (A–E)",
     "mode_ml": "Static ML",
     "mode_ml_desc": "Only models of gestures without movement",
-    "mode_dynamic": "Dynamic ML",
-    "mode_dynamic_desc": "Only models of gestures with movement"
+    "mode_dynamic_ml": "Dynamic ML",
+    "mode_dynamic_ml_desc": "Only models of gestures with movement"
   },
   "train": {
     "warning": "Warning",

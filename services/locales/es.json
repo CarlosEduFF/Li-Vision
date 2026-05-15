@@ -12,6 +12,11 @@
     "about_app": "Acerca de la aplicación",
     "logout": "Cerrar sesión",
     "language": "Idioma",
+    "admin": {
+      "title": "Ajustes de Admin",
+      "rules_toggle": "Modo de Reglas Lógicas",
+      "rules_desc": "Habilita detectores manuales (A-E)"
+    },
     "levels": {
       "champion": "Campeón",
       "champion_desc": "¡El pináculo absoluto de la contribución! Eres una leyenda en el mundo de la IA accesible.",
@@ -201,8 +206,8 @@
     "mode_rules_desc": "Solo detectores basados en lógica (A–E)",
     "mode_ml": "ML Estático",
     "mode_ml_desc": "Solo modelos de gestos sin movimiento",
-    "mode_dynamic": "ML Dinámico",
-    "mode_dynamic_desc": "Solo modelos de gestos con movimiento"
+    "mode_dynamic_ml": "ML Dinámico",
+    "mode_dynamic_ml_desc": "Solo modelos de gestos con movimiento"
   },
   "train": {
     "warning": "Advertencia",

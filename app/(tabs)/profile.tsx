@@ -16,6 +16,7 @@ function ProfileScreen() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [myRank, setMyRank] = useState<any>(null);
+  const [isRulesEnabled, setIsRulesEnabled] = useState(true);
   const [langModalVisible, setLangModalVisible] = useState(false);
   const { t, i18n } = useTranslation();
 
@@ -33,7 +34,6 @@ function ProfileScreen() {
     setLangModalVisible(false);
   };
 
-  // Recarrega os dados toda vez que a tela recebe foco (ex: voltando de edit-profile)
   useFocusEffect(
     useCallback(() => {
       loadProfile();
@@ -51,7 +51,6 @@ function ProfileScreen() {
       setUserRole(role || "member");
       setAvatarUrl(avatar || null);
 
-      // Buscar pontuação
       if (id) {
         const data = await trainingService.getRanking();
         if (data && data.ranking) {
@@ -60,7 +59,6 @@ function ProfileScreen() {
         }
       }
 
-      // Buscar dados frescos do servidor (avatar atualizado, etc)
       try {
         const profileRes = await trainingService.getProfile();
         if (profileRes.ok && profileRes.profile) {
@@ -74,7 +72,10 @@ function ProfileScreen() {
             await AsyncStorage.setItem("userAvatar", p.avatar_url);
           }
         }
-      } catch { /* silencioso — usa cached */ }
+      } catch { /* use cached */ }
+
+      const rulesStored = await AsyncStorage.getItem("config_rules_enabled");
+      setIsRulesEnabled(rulesStored !== "false");
     } catch (e) {
       console.log(e);
     } finally {
@@ -85,6 +86,12 @@ function ProfileScreen() {
   const logout = async () => {
     await AsyncStorage.clear();
     router.replace("/screens/login");
+  };
+
+  const toggleRulesMode = async () => {
+    const nextValue = !isRulesEnabled;
+    setIsRulesEnabled(nextValue);
+    await AsyncStorage.setItem("config_rules_enabled", String(nextValue));
   };
 
   const getLevel = (samples: number) => {
@@ -101,7 +108,7 @@ function ProfileScreen() {
   const levelInfo = getLevel(myRank ? myRank.samples : 0);
 
   return (
-    <View style={styles.container}>
+    <RNScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>{t('profile.title')}</Text>
@@ -116,17 +123,13 @@ function ProfileScreen() {
       ) : (
         <>
           <View style={styles.profileCard}>
-            {/* Avatar */}
             <TouchableOpacity
               style={styles.avatar}
               onPress={() => router.push("/screens/edit-profile")}
               activeOpacity={0.8}
             >
               {avatarUrl ? (
-                <Image
-                  source={{ uri: avatarUrl }}
-                  style={styles.avatarImage}
-                />
+                <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
               ) : (
                 <FontAwesome5 name="user-astronaut" size={40} color="#00e5ff" />
               )}
@@ -135,15 +138,13 @@ function ProfileScreen() {
                    <MaterialIcons name="admin-panel-settings" size={14} color="#000" />
                  </View>
                )}
-               {/* Badge de editar */}
                <View style={styles.editAvatarBadge}>
                  <MaterialIcons name="edit" size={12} color="#fff" />
                </View>
             </TouchableOpacity>
-            <Text style={styles.name}>{userName}</Text>
-            <Text style={styles.role}>{userRole === "admin" ? t('profile.role_admin') : t('profile.role_member')}</Text>
+            <Text style={styles.nameText}>{userName}</Text>
+            <Text style={styles.roleText}>{userRole === "admin" ? t('profile.role_admin') : t('profile.role_member')}</Text>
             
-            {/* Botão editar perfil */}
             <TouchableOpacity
               style={styles.editProfileBtn}
               onPress={() => router.push("/screens/edit-profile")}
@@ -153,13 +154,42 @@ function ProfileScreen() {
             </TouchableOpacity>
           </View>
 
+          {/* ADMIN SETTINGS */}
+          {userRole === "admin" && (
+            <View style={styles.adminSection}>
+              <View style={styles.sectionHeader}>
+                <MaterialIcons name="admin-panel-settings" size={20} color="#ff6b6b" />
+                <Text style={styles.sectionTitle}>{t('profile.admin.title')}</Text>
+              </View>
+              
+              <TouchableOpacity 
+                style={styles.menuItem} 
+                onPress={toggleRulesMode}
+                activeOpacity={0.7}
+              >
+                <View style={styles.menuItemLeft}>
+                  <View style={styles.menuIcon}>
+                    <MaterialIcons name="rule" size={20} color="#ff6b6b" />
+                  </View>
+                  <View>
+                    <Text style={styles.menuText}>{t('profile.admin.rules_toggle')}</Text>
+                    <Text style={styles.menuSubtext}>{t('profile.admin.rules_desc')}</Text>
+                  </View>
+                </View>
+                <View style={[styles.toggleOuter, isRulesEnabled && styles.toggleOuterActive]}>
+                  <View style={[styles.toggleInner, isRulesEnabled && styles.toggleInnerActive]} />
+                </View>
+              </TouchableOpacity>
+            </View>
+          )}
+
           <View style={styles.statsCard}>
             <Text style={styles.statsTitle}>{t('profile.contributions')}</Text>
             
             <View style={styles.statsRow}>
               <View style={styles.statBox}>
-                <Text style={styles.statValue}>{myRank ? myRank.samples : 0}</Text>
-                <Text style={styles.statLabel}>{t('profile.donated_frames')}</Text>
+                <Text style={styles.statValueText}>{myRank ? myRank.samples : 0}</Text>
+                <Text style={styles.statLabelText}>{t('profile.donated_frames')}</Text>
               </View>
               <View style={styles.divider} />
               <TouchableOpacity 
@@ -169,10 +199,10 @@ function ProfileScreen() {
               >
                 <FontAwesome5 name={levelInfo.icon} size={24} color={levelInfo.color} style={{marginBottom: 5}} />
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                  <Text style={[styles.statValue, { color: levelInfo.color, fontSize: 18 }]}>{levelInfo.title}</Text>
+                  <Text style={[styles.statValueText, { color: levelInfo.color, fontSize: 18 }]}>{levelInfo.title}</Text>
                   <MaterialIcons name="info-outline" size={12} color={levelInfo.color} style={{ opacity: 0.6 }} />
                 </View>
-                <Text style={styles.statLabel}>{t('profile.current_level')}</Text>
+                <Text style={styles.statLabelText}>{t('profile.current_level')}</Text>
               </TouchableOpacity>
             </View>
             
@@ -190,8 +220,6 @@ function ProfileScreen() {
             </TouchableOpacity>
           </View>
 
-          <View style={{ flex: 1 }} />
-
           <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
             <MaterialIcons name="logout" size={22} color="#ff4444" />
             <Text style={styles.logoutText}>{t('profile.logout')}</Text>
@@ -207,7 +235,7 @@ function ProfileScreen() {
           onPress={() => setLangModalVisible(false)}
         >
           <View style={styles.langModal}>
-            <Text style={styles.modalTitle}>{t('profile.language')}</Text>
+            <Text style={styles.modalTitleText}>{t('profile.language')}</Text>
             {languages.map((lang) => (
               <TouchableOpacity 
                 key={lang.code}
@@ -219,7 +247,7 @@ function ProfileScreen() {
               >
                 <Text style={styles.langFlag}>{lang.flag}</Text>
                 <Text style={[
-                  styles.langName,
+                  styles.langNameText,
                   i18n.language === lang.code && styles.langNameActive
                 ]}>
                   {lang.name}
@@ -232,46 +260,58 @@ function ProfileScreen() {
           </View>
         </TouchableOpacity>
       </Modal>
-    </View>
+    </RNScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#10141a", padding: 20, paddingTop: 60 },
+  container: { flex: 1, backgroundColor: "#10141a" },
+  scrollContent: { padding: 20, paddingTop: 60, paddingBottom: 40 },
   header: { marginBottom: 30, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   title: { fontSize: 28, fontWeight: "800", color: "#ffffff" },
   langBtn: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "rgba(0, 229, 255, 0.1)", paddingVertical: 8, paddingHorizontal: 12, borderRadius: 10, borderWidth: 1, borderColor: "rgba(0, 229, 255, 0.3)" },
   langText: { color: "#00e5ff", fontWeight: "700", fontSize: 14 },
   profileCard: { alignItems: "center", backgroundColor: "#1c2026", padding: 30, borderRadius: 20, marginBottom: 20, borderWidth: 1, borderColor: "rgba(0, 229, 255, 0.15)" },
-  avatar: { width: 90, height: 90, borderRadius: 45, backgroundColor: "rgba(0, 229, 255, 0.1)", justifyContent: "center", alignItems: "center", marginBottom: 15, position: "relative", overflow: "visible" },
+  avatar: { width: 90, height: 90, borderRadius: 45, backgroundColor: "rgba(0, 229, 255, 0.1)", justifyContent: "center", alignItems: "center", marginBottom: 15, position: "relative" },
   avatarImage: { width: 90, height: 90, borderRadius: 45, borderWidth: 2, borderColor: "#00e5ff" },
   adminBadge: { position: "absolute", bottom: 0, right: 0, backgroundColor: "#ffdf00", width: 28, height: 28, borderRadius: 14, justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: "#1c2026" },
   editAvatarBadge: { position: "absolute", top: -2, right: -2, backgroundColor: "rgba(0, 229, 255, 0.8)", width: 24, height: 24, borderRadius: 12, justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: "#1c2026" },
-  name: { fontSize: 22, color: "#fff", fontWeight: "700", marginBottom: 5 },
-  role: { fontSize: 14, color: "#888", fontWeight: "600", marginBottom: 16 },
+  nameText: { fontSize: 22, color: "#fff", fontWeight: "700", marginBottom: 5 },
+  roleText: { fontSize: 14, color: "#888", fontWeight: "600", marginBottom: 16 },
   editProfileBtn: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "rgba(0, 229, 255, 0.1)", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 12, borderWidth: 1, borderColor: "rgba(0, 229, 255, 0.3)" },
   editProfileBtnText: { color: "#00e5ff", fontWeight: "700", fontSize: 13 },
-  statsCard: { backgroundColor: "#1c2026", borderRadius: 20, padding: 20 },
+  statsCard: { backgroundColor: "#1c2026", borderRadius: 20, padding: 20, marginBottom: 20 },
   statsTitle: { color: "#fff", fontSize: 16, fontWeight: "700", marginBottom: 20 },
   statsRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
   statBox: { flex: 1, alignItems: "center" },
-  statValue: { color: "#00e5ff", fontSize: 32, fontWeight: "800", marginBottom: 5 },
-  statLabel: { color: "#888", fontSize: 12, fontWeight: "600", textTransform: "uppercase" },
-  divider: { width: 1, height: 50, backgroundColor: "rgba(255,255,255,0.05)" },
+  statValueText: { color: "#00e5ff", fontSize: 32, fontWeight: "800", marginBottom: 5 },
+  statLabelText: { color: "#888", fontSize: 12, fontWeight: "600", textTransform: "uppercase" },
+  divider: { width: 1, height: 40, backgroundColor: "rgba(255,255,255,0.05)" },
   rankingBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0, 229, 255, 0.1)", padding: 15, borderRadius: 12, gap: 5, marginBottom: 12 },
   rankingBtnText: { color: "#00e5ff", fontWeight: "bold" },
   aboutBtn: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: "rgba(255, 255, 255, 0.03)", padding: 15, borderRadius: 12, borderWidth: 1, borderColor: "rgba(255, 255, 255, 0.05)" },
   aboutBtnText: { color: "#888", fontWeight: "600", fontSize: 14 },
-  logoutBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 16, borderRadius: 15, backgroundColor: "rgba(255, 68, 68, 0.1)", gap: 10, alignSelf:"center", width:"100%", marginBottom: 30, borderWidth: 1, borderColor: "rgba(255, 68, 68, 0.3)" },
+  logoutBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 16, borderRadius: 15, backgroundColor: "rgba(255, 68, 68, 0.1)", gap: 10, marginTop: 20 },
   logoutText: { color: "#ff4444", fontWeight: "bold", fontSize: 16 },
-  // Modal Idioma
+  adminSection: { marginBottom: 20 },
+  sectionHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 },
+  sectionTitle: { color: "#ff6b6b", fontSize: 13, fontWeight: "bold", textTransform: "uppercase" },
+  menuItem: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: "#1c2026", padding: 16, borderRadius: 16, borderWidth: 1, borderColor: "#2a3548" },
+  menuItemLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
+  menuIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: "rgba(255, 107, 107, 0.1)", justifyContent: "center", alignItems: "center" },
+  menuText: { color: "#fff", fontSize: 15, fontWeight: "600" },
+  menuSubtext: { color: "#697688", fontSize: 12 },
+  toggleOuter: { width: 44, height: 24, borderRadius: 12, backgroundColor: "#2a3548", padding: 2, justifyContent: "center" },
+  toggleOuterActive: { backgroundColor: "#ff6b6b" },
+  toggleInner: { width: 20, height: 20, borderRadius: 10, backgroundColor: "#fff" },
+  toggleInnerActive: { transform: [{ translateX: 20 }] },
   modalBg: { flex: 1, backgroundColor: "rgba(0,0,0,0.85)", justifyContent: "center", alignItems: "center" },
   langModal: { width: "80%", maxWidth: 300, backgroundColor: "#1c2026", borderRadius: 20, padding: 20, borderWidth: 1, borderColor: "rgba(0, 229, 255, 0.3)" },
-  modalTitle: { color: "#fff", fontSize: 18, fontWeight: "bold", marginBottom: 20, textAlign: "center" },
+  modalTitleText: { color: "#fff", fontSize: 18, fontWeight: "bold", marginBottom: 20, textAlign: "center" },
   langItem: { flexDirection: "row", alignItems: "center", paddingVertical: 12, paddingHorizontal: 15, borderRadius: 12, marginBottom: 8, gap: 12 },
   langItemActive: { backgroundColor: "rgba(0, 229, 255, 0.1)" },
   langFlag: { fontSize: 20 },
-  langName: { flex: 1, color: "#888", fontSize: 16, fontWeight: "600" },
+  langNameText: { flex: 1, color: "#888", fontSize: 16, fontWeight: "600" },
   langNameActive: { color: "#fff" },
 });
 

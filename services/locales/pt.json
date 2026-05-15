@@ -12,6 +12,11 @@
     "about_app": "Sobre o Aplicativo",
     "logout": "Encerrar Sessão",
     "language": "Idioma",
+    "admin": {
+      "title": "Configurações de Admin",
+      "rules_toggle": "Modo de Regras Lógicas",
+      "rules_desc": "Habilita detectores manuais (A-E)"
+    },
     "levels": {
       "champion": "Campeão",
       "champion_desc": "O ápice absoluto da contribuição! Você é uma lenda no mundo da IA acessível.",
@@ -181,7 +186,12 @@
     "full_name": "Nome Completo",
     "name_placeholder": "Seu nome completo",
     "save": "Salvar Alterações",
-    "info": "A foto de perfil será armazenada na nuvem do Supabase e ficará visível para outros usuários no ranking."
+    "info": "A foto de perfil será armazenada na nuvem do Supabase e ficará visível para outros usuários no ranking.",
+    "admin": {
+      "title": "Configurações de Admin",
+      "rules_toggle": "Modo de Regras Lógicas",
+      "rules_desc": "Habilita detectores manuais (A-E)"
+    }
   },
   "cam": {
     "connection_error": "Erro de Conexão",
@@ -201,8 +211,8 @@
     "mode_rules_desc": "Apenas detectores baseados em lógica (A–E)",
     "mode_ml": "ML Estático",
     "mode_ml_desc": "Apenas modelos de gestos sem movimento",
-    "mode_dynamic": "ML Dinâmico",
-    "mode_dynamic_desc": "Apenas modelos de gestos com movimento"
+    "mode_dynamic_ml": "ML Dinâmico",
+    "mode_dynamic_ml_desc": "Apenas modelos de gestos com movimento"
   },
   "train": {
     "warning": "Aviso",

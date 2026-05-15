@@ -12,6 +12,11 @@
     "about_app": "アプリについて",
     "logout": "サインアウト",
     "language": "言語",
+    "admin": {
+      "title": "管理者設定",
+      "rules_toggle": "論理ルールモード",
+      "rules_desc": "手動検知器 (A-E) を有効にする"
+    },
     "levels": {
       "champion": "チャンピオン",
       "champion_desc": "貢献の絶対的な頂点！あなたはアクセシブルなAIの世界における伝説です。",
@@ -201,8 +206,8 @@
     "mode_rules_desc": "ロジックベースの検出器のみ (A–E)",
     "mode_ml": "静的ML",
     "mode_ml_desc": "動きのないジェスチャのモデルのみ",
-    "mode_dynamic": "動的ML",
-    "mode_dynamic_desc": "動きのあるジェスチャのモデルのみ"
+    "mode_dynamic_ml": "動的ML",
+    "mode_dynamic_ml_desc": "動きのあるジェスチャのモデルのみ"
   },
   "train": {
     "warning": "警告",
