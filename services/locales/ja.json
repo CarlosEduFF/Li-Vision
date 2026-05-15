@@ -14,8 +14,17 @@
     "language": "言語",
     "admin": {
       "title": "管理者設定",
+      "subtitle": "システムの重要な設定とデータの冗長性を管理します。",
       "rules_toggle": "論理ルールモード",
-      "rules_desc": "手動検知器 (A-E) を有効にする"
+      "rules_desc": "手動検知器 (A-E) を有効にする",
+      "sec_general": "一般",
+      "sec_data": "セキュリティとデータ",
+      "export_title": "フルバックアップのエクスポート",
+      "export_desc": "収集したすべてのサンプルをダウンロード (JSON)",
+      "import_title": "バックアップのインポート",
+      "import_desc": "JSONファイルからデータを復元",
+      "info_box": "バックアップには生のランドマークが含まれています。インポート時にデータセットが自動的に再作成されます。",
+      "footer": "管理者レベルへのアクセス制限。"
     },
     "levels": {
       "champion": "チャンピオン",

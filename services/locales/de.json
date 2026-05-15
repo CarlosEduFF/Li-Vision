@@ -14,8 +14,17 @@
     "language": "Sprache",
     "admin": {
       "title": "Admin-Einstellungen",
+      "subtitle": "Kritische Systemeinstellungen und Datenredundanz verwalten.",
       "rules_toggle": "Logik-Regeln Modus",
-      "rules_desc": "Manuelle Detektoren (A-E) aktivieren"
+      "rules_desc": "Manuelle Detektoren (A-E) aktivieren",
+      "sec_general": "Allgemein",
+      "sec_data": "Sicherheit & Daten",
+      "export_title": "Vollständiges Backup exportieren",
+      "export_desc": "Alle gesammelten Proben herunterladen (JSON)",
+      "import_title": "Backup importieren",
+      "import_desc": "Daten aus einer JSON-Datei wiederherstellen",
+      "info_box": "Das Backup enthält rohe Landmarks. Beim Import werden Datasets automatisch neu erstellt.",
+      "footer": "Zugriff auf Administratorebene beschränkt."
     },
     "levels": {
       "champion": "Champion",

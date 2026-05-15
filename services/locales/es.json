@@ -14,8 +14,17 @@
     "language": "Idioma",
     "admin": {
       "title": "Ajustes de Admin",
+      "subtitle": "Gestione la configuración crítica del sistema e redundancia de datos.",
       "rules_toggle": "Modo de Reglas Lógicas",
-      "rules_desc": "Habilita detectores manuales (A-E)"
+      "rules_desc": "Habilita detectores manuales (A-E)",
+      "sec_general": "General",
+      "sec_data": "Seguridad y Datos",
+      "export_title": "Exportar Backup Completo",
+      "export_desc": "Descargar todas las muestras (JSON)",
+      "import_title": "Importar Backup",
+      "import_desc": "Restaurar datos desde un archivo JSON",
+      "info_box": "El backup contiene los landmarks brutos. Al importar, o sistema recriará los datasets automáticamente.",
+      "footer": "Acceso restringido al nivel de Administrador."
     },
     "levels": {
       "champion": "Campeón",

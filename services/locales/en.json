@@ -14,8 +14,17 @@
     "language": "Language",
     "admin": {
       "title": "Admin Settings",
+      "subtitle": "Manage critical system settings and data redundancy.",
       "rules_toggle": "Logical Rules Mode",
-      "rules_desc": "Enables manual detectors (A-E)"
+      "rules_desc": "Enables manual detectors (A-E)",
+      "sec_general": "General",
+      "sec_data": "Security & Data",
+      "export_title": "Export Full Backup",
+      "export_desc": "Download all collected samples (JSON)",
+      "import_title": "Import Backup",
+      "import_desc": "Restore data from a JSON file",
+      "info_box": "The backup contains raw landmarks. When importing, the system will recreate datasets automatically.",
+      "footer": "Access restricted to Administrator level."
     },
     "levels": {
       "champion": "Champion",

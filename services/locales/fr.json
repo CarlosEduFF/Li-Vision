@@ -14,8 +14,17 @@
     "language": "Langue",
     "admin": {
       "title": "Paramètres d'Admin",
+      "subtitle": "Gérez les paramètres système critiques et la redondance des données.",
       "rules_toggle": "Mode Règles Logiques",
-      "rules_desc": "Active les détecteurs manuels (A-E)"
+      "rules_desc": "Active les détecteurs manuels (A-E)",
+      "sec_general": "Général",
+      "sec_data": "Sécurité et Données",
+      "export_title": "Exporter une Sauvegarde",
+      "export_desc": "Télécharger tous les échantillons (JSON)",
+      "import_title": "Importer une Sauvegarde",
+      "import_desc": "Restaurer les données depuis un fichier JSON",
+      "info_box": "La sauvegarde contient les points de repère bruts. Lors de l'importation, les datasets seront recréés automatiquement.",
+      "footer": "Accès restreint au niveau Administrateur."
     },
     "levels": {
       "champion": "Champion",

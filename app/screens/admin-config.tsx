@@ -45,7 +45,7 @@ export default function AdminConfigScreen() {
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri);
       } else {
-        Alert.alert("Sucesso", "Backup gerado com sucesso no cache do app.");
+        Alert.alert("Sucesso", "Backup gerado com sucesso.");
       }
     } catch (e: any) {
       Alert.alert("Erro no Backup", e.message);
@@ -100,11 +100,11 @@ export default function AdminConfigScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <View style={styles.header}>
         <Text style={styles.title}>{t('profile.admin.title')}</Text>
-        <Text style={styles.subtitle}>Gerencie as configurações críticas do sistema e redundância de dados.</Text>
+        <Text style={styles.subtitle}>{t('profile.admin.subtitle')}</Text>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Geral</Text>
+        <Text style={styles.sectionTitle}>{t('profile.admin.sec_general')}</Text>
         
         <TouchableOpacity 
           style={styles.card} 
@@ -127,7 +127,7 @@ export default function AdminConfigScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Segurança e Dados</Text>
+        <Text style={styles.sectionTitle}>{t('profile.admin.sec_data')}</Text>
         
         {/* EXPORTAR */}
         <TouchableOpacity 
@@ -141,8 +141,8 @@ export default function AdminConfigScreen() {
               <MaterialIcons name="cloud-download" size={24} color="#00e5ff" />
             </View>
             <View style={styles.cardInfo}>
-              <Text style={styles.cardTitle}>Exportar Backup Completo</Text>
-              <Text style={styles.cardDesc}>Baixe todas as amostras coletadas (JSON)</Text>
+              <Text style={styles.cardTitle}>{t('profile.admin.export_title')}</Text>
+              <Text style={styles.cardDesc}>{t('profile.admin.export_desc')}</Text>
             </View>
           </View>
           {loadingBackup ? (
@@ -164,8 +164,8 @@ export default function AdminConfigScreen() {
               <MaterialIcons name="cloud-upload" size={24} color="#4caf50" />
             </View>
             <View style={styles.cardInfo}>
-              <Text style={styles.cardTitle}>Importar Backup</Text>
-              <Text style={styles.cardDesc}>Restaurar dados a partir de um arquivo JSON</Text>
+              <Text style={styles.cardTitle}>{t('profile.admin.import_title')}</Text>
+              <Text style={styles.cardDesc}>{t('profile.admin.import_desc')}</Text>
             </View>
           </View>
           {loadingImport ? (
@@ -178,13 +178,13 @@ export default function AdminConfigScreen() {
         <View style={styles.infoBox}>
           <Ionicons name="shield-checkmark-outline" size={20} color="#4caf50" />
           <Text style={styles.infoText}>
-            O backup contém os landmarks brutos. Ao importar, o sistema recriará os datasets automaticamente se eles não existirem.
+            {t('profile.admin.info_box')}
           </Text>
         </View>
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Acesso restrito ao nível Administrador.</Text>
+        <Text style={styles.footerText}>{t('profile.admin.footer')}</Text>
       </View>
     </ScrollView>
   );
