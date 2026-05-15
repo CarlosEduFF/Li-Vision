@@ -84,7 +84,7 @@ async def get_training_status_by_model(model_name: str):
         supabase.table("training_jobs")
         .select("*")
         .in_("model_id", model_ids)
-        .order("created_at", desc=True)
+        .order("started_at", desc=True)
         .limit(10)
         .execute()
     )
