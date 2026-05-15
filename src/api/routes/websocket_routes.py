@@ -49,7 +49,8 @@ async def handle_action(websocket: WebSocket, session: UserSession, payload: dic
     # ---- Trocar modo de detecção ----
     if action == "set_mode":
         new_mode = payload.get("mode", "hybrid")
-        session.set_mode(new_mode)
+        use_rules = payload.get("use_rules") # Pode vir nulo
+        session.set_mode(new_mode, use_rules=use_rules)
         await websocket.send_json({
             "ok": True,
             "action": "set_mode",
@@ -83,10 +84,13 @@ async def handle_action(websocket: WebSocket, session: UserSession, payload: dic
 async def websocket_detect(websocket: WebSocket):
     await websocket.accept()
 
-    # Extrai modo de conexão do query param (ex: ws://host/ws/detect?mode=hybrid&model=LIBRAS_BR)
+    # Extrai modo de conexão do query param (ex: ws://host/ws/detect?mode=hybrid&model=LIBRAS_BR&use_rules=true)
     detection_mode = websocket.query_params.get("mode", None)
     active_model = websocket.query_params.get("model", None)
-    session = UserSession(detection_mode=detection_mode, active_model_name=active_model)
+    use_rules_str = websocket.query_params.get("use_rules", "true").lower()
+    use_rules = use_rules_str == "true"
+    
+    session = UserSession(detection_mode=detection_mode, active_model_name=active_model, use_rules=use_rules)
 
     print(f"[WS] Cliente conectado (modo: {session.detection_mode}, modelo: {active_model})")
 

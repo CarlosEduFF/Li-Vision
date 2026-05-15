@@ -44,7 +44,7 @@ class UserSession:
     - collecting:         flag indicando se a sessao esta em modo coleta
     """
 
-    def __init__(self, detection_mode: str = None, active_model_name: str = None):
+    def __init__(self, detection_mode: str = None, active_model_name: str = None, use_rules: bool = True):
         config = ModelCache.get_config()
 
         if detection_mode is None:
@@ -52,6 +52,7 @@ class UserSession:
 
         self.detection_mode = detection_mode
         self.active_model_name = active_model_name
+        self.use_rules = use_rules
         self.collecting = False
         self.collection_service = CollectionService()
         self.detector_manager = None
@@ -77,15 +78,17 @@ class UserSession:
                     detectors.extend(self._create_static_detectors(config))
                 except Exception as e:
                     logger.error("[UserSession] Falha ao criar detectores estaticos: %s", e)
-            if config["rules"]["enabled"]:
+            if config["rules"]["enabled"] and self.use_rules:
                 try:
                     detectors.extend(self._create_rule_detectors(config))
                 except Exception as e:
                     logger.error("[UserSession] Falha ao criar detectores de regras: %s", e)
 
         elif mode == "rules":
-            if config["rules"]["enabled"]:
+            if config["rules"]["enabled"] and self.use_rules:
                 detectors.extend(self._create_rule_detectors(config))
+            else:
+                logger.warning("[UserSession] Modo rules solicitado mas as regras estao desativadas.")
 
         elif mode == "ml":
             if config["ml"]["enabled"]:
@@ -222,11 +225,15 @@ class UserSession:
                 logger.warning("[UserSession] Detector de regra para '%s' nao existe", letter)
         return detectors
 
-    def set_mode(self, new_mode: str):
+    def set_mode(self, new_mode: str, use_rules: bool = None):
         """Troca o modo de deteccao em tempo real para esta sessao."""
         config = ModelCache.get_config()
         self.detection_mode = new_mode
+        if use_rules is not None:
+            self.use_rules = use_rules
+            
         self._build_detectors(config)
-        logger.info("[UserSession] Modo alterado para '%s' (%d detectores)",
+        logger.info("[UserSession] Modo alterado para '%s' (rules=%s, %d detectores)",
                     new_mode,
+                    self.use_rules,
                     len(self.detector_manager.detectors) if self.detector_manager else 0)
