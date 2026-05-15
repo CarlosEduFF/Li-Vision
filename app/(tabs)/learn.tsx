@@ -24,6 +24,7 @@ export default function LearnTabScreen() {
     avancado: { total: 0, learned: 0, percent: 0 },
   });
 
+  const [selectedModule, setSelectedModule] = useState<string>("Libras");
   const [role, setRole] = useState<string>("member");
   const [gestures, setGestures] = useState<LearningGestureApi[]>([]);
   const [loading, setLoading] = useState(false);
@@ -31,18 +32,29 @@ export default function LearnTabScreen() {
 
   const isAdmin = useMemo(() => role === "admin", [role]);
 
+  const modules = useMemo(() => {
+    const list = Array.from(new Set(gestures.map(g => g.module || "Libras")));
+    return list.length > 0 ? list : ["Libras"];
+  }, [gestures]);
+
+  useEffect(() => {
+    if (modules.length > 0 && !modules.includes(selectedModule)) {
+      setSelectedModule(modules[0]);
+    }
+  }, [modules, selectedModule]);
+
   const loadProgress = useCallback(async () => {
     const [i, m, a] = await Promise.all([
-      getLevelProgress("iniciante"),
-      getLevelProgress("intermediario"),
-      getLevelProgress("avancado"),
+      getLevelProgress("iniciante", selectedModule),
+      getLevelProgress("intermediario", selectedModule),
+      getLevelProgress("avancado", selectedModule),
     ]);
     setProgress({
       iniciante: i,
       intermediario: m,
       avancado: a,
     });
-  }, []);
+  }, [selectedModule]);
 
   const loadGestures = useCallback(async () => {
     try {
@@ -81,16 +93,18 @@ export default function LearnTabScreen() {
       avancado: {},
     };
 
-    gestures.forEach((g) => {
-      if (!group[g.level]) group[g.level] = {};
-      if (!group[g.level][g.category]) {
-        group[g.level][g.category] = 0;
-      }
-      group[g.level][g.category]++;
-    });
+    gestures
+      .filter((g) => (g.module || "Libras") === selectedModule)
+      .forEach((g) => {
+        if (!group[g.level]) group[g.level] = {};
+        if (!group[g.level][g.category]) {
+          group[g.level][g.category] = 0;
+        }
+        group[g.level][g.category]++;
+      });
 
     return group;
-  }, [gestures]);
+  }, [gestures, selectedModule]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#10141a" }}>
@@ -104,6 +118,21 @@ export default function LearnTabScreen() {
               </Text>
             </View>
           </View>
+        </View>
+
+        {/* Module Selector */}
+        <View style={styles.moduleSelectorContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.moduleScroll}>
+            {modules.map(mod => (
+              <TouchableOpacity 
+                key={mod} 
+                style={[styles.moduleBtn, selectedModule === mod && styles.moduleBtnActive]}
+                onPress={() => setSelectedModule(mod)}
+              >
+                <Text style={[styles.moduleBtnText, selectedModule === mod && styles.moduleBtnTextActive]}>{mod}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
 
         {isAdmin && (
@@ -163,7 +192,7 @@ export default function LearnTabScreen() {
                       onPress={() =>
                         router.push({
                           pathname: "/screens/gesture-detail" as any,
-                          params: { level, category: cat },
+                          params: { level, category: cat, module: selectedModule },
                         })
                       }
                     >
@@ -222,6 +251,33 @@ const styles = StyleSheet.create({
     color: "#b8c0cc",
     marginTop: 8,
     lineHeight: 20,
+  },
+  moduleSelectorContainer: {
+    marginBottom: 20,
+  },
+  moduleScroll: {
+    gap: 10,
+    paddingRight: 20,
+  },
+  moduleBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "#1c2026",
+    borderWidth: 1,
+    borderColor: "#2a3548",
+  },
+  moduleBtnActive: {
+    backgroundColor: "rgba(0, 229, 255, 0.15)",
+    borderColor: "#00e5ff",
+  },
+  moduleBtnText: {
+    color: "#8a92a3",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  moduleBtnTextActive: {
+    color: "#00e5ff",
   },
   adminBtn: {
     flexDirection: "row",

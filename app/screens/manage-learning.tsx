@@ -32,6 +32,7 @@ type FormState = {
   name: string;
   level: LearningLevel;
   category: string;
+  module: string;
   description: string;
   svg_initial: string;
   svg_movement: string;
@@ -42,6 +43,7 @@ const initialForm: FormState = {
   name: "",
   level: "iniciante",
   category: "Alfabeto",
+  module: "Libras",
   description: "",
   svg_initial: "",
   svg_movement: "",
@@ -86,6 +88,7 @@ export default function ManageLearningScreen() {
       name: item.name,
       level: item.level as LearningLevel,
       category: item.category,
+      module: item.module || "Libras",
       description: item.description,
       svg_initial: item.svg_initial || "",
       svg_movement: item.svg_movement || "",
@@ -129,6 +132,7 @@ export default function ManageLearningScreen() {
         name: form.name.trim(),
         level: form.level,
         category: form.category.trim(),
+        module: form.module.trim() || "Libras",
         description: form.description.trim(),
         svg_initial: finalInitial,
         svg_movement: finalMovement,
@@ -224,7 +228,7 @@ export default function ManageLearningScreen() {
               <View style={styles.cardLeft}>
                 <Text style={styles.cardTitle}>{item.name}</Text>
                 <Text style={styles.cardSubtitle}>
-                  {t(`levels_simple.${item.level}`).toUpperCase()} • {item.category}
+                   {t(`levels_simple.${item.level}`).toUpperCase()} • {item.module} • {item.category}
                 </Text>
               </View>
               <View style={styles.cardActions}>
@@ -263,6 +267,15 @@ export default function ManageLearningScreen() {
               onChangeText={(v) => setForm((f) => ({ ...f, category: v }))}
               style={styles.input}
               placeholder={t('manage_learning.category_placeholder')}
+              placeholderTextColor="#697688"
+            />
+
+            <Text style={styles.inputLabel}>{t('manage_learning.module') || "Módulo / Idioma"}</Text>
+            <TextInput
+              value={form.module}
+              onChangeText={(v) => setForm((f) => ({ ...f, module: v }))}
+              style={styles.input}
+              placeholder="Ex: Libras, ASL, Cozinha..."
               placeholderTextColor="#697688"
             />
 

@@ -89,6 +89,7 @@ export interface LearningGestureApi {
   name: string;
   level: LearningLevelApi;
   category: string;
+  module: string;
   description: string;
   svg_initial?: string;
   svg_movement?: string;
@@ -102,6 +103,7 @@ export interface LearningGesturePayloadApi {
   name: string;
   level: LearningLevelApi;
   category: string;
+  module: string;
   description: string;
   svg_initial?: string;
   svg_movement?: string;
@@ -112,11 +114,13 @@ export interface LearningGesturePayloadApi {
 export async function getLearningGestures(params?: {
   level?: LearningLevelApi;
   category?: string;
+  module?: string;
   include_inactive?: boolean;
 }) {
   const query = new URLSearchParams();
   if (params?.level) query.append("level", params.level);
   if (params?.category) query.append("category", params.category);
+  if (params?.module) query.append("module", params.module);
   if (typeof params?.include_inactive === "boolean") {
     query.append("include_inactive", String(params.include_inactive));
   }

@@ -8,6 +8,7 @@ export interface Gesture {
   name: string;
   level: LearningLevel;
   category: string;
+  module: string;
   description: string;
   svgInitial: string;
   svgMovement: string;
@@ -56,6 +57,7 @@ function mapApiGesture(item: LearningGestureApi): Gesture {
     name: item.name,
     level: item.level,
     category: item.category,
+    module: item.module || "Libras",
     description: item.description,
     svgInitial: item.svg_initial || "",
     svgMovement: item.svg_movement || "",
@@ -63,9 +65,9 @@ function mapApiGesture(item: LearningGestureApi): Gesture {
   };
 }
 
-export async function getAllGestures(): Promise<Gesture[]> {
+export async function getAllGestures(module?: string): Promise<Gesture[]> {
   try {
-    const response = await getLearningGestures();
+    const response = await getLearningGestures({ module });
     if (response.ok && Array.isArray(response.items)) {
       const apiGestures = response.items.map(mapApiGesture);
       return apiGestures;
@@ -112,17 +114,17 @@ export async function markGestureProgress(
   await saveProgressMap(current);
 }
 
-export async function getGesturesByLevel(level: LearningLevel): Promise<Gesture[]> {
-  const all = await getAllGestures();
+export async function getGesturesByLevel(level: LearningLevel, module?: string): Promise<Gesture[]> {
+  const all = await getAllGestures(module);
   return all.filter((g) => g.level === level);
 }
 
-export async function getLevelProgress(level: LearningLevel): Promise<{
+export async function getLevelProgress(level: LearningLevel, module?: string): Promise<{
   total: number;
   learned: number;
   percent: number;
 }> {
-  const gestures = await getGesturesByLevel(level);
+  const gestures = await getGesturesByLevel(level, module);
   const progressMap = await getProgressMap();
 
   const learnedCount = gestures.filter((g) => progressMap[g.id]?.learned).length;

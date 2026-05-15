@@ -27,10 +27,11 @@ function isLearningLevel(value: string): value is LearningLevel {
 
 export default function GestureDetailScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ level?: string; category?: string }>();
+  const params = useLocalSearchParams<{ level?: string; category?: string; module?: string }>();
   const level: LearningLevel = isLearningLevel(params.level || "")
     ? (params.level as LearningLevel)
     : "iniciante";
+  const selectedModule = params.module || "Libras";
 
   const [gestures, setGestures] = useState<Gesture[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +42,7 @@ export default function GestureDetailScreen() {
     try {
       setLoading(true);
       const [items, pMap] = await Promise.all([
-        getGesturesByLevel(level),
+        getGesturesByLevel(level, selectedModule),
         getProgressMap(),
       ]);
       setProgressMap(pMap);
