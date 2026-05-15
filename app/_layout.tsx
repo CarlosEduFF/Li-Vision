@@ -106,6 +106,7 @@ export default function RootLayout() {
         <Stack.Screen name="screens/ranking" options={{ headerShown: false }} />
         <Stack.Screen name="screens/about" options={{ headerShown: false }} />
         <Stack.Screen name="screens/levels-info" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/admin-config" options={{headerShown: false}}/>
       </Stack>
       <StatusBar style="auto" />
       <GlobalVLibras />

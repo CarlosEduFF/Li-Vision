@@ -38,10 +38,13 @@ export default function AdminConfigScreen() {
 
       const jsonData = JSON.stringify(res, null, 2);
       const filename = `LiVision_Backup_${new Date().toISOString().split('T')[0]}.json`;
-      const fs: any = FileSystem;
-      const fileUri = (fs.cacheDirectory || "") + filename;
+      
+      // Usando cast para 'any' para silenciar erros de definição de tipo do TypeScript
+      const fs = FileSystem as any;
+      const cacheDir = fs.cacheDirectory || fs.documentDirectory || "";
+      const fileUri = cacheDir + filename;
 
-      await fs.writeAsStringAsync(fileUri, jsonData, { encoding: fs.EncodingType.UTF8 });
+      await fs.writeAsStringAsync(fileUri, jsonData, { encoding: 'utf8' });
       
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri);
@@ -73,8 +76,8 @@ export default function AdminConfigScreen() {
               if (result.canceled) return;
 
               setLoadingImport(true);
-              const fs: any = FileSystem;
-              const fileContent = await fs.readAsStringAsync(result.assets[0].uri);
+              const fs = FileSystem as any;
+              const fileContent = await fs.readAsStringAsync(result.assets[0].uri, { encoding: 'utf8' });
               const backupData = JSON.parse(fileContent);
 
               if (!backupData.samples || !backupData.datasets) {
