@@ -13,14 +13,22 @@
     "logout": "Cerrar sesión",
     "language": "Idioma",
     "levels": {
+      "champion": "Campeón",
+      "champion_desc": "¡El pináculo absoluto de la contribución! Eres una leyenda en el mundo de la IA accesible.",
+      "legend": "Leyenda",
+      "legend_desc": "Dedicación increíble. Tus donaciones están dando forma al futuro de Li-Vision.",
+      "specialist": "Especialista",
+      "specialist_desc": "Un verdadero especialista en datos. Tus contribuciones constantes son vitales para nuestro progreso.",
+      "expert": "Experto",
+      "expert_desc": "Has superado el nivel maestro. Tu experiencia en la enseñanza de lengua de señas es inigualable.",
       "master": "Maestro",
-      "master_desc": "¡El nivel más alto! Reservado para quienes han donado más de 500 secuencias de señas a la inteligencia artificial.",
+      "master_desc": "¡Nivel Maestro! Reservado para quienes han donado más de 500 secuencias de señas.",
       "fluent": "Fluido",
       "fluent_desc": "Colaborador recurrente. Ya has dominado el arte de enseñar a la IA con más de 100 donaciones.",
       "apprentice": "Aprendiz",
-      "apprentice_desc": "¡Has roto la inercia y comenzado tu viaje de impacto. ¡Sigue donando para subir de nivel!",
+      "apprentice_desc": "Has roto la inercia y comenzado tu viaje de impacto.",
       "beginner": "Principiante",
-      "beginner_desc": "Todos empiezan aquí. Haz tus primeras donaciones en el ML Studio para avanzar al siguiente nivel."
+      "beginner_desc": "Todos empiezan aquí. Haz tus primeras donaciones en el ML Studio."
     }
   },
   "learn": {

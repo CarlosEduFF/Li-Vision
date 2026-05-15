@@ -87,6 +87,10 @@ function ProfileScreen() {
   };
 
   const getLevel = (samples: number) => {
+    if (samples >= 20000) return { title: t("profile.levels.champion"), color: "#E91E63", icon: "trophy" };
+    if (samples >= 10000) return { title: t("profile.levels.legend"), color: "#9C27B0", icon: "fire" };
+    if (samples >= 5000) return { title: t("profile.levels.specialist"), color: "#3F51B5", icon: "medal" };
+    if (samples >= 1001) return { title: t("profile.levels.expert"), color: "#FF5722", icon: "user-graduate" };
     if (samples > 500) return { title: t("profile.levels.master"), color: "#ffdf00", icon: "crown" };
     if (samples > 100) return { title: t("profile.levels.fluent"), color: "#00e5ff", icon: "shield-alt" };
     if (samples > 10) return { title: t("profile.levels.apprentice"), color: "#4caf50", icon: "seedling" };

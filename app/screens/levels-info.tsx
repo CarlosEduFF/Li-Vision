@@ -32,9 +32,8 @@ export default function LevelsInfoScreen() {
               <View style={styles.levelTextContainer}>
                 <Text style={[styles.levelTitle, { color: level.color }]}>{t(`profile.levels.${level.id}`)}</Text>
                 <Text style={styles.levelRange}>
-                  {level.minSamples === 501 ? t('levels_info.above_500') : 
-                   level.minSamples === 101 ? `101 ${t('levels_info.to')} 500` :
-                   level.minSamples === 11 ? `11 ${t('levels_info.to')} 100` : `0 ${t('levels_info.to')} 10`} {t('levels_info.frames')}
+                  {index === 0 ? `${t('levels_info.above_500').replace('500', level.minSamples.toString())}` : 
+                   `${level.minSamples} ${t('levels_info.to')} ${APP_LEVELS[index - 1].minSamples - 1}`} {t('levels_info.frames')}
                 </Text>
               </View>
             </View>

@@ -13,14 +13,22 @@
     "logout": "Abmelden",
     "language": "Sprache",
     "levels": {
+      "champion": "Champion",
+      "champion_desc": "Der absolute Höhepunkt des Beitrags! Du bist eine Legende in der Welt der barrierefreien KI.",
+      "legend": "Legende",
+      "legend_desc": "Unglaubliches Engagement. Deine Spenden prägen die Zukunft von Li-Vision.",
+      "specialist": "Spezialist",
+      "specialist_desc": "Ein wahrer Datenspezialist. Deine beständigen Beiträge sind lebenswichtig für unseren Fortschritt.",
+      "expert": "Experte",
+      "expert_desc": "Du hast das Meister-Level überschritten. Deine Expertise im Unterrichten von Gebärdensprache ist unerreicht.",
       "master": "Meister",
-      "master_desc": "Das höchste Level! Reserviert für diejenigen, die mehr als 500 Gebärdensequenzen für die künstliche Intelligenz gespendet haben.",
+      "master_desc": "Meister-Level! Reserviert für diejenigen, die mehr als 500 Gebärdensequenzen gespendet haben.",
       "fluent": "Fließend",
       "fluent_desc": "Regelmäßiger Mitwirkender. Du hast mit mehr als 100 Spenden bereits die Kunst gemeistert, der KI etwas beizubringen.",
       "apprentice": "Lehrling",
-      "apprentice_desc": "Du hast den Anfang gemacht und deine Reise mit Wirkung begonnen. Spende weiter, um aufzusteigen!",
+      "apprentice_desc": "Du hast den Anfang gemacht und deine Reise mit Wirkung begonnen.",
       "beginner": "Anfänger",
-      "beginner_desc": "Jeder fängt hier an. Mache deine ersten Spenden im ML Studio, um das nächste Level zu erreichen."
+      "beginner_desc": "Jeder fängt hier an. Mache deine ersten Spenden im ML Studio."
     }
   },
   "learn": {
