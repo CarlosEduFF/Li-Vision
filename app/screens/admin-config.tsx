@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from "react-native";
+import { View, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Platform } from "react-native";
 import Text from "@/components/TranslatableText";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -39,22 +39,50 @@ export default function AdminConfigScreen() {
       const jsonData = JSON.stringify(res, null, 2);
       const filename = `LiVision_Backup_${new Date().toISOString().split('T')[0]}.json`;
       
-      // Usando cast para 'any' para silenciar erros de definição de tipo do TypeScript
       const fs = FileSystem as any;
-      const cacheDir = fs.cacheDirectory || fs.documentDirectory || "";
-      const fileUri = cacheDir + filename;
 
-      await fs.writeAsStringAsync(fileUri, jsonData, { encoding: 'utf8' });
-      
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(fileUri);
+      // ---- LÓGICA PARA ESCOLHER PASTA (ANDROID) ----
+      if (Platform.OS === 'android') {
+        const permissions = await fs.StorageAccessFramework.requestDirectoryPermissionsAsync();
+        
+        if (permissions.granted) {
+          // Usuário escolheu uma pasta
+          const directoryUri = permissions.directoryUri;
+          const fileUri = await fs.StorageAccessFramework.createFileAsync(
+            directoryUri,
+            filename,
+            'application/json'
+          );
+          
+          await fs.writeAsStringAsync(fileUri, jsonData, { encoding: 'utf8' });
+          Alert.alert("Sucesso", "Backup salvo com sucesso na pasta selecionada.");
+        } else {
+          // Fallback para compartilhamento normal se permissão negada
+          await shareFallback(jsonData, filename);
+        }
       } else {
-        Alert.alert("Sucesso", "Backup gerado com sucesso.");
+        // iOS: O menu de compartilhamento já tem "Salvar em Arquivos" nativamente
+        await shareFallback(jsonData, filename);
       }
+
     } catch (e: any) {
       Alert.alert("Erro no Backup", e.message);
     } finally {
       setLoadingBackup(false);
+    }
+  };
+
+  const shareFallback = async (data: string, filename: string) => {
+    const fs = FileSystem as any;
+    const cacheDir = fs.cacheDirectory || fs.documentDirectory || "";
+    const tempUri = cacheDir + filename;
+    
+    await fs.writeAsStringAsync(tempUri, data, { encoding: 'utf8' });
+    
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(tempUri);
+    } else {
+      Alert.alert("Sucesso", "Backup gerado. Compartilhamento indisponível.");
     }
   };
 
