@@ -9,6 +9,7 @@ import { LearningLevel } from "@/services/learningService";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   Modal,
@@ -54,6 +55,7 @@ export default function ManageLearningScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<FormState>(initialForm);
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadCrudList();
@@ -65,7 +67,7 @@ export default function ManageLearningScreen() {
       const res = await getLearningGestures({ include_inactive: true });
       setCrudItems(res.items || []);
     } catch (error: any) {
-      Alert.alert("Erro", error?.message || "Não foi possível carregar gestos para edição.");
+      Alert.alert(t('manage_learning.success_title'), error?.message || t('manage_learning.error_load'));
     } finally {
       setLoadingCrud(false);
     }
@@ -92,11 +94,11 @@ export default function ManageLearningScreen() {
 
   const saveGesture = async () => {
     if (!form.name.trim()) {
-      Alert.alert("Validação", "Informe o nome do gesto.");
+      Alert.alert(t('manage_learning.validation_title'), t('manage_learning.name_required'));
       return;
     }
     if (!form.category.trim()) {
-      Alert.alert("Validação", "Informe a categoria.");
+      Alert.alert(t('manage_learning.validation_title'), t('manage_learning.category_required'));
       return;
     }
 
@@ -141,9 +143,9 @@ export default function ManageLearningScreen() {
       setModalVisible(false);
       setForm(initialForm);
       await loadCrudList();
-      Alert.alert("Sucesso", form.id ? "Gesto atualizado." : "Gesto criado.");
+      Alert.alert(t('manage_learning.success_title'), form.id ? t('manage_learning.gesture_updated') : t('manage_learning.gesture_created'));
     } catch (error: any) {
-      Alert.alert("Erro", error?.message || "Falha ao salvar gesto.");
+      Alert.alert(t('manage_learning.success_title'), error?.message || t('manage_learning.save_error'));
     } finally {
       setSaving(false);
     }
@@ -152,7 +154,7 @@ export default function ManageLearningScreen() {
   const pickImageFor = async (field: "svg_initial" | "svg_movement" | "svg_final") => {
     const permResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permResult.granted) {
-      Alert.alert("Permissão", "Precisamos de acesso à galeria.");
+      Alert.alert(t('manage_learning.permission_title'), t('manage_learning.gallery_permission'));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -167,19 +169,19 @@ export default function ManageLearningScreen() {
 
   const removeGesture = (item: LearningGestureApi) => {
     Alert.alert(
-      "Excluir gesto",
-      `Deseja excluir "${item.name}"?`,
+      t('manage_learning.delete_title'),
+      t('manage_learning.delete_msg', { name: item.name }),
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: t('manage_learning.cancel'), style: "cancel" },
         {
-          text: "Excluir",
+          text: t('manage_learning.delete'),
           style: "destructive",
           onPress: async () => {
             try {
               await deleteLearningGesture(item.id);
               await loadCrudList();
             } catch (error: any) {
-              Alert.alert("Erro", error?.message || "Falha ao excluir gesto.");
+              Alert.alert(t('manage_learning.success_title'), error?.message || t('manage_learning.delete_error'));
             }
           },
         },
@@ -200,27 +202,27 @@ export default function ManageLearningScreen() {
           <MaterialIcons name="arrow-back" size={24} color="#00e5ff" />
         </TouchableOpacity>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Gerenciar Módulos</Text>
-          <Text style={styles.subtitle}>Crie categorias e gestos de aprendizado</Text>
+          <Text style={styles.title}>{t('manage_learning.title')}</Text>
+          <Text style={styles.subtitle}>{t('manage_learning.subtitle')}</Text>
         </View>
         <TouchableOpacity style={styles.addBtn} onPress={openCreate}>
           <MaterialIcons name="add" size={20} color="#081018" />
-          <Text style={styles.addBtnText}>Novo Gesto</Text>
+          <Text style={styles.addBtnText}>{t('manage_learning.new_gesture')}</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
         {loadingCrud ? (
-          <Text style={styles.emptyText}>Carregando lista de gestos...</Text>
+          <Text style={styles.emptyText}>{t('manage_learning.loading_gestures')}</Text>
         ) : crudItems.length === 0 ? (
-          <Text style={styles.emptyText}>Nenhum gesto cadastrado.</Text>
+          <Text style={styles.emptyText}>{t('manage_learning.no_gestures')}</Text>
         ) : (
           crudItems.map((item) => (
             <View key={item.id} style={styles.card}>
               <View style={styles.cardLeft}>
                 <Text style={styles.cardTitle}>{item.name}</Text>
                 <Text style={styles.cardSubtitle}>
-                  {item.level.toUpperCase()} • {item.category}
+                  {t(`levels_simple.${item.level}`).toUpperCase()} • {item.category}
                 </Text>
               </View>
               <View style={styles.cardActions}>
@@ -242,45 +244,45 @@ export default function ManageLearningScreen() {
           style={styles.modalBg}
         >
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{form.id ? "Editar gesto" : "Novo gesto"}</Text>
+            <Text style={styles.modalTitle}>{form.id ? t('manage_learning.edit_gesture') : t('manage_learning.new_gesture_modal')}</Text>
 
-            <Text style={styles.inputLabel}>Nome do Gesto</Text>
+            <Text style={styles.inputLabel}>{t('manage_learning.gesture_name')}</Text>
             <TextInput
               value={form.name}
               onChangeText={(v) => setForm((f) => ({ ...f, name: v }))}
               style={styles.input}
-              placeholder="Ex: A, Oi, Bom dia"
+              placeholder={t('manage_learning.name_placeholder')}
               placeholderTextColor="#697688"
             />
 
-            <Text style={styles.inputLabel}>Categoria</Text>
+            <Text style={styles.inputLabel}>{t('manage_learning.category')}</Text>
             <TextInput
               value={form.category}
               onChangeText={(v) => setForm((f) => ({ ...f, category: v }))}
               style={styles.input}
-              placeholder="Ex: Alfabeto, Cumprimentos"
+              placeholder={t('manage_learning.category_placeholder')}
               placeholderTextColor="#697688"
             />
 
-            <Text style={styles.inputLabel}>Descrição</Text>
+            <Text style={styles.inputLabel}>{t('manage_learning.description')}</Text>
             <TextInput
               value={form.description}
               onChangeText={(v) => setForm((f) => ({ ...f, description: v }))}
               style={[styles.input, { height: 76 }]}
               multiline
-              placeholder="Descrição pedagógica do gesto"
+              placeholder={t('manage_learning.description_placeholder')}
               placeholderTextColor="#697688"
             />
 
-            <Text style={styles.inputLabel}>Nível de Dificuldade</Text>
+            <Text style={styles.inputLabel}>{t('manage_learning.difficulty_level')}</Text>
             <TouchableOpacity
               style={styles.levelPicker}
               onPress={() => setForm((f) => ({ ...f, level: nextLevel() }))}>
-              <Text style={styles.levelPickerText}>{form.level.toUpperCase()}</Text>
+              <Text style={styles.levelPickerText}>{t(`levels_simple.${form.level}`).toUpperCase()}</Text>
               <MaterialIcons name="swap-horiz" size={20} color="#00e5ff" />
             </TouchableOpacity>
 
-            <Text style={styles.inputLabel}>Imagens (Inicial / Movimento / Final)</Text>
+            <Text style={styles.inputLabel}>{t('manage_learning.images_label')}</Text>
             <View style={styles.imagesRow}>
               <TouchableOpacity style={styles.imageBox} onPress={() => pickImageFor("svg_initial")}>
                 {form.svg_initial ? (
@@ -288,7 +290,7 @@ export default function ManageLearningScreen() {
                 ) : (
                   <MaterialIcons name="pan-tool" size={24} color="#697688" />
                 )}
-                <Text style={styles.imageBoxText}>Inicial</Text>
+                <Text style={styles.imageBoxText}>{t('manage_learning.initial')}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.imageBox} onPress={() => pickImageFor("svg_movement")}>
@@ -297,7 +299,7 @@ export default function ManageLearningScreen() {
                 ) : (
                   <MaterialIcons name="gesture" size={24} color="#697688" />
                 )}
-                <Text style={styles.imageBoxText}>Movimento</Text>
+                <Text style={styles.imageBoxText}>{t('manage_learning.movement')}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.imageBox} onPress={() => pickImageFor("svg_final")}>
@@ -306,7 +308,7 @@ export default function ManageLearningScreen() {
                 ) : (
                   <MaterialIcons name="front-hand" size={24} color="#697688" />
                 )}
-                <Text style={styles.imageBoxText}>Final</Text>
+                <Text style={styles.imageBoxText}>{t('manage_learning.final')}</Text>
               </TouchableOpacity>
             </View>
 
@@ -314,13 +316,13 @@ export default function ManageLearningScreen() {
               <TouchableOpacity
                 style={[styles.modalBtn, styles.cancelBtn]}
                 onPress={() => setModalVisible(false)}>
-                <Text style={styles.cancelText}>Cancelar</Text>
+                <Text style={styles.cancelText}>{t('manage_learning.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalBtn, styles.saveBtn]}
                 onPress={saveGesture}
                 disabled={saving}>
-                <Text style={styles.saveText}>{saving ? "Salvando..." : "Salvar Gesto"}</Text>
+                <Text style={styles.saveText}>{saving ? t('manage_learning.saving') : t('manage_learning.save_btn')}</Text>
               </TouchableOpacity>
             </View>
           </View>

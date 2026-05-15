@@ -9,6 +9,7 @@ import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { trainingService } from "@/services/trainingService";
+import { useTranslation } from "react-i18next";
 
 export default function EditProfileScreen() {
   const [fullName, setFullName] = useState("");
@@ -17,6 +18,7 @@ export default function EditProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadProfile();
@@ -46,7 +48,7 @@ export default function EditProfileScreen() {
   const pickImage = async () => {
     const permResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permResult.granted) {
-      Alert.alert("Permissão necessária", "Precisamos de acesso à sua galeria para selecionar uma foto.");
+      Alert.alert(t('edit_profile.permission_gallery_title'), t('edit_profile.permission_gallery_msg'));
       return;
     }
 
@@ -65,7 +67,7 @@ export default function EditProfileScreen() {
   const takePhoto = async () => {
     const permResult = await ImagePicker.requestCameraPermissionsAsync();
     if (!permResult.granted) {
-      Alert.alert("Permissão necessária", "Precisamos de acesso à câmera para tirar uma foto.");
+      Alert.alert(t('edit_profile.permission_camera_title'), t('edit_profile.permission_camera_msg'));
       return;
     }
 
@@ -82,7 +84,7 @@ export default function EditProfileScreen() {
 
   const handleSaveChanges = async () => {
     if (!fullName.trim()) {
-      Alert.alert("Aviso", "O nome não pode estar vazio.");
+      Alert.alert(t('edit_profile.warning'), t('edit_profile.empty_name'));
       return;
     }
 
@@ -97,7 +99,7 @@ export default function EditProfileScreen() {
         await AsyncStorage.setItem("userName", resName.full_name);
         nameSuccess = true;
       } else {
-        Alert.alert("Erro", resName.detail || "Falha ao atualizar o nome.");
+        Alert.alert(t('edit_profile.error'), resName.detail || t('edit_profile.update_name_fail'));
         setSaving(false);
         return;
       }
@@ -112,18 +114,18 @@ export default function EditProfileScreen() {
           await AsyncStorage.setItem("userAvatar", resPhoto.avatar_url);
           photoSuccess = true;
         } else {
-          Alert.alert("Erro", resPhoto.detail || "Falha ao enviar a foto.");
+          Alert.alert(t('edit_profile.error'), resPhoto.detail || t('edit_profile.update_photo_fail'));
         }
         setUploadingPhoto(false);
       }
 
       if (nameSuccess && !localImageUri) {
-        Alert.alert("✅ Sucesso!", `Perfil atualizado com sucesso.`);
+        Alert.alert(t('edit_profile.success'), t('edit_profile.success_profile'));
       } else if (nameSuccess && photoSuccess) {
-        Alert.alert("✅ Sucesso!", "Nome e foto de perfil atualizados com sucesso!");
+        Alert.alert(t('edit_profile.success'), t('edit_profile.success_both'));
       }
     } catch (e) {
-      Alert.alert("Erro de rede", "Não foi possível salvar as alterações: " + String(e));
+      Alert.alert(t('edit_profile.network_error'), t('edit_profile.network_error_msg') + String(e));
     } finally {
       setSaving(false);
     }
@@ -154,7 +156,7 @@ export default function EditProfileScreen() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <MaterialIcons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Editar Perfil</Text>
+          <Text style={styles.headerTitle}>{t('edit_profile.title')}</Text>
           <View style={{ width: 40 }} />
         </View>
 
@@ -177,12 +179,12 @@ export default function EditProfileScreen() {
               style={styles.editBadge}
               onPress={() => {
                 Alert.alert(
-                  "Alterar Foto",
-                  "Escolha de onde deseja pegar a foto",
+                  t('edit_profile.change_photo'),
+                  t('edit_profile.choose_source'),
                   [
-                    { text: "📷 Câmera", onPress: takePhoto },
-                    { text: "🖼️ Galeria", onPress: pickImage },
-                    { text: "Cancelar", style: "cancel" },
+                    { text: t('edit_profile.camera'), onPress: takePhoto },
+                    { text: t('edit_profile.gallery'), onPress: pickImage },
+                    { text: t('edit_profile.cancel'), style: "cancel" },
                   ]
                 );
               }}
@@ -194,14 +196,14 @@ export default function EditProfileScreen() {
 
         {/* Form */}
         <View style={styles.formCard}>
-          <Text style={styles.fieldLabel}>Nome Completo</Text>
+          <Text style={styles.fieldLabel}>{t('edit_profile.full_name')}</Text>
           <View style={styles.inputRow}>
             <MaterialIcons name="person" size={20} color="#555" />
             <TextInput
               style={styles.input}
               value={fullName}
               onChangeText={setFullName}
-              placeholder="Seu nome completo"
+              placeholder={t('edit_profile.name_placeholder')}
               placeholderTextColor="#444"
               autoCapitalize="words"
             />
@@ -217,7 +219,7 @@ export default function EditProfileScreen() {
             ) : (
               <>
                 <MaterialIcons name="save" size={20} color="#000" />
-                <Text style={styles.saveBtnText}>Salvar Alterações</Text>
+                <Text style={styles.saveBtnText}>{t('edit_profile.save')}</Text>
               </>
             )}
           </TouchableOpacity>
@@ -227,7 +229,7 @@ export default function EditProfileScreen() {
         <View style={styles.infoCard}>
           <MaterialIcons name="info-outline" size={18} color="#ffab00" />
           <Text style={styles.infoText}>
-            A foto de perfil será armazenada na nuvem do Supabase e ficará visível para outros usuários no ranking.
+            {t('edit_profile.info')}
           </Text>
         </View>
       </ScrollView>

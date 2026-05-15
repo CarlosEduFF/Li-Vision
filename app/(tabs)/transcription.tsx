@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
+import { useTranslation } from "react-i18next";
 
 // VLibras renderiza internamente em tamanho fixo.
 // Não tentamos redimensionar — o WebView preenche o espaço e o VLibras renderiza dentro.
@@ -177,6 +178,7 @@ export default function TranscriptionTabScreen() {
     const [isReady, setIsReady] = useState(false);
     const [isTranslating, setIsTranslating] = useState(false);
     const [lastTranslated, setLastTranslated] = useState("");
+    const { t } = useTranslation();
 
     const handleTranslate = () => {
         if (!text.trim() || !webViewRef.current) return;
@@ -208,7 +210,7 @@ export default function TranscriptionTabScreen() {
             {/* Header */}
             <View style={styles.header}>
                 <MaterialIcons name="translate" size={24} color="#00e5ff" />
-                <Text style={styles.title}>Transcrição para Libras</Text>
+                <Text style={styles.title}>{t('transcription.title')}</Text>
             </View>
 
             {/* Input Area */}
@@ -221,7 +223,7 @@ export default function TranscriptionTabScreen() {
                         style={styles.input}
                         value={text}
                         onChangeText={setText}
-                        placeholder="Digite o texto em Português..."
+                        placeholder={t('transcription.placeholder')}
                         placeholderTextColor="#697688"
                         multiline
                         maxLength={500}
@@ -242,7 +244,7 @@ export default function TranscriptionTabScreen() {
                             ) : (
                                 <>
                                     <MaterialIcons name="sign-language" size={18} color="#081018" />
-                                    <Text style={styles.translateBtnText}>Traduzir</Text>
+                                    <Text style={styles.translateBtnText}>{t('transcription.translate')}</Text>
                                 </>
                             )}
                         </TouchableOpacity>
@@ -255,7 +257,7 @@ export default function TranscriptionTabScreen() {
                 {!isReady && (
                     <View style={styles.loadingOverlay}>
                         <ActivityIndicator size="large" color="#00e5ff" />
-                        <Text style={styles.loadingText}>Carregando avatar...</Text>
+                        <Text style={styles.loadingText}>{t('transcription.loading')}</Text>
                     </View>
                 )}
                 <WebView
@@ -287,7 +289,7 @@ export default function TranscriptionTabScreen() {
             <View style={styles.footer}>
                 <MaterialIcons name="info-outline" size={14} color="#697688" />
                 <Text style={styles.footerText}>
-                    Tradução automática via VLibras (Governo Federal / UFPB)
+                    {t('transcription.footer')}
                 </Text>
             </View>
         </SafeAreaView>

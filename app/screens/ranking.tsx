@@ -4,11 +4,13 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { trainingService } from "../../services/trainingService";
+import { useTranslation } from "react-i18next";
 
 export default function RankingScreen() {
   const router = useRouter();
   const [ranking, setRanking] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const loadRanking = async () => {
@@ -35,7 +37,7 @@ export default function RankingScreen() {
     return (
       <View style={[styles.podiumCol, { zIndex: position === 1 ? 2 : 1 }]}>
         <Text style={styles.podiumName} numberOfLines={1}>{item.name}</Text>
-        <Text style={styles.podiumSamples}>{item.samples} pts</Text>
+        <Text style={styles.podiumSamples}>{item.samples} {t('ranking.points')}</Text>
         <LinearGradient
           colors={colors as [string, string]}
           style={[styles.podiumBox, { height }]}
@@ -59,7 +61,7 @@ export default function RankingScreen() {
           <Text style={styles.rankRowName}>{item.name}</Text>
         </View>
         <LinearGradient colors={["rgba(0, 229, 255, 0.2)", "rgba(0, 229, 255, 0.0)"]} style={styles.pointsBadge}>
-          <Text style={styles.rankRowPoints}>{item.samples} frames</Text>
+          <Text style={styles.rankRowPoints}>{item.samples} {t('ranking.frames')}</Text>
         </LinearGradient>
       </View>
     );
@@ -72,7 +74,7 @@ export default function RankingScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <MaterialIcons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.title}>Global Leaderboard</Text>
+        <Text style={styles.title}>{t('ranking.title')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -81,7 +83,7 @@ export default function RankingScreen() {
       ) : (
         <>
           <Text style={styles.subtitle}>
-            Os pesquisadores que mais contribuíram treinando a IA do Li-Vision Edge.
+            {t('ranking.subtitle')}
           </Text>
 
           {/* Podium for top 3 */}

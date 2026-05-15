@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { trainingService } from '../../services/trainingService';
+import { useTranslation } from 'react-i18next';
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState('');
@@ -13,9 +14,11 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [hasToken, setHasToken] = useState(false);
+  const { t } = useTranslation();
+
   const handleSubmit = async () => {
     if (!email || !password || !fullName) {
-      Alert.alert("Aviso", "Por favor preencha todos os campos.");
+      Alert.alert(t('register.warning'), t('login.fill_fields'));
       return;
     }
     
@@ -38,10 +41,10 @@ export default function RegisterScreen() {
            setShowSuccessModal(true);
         }
       } else {
-        Alert.alert("Aviso no Cadastro", "Verifique o backend ou tente fazer login com a conta recém-criada. Erro: " + (res.detail || "Erro desconhecido"));
+        Alert.alert(t('register.warning'), t('register.check_backend') + (res.detail || "Erro desconhecido"));
       }
     } catch(e) {
-      Alert.alert("Erro de Conexão", "Não foi possível conectar com o servidor Li-Vision.");
+      Alert.alert(t('login.connection_error'), t('login.connection_failed'));
     } finally {
       setLoading(false);
     }
@@ -55,14 +58,14 @@ export default function RegisterScreen() {
         <View style={styles.iconCircle}>
           <Image source={require('../../assets/images/Li-Vision-Logo-BackgroundOff.png')} style={{ width: 50, height: 50 }} resizeMode="contain" />
         </View>
-        <Text style={styles.title}>Novo Pesquisador</Text>
-        <Text style={styles.subtitle}>Crie uma conta para catalogar suas doações de dados.</Text>
+        <Text style={styles.title}>{t('register.new_researcher')}</Text>
+        <Text style={styles.subtitle}>{t('register.subtitle')}</Text>
 
         <View style={styles.inputBox}>
           <MaterialIcons name="person" size={20} color="#888" style={styles.icon}/>
           <TextInput
             style={styles.input}
-            placeholder="Nome Completo"
+            placeholder={t('register.full_name')}
             placeholderTextColor="#555"
             autoCapitalize="words"
             value={fullName}
@@ -74,7 +77,7 @@ export default function RegisterScreen() {
           <MaterialIcons name="email" size={20} color="#888" style={styles.icon}/>
           <TextInput
             style={styles.input}
-            placeholder="E-mail"
+            placeholder={t('login.email')}
             placeholderTextColor="#555"
             autoCapitalize="none"
             keyboardType="email-address"
@@ -87,7 +90,7 @@ export default function RegisterScreen() {
           <MaterialIcons name="lock" size={20} color="#888" style={styles.icon}/>
           <TextInput
             style={styles.input}
-            placeholder="Senha de acesso"
+            placeholder={t('login.password')}
             placeholderTextColor="#555"
             secureTextEntry
             value={password}
@@ -97,12 +100,12 @@ export default function RegisterScreen() {
 
         <TouchableOpacity style={styles.mainBtn} onPress={handleSubmit} disabled={loading}>
           {loading ? <ActivityIndicator color="#0c0f16"/> : (
-            <Text style={styles.mainBtnText}>Criar Conta</Text>
+            <Text style={styles.mainBtnText}>{t('register.create')}</Text>
           )}
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.replace("/screens/login")} style={styles.toggleBtn}>
-          <Text style={styles.toggleText}>Já possuo conta (Fazer Login)</Text>
+          <Text style={styles.toggleText}>{t('register.already_have')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -111,11 +114,11 @@ export default function RegisterScreen() {
         <View style={styles.modalBg}>
           <View style={styles.modalCard}>
             <FontAwesome5 name="check-circle" size={60} color="#00e5ff" style={{ marginBottom: 20 }} />
-            <Text style={styles.modalTitle}>Cadastro Realizado!</Text>
+            <Text style={styles.modalTitle}>{t('register.success_title')}</Text>
             <Text style={styles.modalSubtitle}>
               {hasToken 
-                ? "Sua conta de pesquisador foi criada com sucesso no Li-Vision. Bem-vindo(a)!"
-                : "Conta criada com sucesso! Faça login para continuar."}
+                ? t('register.success_token')
+                : t('register.success_no_token')}
             </Text>
             <TouchableOpacity 
               style={styles.modalBtn} 
@@ -128,7 +131,7 @@ export default function RegisterScreen() {
                 }
               }}
             >
-              <Text style={styles.modalBtnText}>Continuar</Text>
+              <Text style={styles.modalBtnText}>{t('register.continue')}</Text>
             </TouchableOpacity>
           </View>
         </View>

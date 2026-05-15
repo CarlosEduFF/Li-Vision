@@ -3,8 +3,11 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-nati
 import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { APP_LEVELS } from "@/constants/levels";
+import { useTranslation } from "react-i18next";
 
 export default function LevelsInfoScreen() {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container}>
       {/* HEADER */}
@@ -12,12 +15,12 @@ export default function LevelsInfoScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <MaterialIcons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.title}>Níveis de Contribuição</Text>
+        <Text style={styles.title}>{t('levels_info.title')}</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.subtitle}>
-          Quanto mais sequências você doa, mais sua conta evolui e mais a nossa IA aprende Libras.
+          {t('levels_info.subtitle')}
         </Text>
 
         {APP_LEVELS.map((level, index) => (
@@ -27,22 +30,22 @@ export default function LevelsInfoScreen() {
                 <FontAwesome5 name={level.icon} size={24} color={level.color} />
               </View>
               <View style={styles.levelTextContainer}>
-                <Text style={[styles.levelTitle, { color: level.color }]}>{level.title}</Text>
+                <Text style={[styles.levelTitle, { color: level.color }]}>{t(`profile.levels.${level.id}`)}</Text>
                 <Text style={styles.levelRange}>
-                  {level.minSamples === 501 ? "Acima de 500" : 
-                   level.minSamples === 101 ? "101 a 500" :
-                   level.minSamples === 11 ? "11 a 100" : "0 a 10"} frames
+                  {level.minSamples === 501 ? t('levels_info.above_500') : 
+                   level.minSamples === 101 ? `101 ${t('levels_info.to')} 500` :
+                   level.minSamples === 11 ? `11 ${t('levels_info.to')} 100` : `0 ${t('levels_info.to')} 10`} {t('levels_info.frames')}
                 </Text>
               </View>
             </View>
-            <Text style={styles.levelDesc}>{level.desc}</Text>
+            <Text style={styles.levelDesc}>{t(`profile.levels.${level.id}_desc`)}</Text>
           </View>
         ))}
 
         <View style={styles.footerInfo}>
           <MaterialIcons name="info-outline" size={18} color="#697688" />
           <Text style={styles.footerText}>
-            As contribuições são validadas pelo nosso motor de inteligência artificial.
+            {t('levels_info.footer')}
           </Text>
         </View>
       </ScrollView>

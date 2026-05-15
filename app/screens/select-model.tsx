@@ -4,12 +4,14 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { trainingService } from "../../services/trainingService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 export default function SelectModelScreen() {
   const [models, setModels] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activatingId, setActivatingId] = useState<string | null>(null);
   const [activeModelId, setActiveModelId] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadModels();
@@ -44,15 +46,15 @@ export default function SelectModelScreen() {
         setActiveModelId(id);
         
         Alert.alert(
-          "✅ Idioma Configurado!",
-          `Sua IA agora está configurada para ${name}.`,
-          [{ text: "Incrível", onPress: () => router.back() }]
+          t('select_model.active_success_title'),
+          t('select_model.active_success_msg', { name }),
+          [{ text: t('select_model.amazing_btn'), onPress: () => router.back() }]
         );
       } else {
-        Alert.alert("Erro", res.error || "Falha ao selecionar o idioma.");
+        Alert.alert(t('select_model.error'), res.error || t('select_model.error_msg'));
       }
     } catch (e) {
-      Alert.alert("Erro de conexão", "Não foi possível conectar ao servidor: " + String(e));
+      Alert.alert(t('select_model.connection_error'), t('select_model.connection_error_msg', { error: String(e) }));
     } finally {
       setActivatingId(null);
     }
@@ -64,11 +66,11 @@ export default function SelectModelScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <MaterialIcons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.title}>Selecionar Idioma</Text>
+        <Text style={styles.title}>{t('select_model.title')}</Text>
       </View>
 
       <Text style={styles.subtitle}>
-        Escolha abaixo o banco de dados (Língua de Sinais) que você quer que a Inteligência Artificial traduza hoje!
+        {t('select_model.subtitle')}
       </Text>
 
       {isLoading ? (
@@ -76,7 +78,7 @@ export default function SelectModelScreen() {
       ) : models.length === 0 ? (
         <View style={styles.emptyBox}>
           <MaterialIcons name="language" size={48} color="#333" />
-          <Text style={styles.emptyText}>Nenhum idioma treinado.</Text>
+          <Text style={styles.emptyText}>{t('select_model.empty_text')}</Text>
         </View>
       ) : (
         <View style={styles.list}>
@@ -108,7 +110,7 @@ export default function SelectModelScreen() {
                     {m.name}
                   </Text>
                   <Text style={styles.modelStatus}>
-                    {isActive ? "Sua IA está conectada e fluente nesta língua!" : "Toque para configurar e conectar o cérebro associado."}
+                    {isActive ? t('select_model.active_status') : t('select_model.inactive_status')}
                   </Text>
                 </View>
 

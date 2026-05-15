@@ -5,15 +5,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { trainingService } from '../../services/trainingService';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   const handleSubmit = async () => {
     if (!email || !password) {
-      Alert.alert("Aviso", "Por favor preencha todos os campos.");
+      Alert.alert(t('login.warning'), t('login.fill_fields'));
       return;
     }
     
@@ -30,10 +32,10 @@ export default function LoginScreen() {
         }
         router.replace("/(tabs)");
       } else {
-        Alert.alert("Acesso Negado", res.detail || "Credenciais inválidas");
+        Alert.alert(t('login.access_denied'), res.detail || t('login.invalid_credentials'));
       }
     } catch(e) {
-      Alert.alert("Erro de Conexão", "Não foi possível conectar com o servidor Li-Vision.");
+      Alert.alert(t('login.connection_error'), t('login.connection_failed'));
     } finally {
       setLoading(false);
     }
@@ -47,14 +49,14 @@ export default function LoginScreen() {
         <View style={styles.iconCircle}>
           <Image source={require('../../assets/images/Li-Vision-Logo-BackgroundOff.png')} style={{ width: 50, height: 50 }} resizeMode="contain" />
         </View>
-        <Text style={styles.title}>Acesso Restrito</Text>
-        <Text style={styles.subtitle}>Entre para contribuir com os datasets do Li-Vision Edge.</Text>
+        <Text style={styles.title}>{t('login.restricted_access')}</Text>
+        <Text style={styles.subtitle}>{t('login.subtitle')}</Text>
 
         <View style={styles.inputBox}>
           <MaterialIcons name="email" size={20} color="#888" style={styles.icon}/>
           <TextInput
             style={styles.input}
-            placeholder="E-mail"
+            placeholder={t('login.email')}
             placeholderTextColor="#555"
             autoCapitalize="none"
             keyboardType="email-address"
@@ -67,7 +69,7 @@ export default function LoginScreen() {
           <MaterialIcons name="lock" size={20} color="#888" style={styles.icon}/>
           <TextInput
             style={styles.input}
-            placeholder="Senha de acesso"
+            placeholder={t('login.password')}
             placeholderTextColor="#555"
             secureTextEntry
             value={password}
@@ -77,12 +79,12 @@ export default function LoginScreen() {
 
         <TouchableOpacity style={styles.mainBtn} onPress={handleSubmit} disabled={loading}>
           {loading ? <ActivityIndicator color="#0c0f16"/> : (
-            <Text style={styles.mainBtnText}>Entrar</Text>
+            <Text style={styles.mainBtnText}>{t('login.enter')}</Text>
           )}
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.replace("/screens/register")} style={styles.toggleBtn}>
-          <Text style={styles.toggleText}>Ainda não contribuiu? Crie sua conta!</Text>
+          <Text style={styles.toggleText}>{t('login.create_account')}</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

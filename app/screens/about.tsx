@@ -3,10 +3,12 @@ import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { router } from "expo-router";
 import AboutModal from "@/components/AboutModal";
+import { useTranslation } from "react-i18next";
 
 export default function AboutScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [activeSlide, setActiveSlide] = useState(1);
+  const { t } = useTranslation();
 
   const openModal = (slide: number) => {
     setActiveSlide(slide);
@@ -22,28 +24,26 @@ export default function AboutScreen() {
             <MaterialIcons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <MaterialIcons name="tune" size={28} color="#00e5ff" />
-          <Text style={styles.title}>Sobre</Text>
+          <Text style={styles.title}>{t('about.title')}</Text>
         </View>
 
         <Text style={styles.subtitle}>
-          Informações sobre o Li-Vision.
+          {t('about.subtitle')}
         </Text>
 
         {/* CARD INFO ARQUITETURA */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <MaterialIcons name="cloud-done" size={20} color="#4caf50" />
-            <Text style={styles.sectionTitle}>Modo Multi-Sessão</Text>
+            <Text style={styles.sectionTitle}>{t('about.multi_session')}</Text>
           </View>
           <Text style={styles.infoText}>
-            Cada usuário possui sua própria sessão isolada no servidor. 
-            As configurações de detecção (Híbrido, Regras, ML Estático, ML Dinâmico) 
-            são escolhidas diretamente na tela da câmera e não afetam outros usuários.
+            {t('about.multi_session_desc')}
           </Text>
           <View style={styles.tipBox}>
             <MaterialIcons name="lightbulb-outline" size={18} color="#ffab00" />
             <Text style={styles.tipText}>
-              Abra a câmera e toque no botão de modo no header para selecionar o cérebro de reconhecimento.
+              {t('about.tip')}
             </Text>
           </View>
         </View>
@@ -52,7 +52,7 @@ export default function AboutScreen() {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <MaterialIcons name="flash-on" size={20} color="#fff" />
-            <Text style={styles.sectionTitle}>Guia do Aplicativo</Text>
+            <Text style={styles.sectionTitle}>{t('about.guide')}</Text>
           </View>
 
           <TouchableOpacity
@@ -63,8 +63,8 @@ export default function AboutScreen() {
             <View style={styles.actionLeft}>
               <MaterialIcons name="dashboard" size={22} color="#00e5ff" />
               <View>
-                <Text style={styles.actionLabel}>Apresentação do App</Text>
-                <Text style={styles.actionDesc}>Conheça todas as funcionalidades e abas</Text>
+                <Text style={styles.actionLabel}>{t('about.guide_presentation')}</Text>
+                <Text style={styles.actionDesc}>{t('about.guide_presentation_desc')}</Text>
               </View>
             </View>
             <MaterialIcons name="chevron-right" size={22} color="#555" />
@@ -78,8 +78,8 @@ export default function AboutScreen() {
             <View style={styles.actionLeft}>
               <MaterialIcons name="videocam" size={22} color="#00e5ff" />
               <View>
-                <Text style={styles.actionLabel}>Como Fazer Inferência</Text>
-                <Text style={styles.actionDesc}>Use a câmera para reconhecimento em tempo real</Text>
+                <Text style={styles.actionLabel}>{t('about.guide_inference')}</Text>
+                <Text style={styles.actionDesc}>{t('about.guide_inference_desc')}</Text>
               </View>
             </View>
             <MaterialIcons name="chevron-right" size={22} color="#555" />
@@ -93,8 +93,8 @@ export default function AboutScreen() {
             <View style={styles.actionLeft}>
               <MaterialIcons name="science" size={22} color="#00e5ff" />
               <View>
-                <Text style={styles.actionLabel}>Como Treinar Modelos</Text>
-                <Text style={styles.actionDesc}>Coleta de dados e treinamento no ML Studio</Text>
+                <Text style={styles.actionLabel}>{t('about.guide_train')}</Text>
+                <Text style={styles.actionDesc}>{t('about.guide_train_desc')}</Text>
               </View>
             </View>
             <MaterialIcons name="chevron-right" size={22} color="#555" />
@@ -108,8 +108,8 @@ export default function AboutScreen() {
             <View style={styles.actionLeft}>
               <MaterialIcons name="leaderboard" size={22} color="#00e5ff" />
               <View>
-                <Text style={styles.actionLabel}>Pontuação e Ranking</Text>
-                <Text style={styles.actionDesc}>Entenda como funciona o sistema de pontos</Text>
+                <Text style={styles.actionLabel}>{t('about.guide_ranking')}</Text>
+                <Text style={styles.actionDesc}>{t('about.guide_ranking_desc')}</Text>
               </View>
             </View>
             <MaterialIcons name="chevron-right" size={22} color="#555" />
@@ -120,18 +120,18 @@ export default function AboutScreen() {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <MaterialIcons name="info-outline" size={20} color="#fff" />
-            <Text style={styles.sectionTitle}>Sobre</Text>
+            <Text style={styles.sectionTitle}>{t('about.about_app')}</Text>
           </View>
           <View style={styles.versionRow}>
-            <Text style={styles.versionLabel}>Versão do App</Text>
+            <Text style={styles.versionLabel}>{t('about.version')}</Text>
             <Text style={styles.versionValue}>1.0.0 — Multi-Tenant</Text>
           </View>
           <View style={styles.versionRow}>
-            <Text style={styles.versionLabel}>API Backend</Text>
+            <Text style={styles.versionLabel}>{t('about.api')}</Text>
             <Text style={styles.versionValue}>Li-Vision · Render</Text>
           </View>
           <View style={[styles.versionRow, { borderBottomWidth: 0 }]}>
-            <Text style={styles.versionLabel}>Arquitetura</Text>
+            <Text style={styles.versionLabel}>{t('about.architecture')}</Text>
             <Text style={styles.versionValue}>Edge + Cloud Hybrid</Text>
           </View>
         </View>

@@ -4,6 +4,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { trainingService } from "../../services/trainingService";
 import { router } from "expo-router";
 import TrainingProgressModal from "../../components/TrainingProgressModal";
+import { useTranslation } from "react-i18next";
 
 export default function TrainScreen() {
   const [datasets, setDatasets] = useState<any[]>([]);
@@ -22,6 +23,7 @@ export default function TrainScreen() {
   const [trainingProgress, setTrainingProgress] = useState(0);
   const [trainingJobs, setTrainingJobs] = useState<any[]>([]);
   const pollingRef = useRef<boolean>(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadData();
@@ -63,7 +65,7 @@ export default function TrainScreen() {
 
   const startTraining = async () => {
     if (!modelName || selectedDatasetIds.length === 0) {
-      Alert.alert("Aviso", "Preencha o nome do modelo e selecione pelo menos um dataset.");
+      Alert.alert(t('train.warning'), t('train.warning_msg'));
       return;
     }
     try {
@@ -150,7 +152,7 @@ export default function TrainScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <MaterialIcons name="arrow-back" size={28} color="#00e5ff" />
         </TouchableOpacity>
-        <Text style={styles.title}>Treinar Modelo</Text>
+        <Text style={styles.title}>{t('train.title')}</Text>
       </View>
 
       {isLoading ? (
@@ -163,29 +165,29 @@ export default function TrainScreen() {
                 style={[styles.tab, mode === "new" && styles.tabActive]}
                 onPress={() => { setMode("new"); setModelName(""); }}
               >
-                <Text style={[styles.tabText, mode === "new" && styles.tabTextActive]}>Novo Modelo</Text>
+                <Text style={[styles.tabText, mode === "new" && styles.tabTextActive]}>{t('train.new_model')}</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={[styles.tab, mode === "retrain" && styles.tabActive]}
                 onPress={() => setMode("retrain")}
               >
-                <Text style={[styles.tabText, mode === "retrain" && styles.tabTextActive]}>Retreinar Existente</Text>
+                <Text style={[styles.tabText, mode === "retrain" && styles.tabTextActive]}>{t('train.retrain')}</Text>
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.label}>{mode === "new" ? "Nome do Novo Modelo" : "Selecione o Modelo Base"}</Text>
+            <Text style={styles.label}>{mode === "new" ? t('train.new_model_label') : t('train.base_model_label')}</Text>
             
             {mode === "new" ? (
               <TextInput 
                 style={styles.input}
                 placeholderTextColor="#666"
-                placeholder="EX: LIBRAS_BR"
+                placeholder={t('train.placeholder_name')}
                 value={modelName}
                 onChangeText={(v) => setModelName(v.toUpperCase())}
               />
             ) : (
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.modelsScroll}>
-                {existingModels.length === 0 && <Text style={{ color: "#888" }}>Nenhum modelo existente.</Text>}
+                {existingModels.length === 0 && <Text style={{ color: "#888" }}>{t('train.no_model')}</Text>}
                 {existingModels.map(m => (
                   <TouchableOpacity 
                     key={m.name}
@@ -200,8 +202,8 @@ export default function TrainScreen() {
               </ScrollView>
             )}
 
-            <Text style={styles.label}>Selecionar Datasets ({selectedDatasetIds.length})</Text>
-            {datasets.length === 0 && <Text style={{ color: "#888" }}>Nenhum dataset disponível.</Text>}
+            <Text style={styles.label}>{t('train.select_datasets')} ({selectedDatasetIds.length})</Text>
+            {datasets.length === 0 && <Text style={{ color: "#888" }}>{t('train.no_dataset')}</Text>}
             {datasets.map(ds => {
               const isSelected = selectedDatasetIds.includes(ds.id);
               return (
@@ -216,7 +218,7 @@ export default function TrainScreen() {
                         {ds.name}
                       </Text>
                       <Text style={{ color: "#888", fontSize: 12, marginTop: 4 }}>
-                        Formato: {ds.type === "static" ? "Estático" : "Dinâmico"}
+                        {ds.type === "static" ? t('train.format_static') : t('train.format_dynamic')}
                       </Text>
                     </View>
                     <MaterialIcons 
@@ -231,24 +233,24 @@ export default function TrainScreen() {
 
             <TouchableOpacity style={styles.captureBtn} onPress={startTraining} disabled={status?.status === "running"}>
               <MaterialIcons name="bolt" size={24} color="#000" />
-              <Text style={styles.captureBtnText}>Iniciar Treinamento Mestre</Text>
+              <Text style={styles.captureBtnText}>{t('train.start')}</Text>
             </TouchableOpacity>
 
             {status && status.status !== "running" && (
               <View style={styles.statusBox}>
                 <Text style={{color: status.status === "completed" ? "#4caf50" : "red", fontWeight:"bold", marginBottom:10}}>
-                  Status: {status.status.toUpperCase()}
+                  {t('train.status')} {status.status.toUpperCase()}
                 </Text>
                 
                 {status.details && status.details.map((d: any, idx: number) => (
                    <View key={idx} style={{ marginBottom: 10, paddingBottom: 10, borderBottomWidth: 1, borderColor: "#333" }}>
                      <Text style={{color:"#00e5ff", fontWeight:"bold"}}>[{d.type.toUpperCase()}] Model</Text>
                      {d.accuracy != null && d.accuracy !== undefined ? (
-                       <Text style={{color:"#ccc"}}>Precisão: {(d.accuracy * 100).toFixed(2)}%</Text>
+                       <Text style={{color:"#ccc"}}>{t('train.accuracy')} {(d.accuracy * 100).toFixed(2)}%</Text>
                      ) : d.error ? (
                        <Text style={{color:"red"}}>{d.error}</Text>
                      ) : (
-                       <Text style={{color:"#888"}}>Sem dados</Text>
+                       <Text style={{color:"#888"}}>{t('train.no_data')}</Text>
                      )}
                    </View>
                 ))}

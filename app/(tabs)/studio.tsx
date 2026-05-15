@@ -3,9 +3,11 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTranslation } from "react-i18next";
 
 export default function StudioScreen() {
   const [isAdmin, setIsAdmin] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const checkRole = async () => {
@@ -19,11 +21,11 @@ export default function StudioScreen() {
       {/* HEADER */}
       <View style={styles.header}>
         <MaterialIcons name="dashboard" size={28} color="#00e5ff" />
-        <Text style={styles.title}>ML Studio</Text>
+        <Text style={styles.title}>{t('studio.title')}</Text>
       </View>
 
       <Text style={styles.subtitle}>
-        Coleta de dados e gerenciamento de modelos do Li-Vision Edge.
+        {t('studio.subtitle')}
       </Text>
 
       {/* CARD — Coleta de Dados */}
@@ -31,12 +33,12 @@ export default function StudioScreen() {
         <View style={styles.cardHeader}>
           <MaterialIcons name="backup" size={20} color="#fff" />
           <Text style={styles.sectionTitle}>
-            {isAdmin ? "Aquisição de Datasets" : "Contribuir com Dados"}
+            {isAdmin ? t('studio.section_data') : t('studio.section_data_user')}
           </Text>
         </View>
         {!isAdmin && (
           <Text style={styles.collaboratorHint}>
-            Contribua coletando amostras para datasets e movimentos já cadastrados pelo administrador.
+            {t('studio.collaborator_hint')}
           </Text>
         )}
         <View style={styles.optionsGrid}>
@@ -46,7 +48,7 @@ export default function StudioScreen() {
           >
             <View style={styles.optionContent}>
               <MaterialIcons name="camera" size={22} color="#888" />
-              <Text style={styles.optionText}>Coleta Estática (Frame Único)</Text>
+              <Text style={styles.optionText}>{t('studio.static_collection')}</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity
@@ -55,7 +57,7 @@ export default function StudioScreen() {
           >
             <View style={styles.optionContent}>
               <MaterialIcons name="videocam" size={22} color="#888" />
-              <Text style={styles.optionText}>Gravar Sequência Múltipla (Sinais)</Text>
+              <Text style={styles.optionText}>{t('studio.dynamic_collection')}</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity
@@ -65,7 +67,7 @@ export default function StudioScreen() {
             <View style={styles.optionContent}>
               <MaterialIcons name="folder-open" size={22} color={isAdmin ? "#00e5ff" : "#888"} />
               <Text style={[styles.optionText, isAdmin && { color: "#00e5ff" }]}>
-                {isAdmin ? "Gerenciar Gestos e Datasets" : "Visualizar Datasets"}
+                {isAdmin ? t('studio.manage_datasets') : t('studio.view_datasets')}
               </Text>
             </View>
           </TouchableOpacity>
@@ -77,7 +79,7 @@ export default function StudioScreen() {
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <MaterialIcons name="model-training" size={20} color="#fff" />
-          <Text style={styles.sectionTitle}>Modelos & Treinamento</Text>
+          <Text style={styles.sectionTitle}>{t('studio.section_models')}</Text>
         </View>
         <View style={styles.optionsGrid}>
           <TouchableOpacity
@@ -86,7 +88,7 @@ export default function StudioScreen() {
           >
             <View style={styles.optionContent}>
               <MaterialIcons name="bolt" size={22} color="#888" />
-              <Text style={styles.optionText}>Iniciar Treinamento (API)</Text>
+              <Text style={styles.optionText}>{t('studio.start_training')}</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity
@@ -95,7 +97,7 @@ export default function StudioScreen() {
           >
             <View style={styles.optionContent}>
               <MaterialIcons name="list" size={22} color="#888" />
-              <Text style={styles.optionText}>Gerenciar Modelos do Servidor</Text>
+              <Text style={styles.optionText}>{t('studio.manage_models')}</Text>
             </View>
           </TouchableOpacity>
         </View>

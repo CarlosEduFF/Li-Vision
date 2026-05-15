@@ -10,6 +10,7 @@ import {
   Dimensions,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const BAR_WIDTH = SCREEN_WIDTH - 100;
@@ -55,6 +56,7 @@ export default function TrainingProgressModal({
   jobs,
   onClose,
 }: TrainingProgressModalProps) {
+  const { t } = useTranslation();
   // ── Animated values ──────────────────────────────────────
   const barWidth = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -192,18 +194,26 @@ export default function TrainingProgressModal({
 
   // ── Build stage description ──────────────────────────────
   const getStageText = (): string => {
-    if (isDone) return isSuccess ? "Treinamento concluído!" : "Treinamento falhou.";
-    if (jobs.length === 0) return "Iniciando treinamento...";
+    if (isDone) return isSuccess ? t('training_modal.completed') : t('training_modal.failed');
+    if (jobs.length === 0) return t('training_modal.starting');
 
     const activeJob = jobs.find((j) => j.status === "running") || jobs[0];
-    const typeLabel = activeJob.type === "static" ? "estático" : "dinâmico";
-    const stageName = STAGE_LABELS[activeJob.stage || ""] || activeJob.stage || "Processando";
+    const typeLabel = activeJob.type === "static" ? t('training_modal.static') : t('training_modal.dynamic');
+    const stageName = t(`training_modal.${activeJob.stage || 'processing'}`);
 
     if (activeJob.stage === "training" && activeJob.current_epoch && activeJob.total_epochs) {
-      return `${stageName} modelo ${typeLabel} — Epoch ${activeJob.current_epoch}/${activeJob.total_epochs}`;
+      return t('training_modal.model_epoch', {
+        stage: stageName,
+        type: typeLabel,
+        current: activeJob.current_epoch,
+        total: activeJob.total_epochs
+      });
     }
 
-    return `${stageName} — modelo ${typeLabel}`;
+    return t('training_modal.model_stage', {
+      stage: stageName,
+      type: typeLabel
+    });
   };
 
   return (
@@ -233,9 +243,9 @@ export default function TrainingProgressModal({
           <Text style={styles.title}>
             {isDone
               ? isSuccess
-                ? "Treinamento Concluído"
-                : "Treinamento Falhou"
-              : "Treinando Modelo"}
+                ? t('training_modal.title_completed')
+                : t('training_modal.title_failed')
+              : t('training_modal.title_training')}
           </Text>
 
           {/* ── Progress Percentage ───────────── */}
@@ -275,13 +285,13 @@ export default function TrainingProgressModal({
           <View style={styles.timeRow}>
             <View style={styles.timeBlock}>
               <MaterialIcons name="timer" size={14} color="#555" />
-              <Text style={styles.timeLabel}>Decorrido</Text>
+              <Text style={styles.timeLabel}>{t('training_modal.elapsed')}</Text>
               <Text style={styles.timeValue}>{formatTime(elapsed)}</Text>
             </View>
             {!isDone && eta !== null && (
               <View style={styles.timeBlock}>
                 <MaterialIcons name="hourglass-bottom" size={14} color="#555" />
-                <Text style={styles.timeLabel}>Restante</Text>
+                <Text style={styles.timeLabel}>{t('training_modal.remaining')}</Text>
                 <Text style={styles.timeValue}>~{formatTime(eta)}</Text>
               </View>
             )}
@@ -310,7 +320,7 @@ export default function TrainingProgressModal({
                     }
                   />
                   <Text style={styles.jobType}>
-                    {job.type === "static" ? "Estático" : "Dinâmico"}
+                    {job.type === "static" ? t('training_modal.static_type') : t('training_modal.dynamic_type')}
                   </Text>
                   <View style={{ flex: 1 }} />
                   {job.status === "completed" && job.accuracy != null ? (
@@ -318,7 +328,7 @@ export default function TrainingProgressModal({
                       {(job.accuracy * 100).toFixed(1)}%
                     </Text>
                   ) : job.status === "failed" ? (
-                    <Text style={styles.jobError}>Erro</Text>
+                    <Text style={styles.jobError}>{t('training_modal.error')}</Text>
                   ) : (
                     <Text style={styles.jobProgress}>{job.progress || 0}%</Text>
                   )}
@@ -348,7 +358,7 @@ export default function TrainingProgressModal({
               color={isSuccess ? "#000" : "#fff"}
             />
             <Text style={[styles.closeBtnText, isSuccess && { color: "#000" }]}>
-              {isSuccess ? "Concluído" : isDone ? "Fechar" : "Ocultar / Cancelar"}
+              {isSuccess ? t('training_modal.btn_completed') : isDone ? t('training_modal.btn_close') : t('training_modal.btn_hide')}
             </Text>
           </TouchableOpacity>
         </Animated.View>

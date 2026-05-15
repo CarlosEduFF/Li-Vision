@@ -10,6 +10,7 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ScrollView,
   StyleSheet,
@@ -34,6 +35,7 @@ export default function GestureDetailScreen() {
   const [gestures, setGestures] = useState<Gesture[]>([]);
   const [loading, setLoading] = useState(true);
   const [progressMap, setProgressMap] = useState<Record<string, GestureProgress>>({});
+  const { t } = useTranslation();
 
   useEffect(() => {
     let mounted = true;
@@ -53,7 +55,7 @@ export default function GestureDetailScreen() {
           }
         }
       } catch (error) {
-        console.log("Erro ao carregar dados:", error);
+        console.log("Error loading data:", error);
       } finally {
         if (mounted) {
           setLoading(false);
@@ -85,22 +87,22 @@ export default function GestureDetailScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <MaterialIcons name="arrow-back" size={20} color="#d8dee9" />
         </TouchableOpacity>
-        <Text style={styles.title}>{params.category ? `${params.category}` : meta.title}</Text>
+        <Text style={styles.title}>{params.category ? `${params.category}` : t(`learn.levels.${level}.title`)}</Text>
         <View style={{ width: 38 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.subtitle}>Biblioteca de gestos • Faixa {meta.range}</Text>
+        <Text style={styles.subtitle}>{t('gesture_detail.library', { range: meta.range })}</Text>
 
         {loading ? (
-          <Text style={styles.loadingText}>Carregando gestos...</Text>
+          <Text style={styles.loadingText}>{t('gesture_detail.loading')}</Text>
         ) : gestures.length === 0 ? (
           <View style={styles.emptyBox}>
             <MaterialIcons name="search-off" size={24} color="#8a92a3" />
             <Text style={styles.emptyText}>
               {params.category 
-                ? `Nenhum gesto encontrado em "${params.category}"` 
-                : "Nenhum gesto cadastrado neste nível."}
+                ? t('gesture_detail.no_gestures_category', { category: params.category }) 
+                : t('gesture_detail.no_gestures_level')}
             </Text>
           </View>
         ) : (
@@ -119,7 +121,7 @@ export default function GestureDetailScreen() {
                   )}
                 </View>
                 <Text style={[styles.levelBadge, { borderColor: meta.color, color: meta.color }]}>
-                  {meta.title}
+                  {t(`learn.levels.${level}.title`)}
                 </Text>
               </View>
 
@@ -128,7 +130,7 @@ export default function GestureDetailScreen() {
 
               <View style={styles.stepsRow}>
                 <View style={styles.stepBox}>
-                  <Text style={styles.stepTitle}>1. Inicial</Text>
+                  <Text style={styles.stepTitle}>{t('gesture_detail.step_initial')}</Text>
                   <View style={styles.placeholder}>
                     {gesture.svgInitial ? (
                       <Image source={{ uri: gesture.svgInitial }} style={styles.previewImage} />
@@ -139,7 +141,7 @@ export default function GestureDetailScreen() {
                 </View>
 
                 <View style={styles.stepBox}>
-                  <Text style={styles.stepTitle}>2. Movimento</Text>
+                  <Text style={styles.stepTitle}>{t('gesture_detail.step_movement')}</Text>
                   <View style={styles.placeholder}>
                     {gesture.svgMovement ? (
                       <Image source={{ uri: gesture.svgMovement }} style={styles.previewImage} />
@@ -150,7 +152,7 @@ export default function GestureDetailScreen() {
                 </View>
 
                 <View style={styles.stepBox}>
-                  <Text style={styles.stepTitle}>3. Final</Text>
+                  <Text style={styles.stepTitle}>{t('gesture_detail.step_final')}</Text>
                   <View style={styles.placeholder}>
                     {gesture.svgFinal ? (
                       <Image source={{ uri: gesture.svgFinal }} style={styles.previewImage} />
@@ -178,7 +180,7 @@ export default function GestureDetailScreen() {
                   styles.learnBtnText, 
                   progressMap[gesture.id]?.learned ? styles.learnedBtnText : styles.unlearnedBtnText
                 ]}>
-                  {progressMap[gesture.id]?.learned ? "Revisar Novamente" : "Concluir Aprendizado"}
+                  {progressMap[gesture.id]?.learned ? t('gesture_detail.review_btn') : t('gesture_detail.conclude_btn')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -187,7 +189,7 @@ export default function GestureDetailScreen() {
 
         <View style={styles.footerNote}>
           <MaterialIcons name="image" size={16} color="#8a92a3" />
-          <Text style={styles.footerText}>Somente ilustrações SVG (sem vídeo).</Text>
+          <Text style={styles.footerText}>{t('gesture_detail.svg_note')}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

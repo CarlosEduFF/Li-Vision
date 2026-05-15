@@ -8,6 +8,7 @@ import { Camera, useCameraDevice, useFrameProcessor } from "react-native-vision-
 import { Worklets } from "react-native-worklets-core";
 import { detectHandLandmarks, LandmarkPoint } from "@/services/handLandmarkerPlugin";
 import { gestureWS } from "@/services/gestureWebSocket";
+import { useTranslation } from "react-i18next";
 
 export default function CollectDynamicScreen() {
   const [label, setLabel] = useState("");
@@ -21,6 +22,7 @@ export default function CollectDynamicScreen() {
   const [gestureLabels, setGestureLabels] = useState<string[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [labelHint, setLabelHint] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     isRecordingRef.current = isRecording;
@@ -131,7 +133,7 @@ export default function CollectDynamicScreen() {
 
   const startDynamic = async () => {
     if (!label || !datasetName) {
-      Alert.alert("Aviso", "Preencha Nome e Label");
+      Alert.alert(t('collect_static.warning'), t('collect_static.fill_required'));
       return;
     }
 
@@ -151,19 +153,19 @@ export default function CollectDynamicScreen() {
         if (isRecordingRef.current) {
            gestureWS.sendAction({ action: "stop_collect" });
            setIsRecording(false);
-           Alert.alert("Tempo Esgotado", "Não foi possível detectar as mãos ou focar as 15 frames suficientes a tempo. Tente novamente focando a mão.");
+           Alert.alert(t('collect_dynamic.timeout_title'), t('collect_dynamic.timeout_msg'));
         }
       }, 6000);
     } catch (e) {
-      Alert.alert("Erro na Gravação", String(e));
+      Alert.alert(t('collect_dynamic.recording_error'), String(e));
       setIsRecording(false);
     }
   };
 
   const finalizeDataset = () => {
     Alert.alert(
-      "Sucesso!",
-      `Massa! Coleta de sinais de "${label}" finalizada. Salvo ${sequences} sequências dinâmicas no banco de dados para o dataset ${datasetName}.`,
+      t('collect_dynamic.success_title'),
+      t('collect_dynamic.success_msg', { label, count: sequences, datasetName }),
       [{ text: "OK", onPress: () => router.back() }]
     );
   };
@@ -180,7 +182,7 @@ export default function CollectDynamicScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <MaterialIcons name="arrow-back" size={28} color="#00e5ff" />
         </TouchableOpacity>
-        <Text style={styles.title}>Coleta Dinâmica</Text>
+        <Text style={styles.title}>{t('collect_dynamic.title')}</Text>
       </View>
 
       <View style={[styles.cameraContainer, { width: CAM_WIDTH, height: CAM_HEIGHT }]}>
@@ -193,7 +195,7 @@ export default function CollectDynamicScreen() {
           />
         ) : (
           <View style={styles.permissionBox}>
-            <Text style={{ color: "#888" }}>Aguardando câmera...</Text>
+            <Text style={{ color: "#888" }}>{t('collect_static.waiting_camera')}</Text>
           </View>
         )}
 
@@ -210,7 +212,7 @@ export default function CollectDynamicScreen() {
         {isRecording && (
           <View style={styles.recordingOverlay}>
             <MaterialIcons name="videocam" size={20} color="red" />
-            <Text style={styles.recordingText}>GRAVANDO...</Text>
+            <Text style={styles.recordingText}>{t('collect_dynamic.recording_status')}</Text>
           </View>
         )}
       </View>
@@ -222,7 +224,7 @@ export default function CollectDynamicScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.form}>
-          <Text style={styles.label}>Dataset Nome</Text>
+          <Text style={styles.label}>{t('collect_static.dataset_name')}</Text>
 
           {datasets.length > 0 && (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
@@ -251,10 +253,10 @@ export default function CollectDynamicScreen() {
               autoCorrect={false}
             />
           ) : (
-            datasets.length === 0 && <Text style={{ color: "#888" }}>Nenhum dataset disponível</Text>
+            datasets.length === 0 && <Text style={{ color: "#888" }}>{t('collect_static.no_dataset')}</Text>
           )}
 
-          <Text style={styles.label}>Label (Gesto)</Text>
+          <Text style={styles.label}>{t('collect_static.label_gesto')}</Text>
           {gestureLabels.length > 0 && (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
               {gestureLabels.map((lbl) => (
@@ -285,10 +287,7 @@ export default function CollectDynamicScreen() {
               setLabel(v);
               const normalized = v.toUpperCase();
               if (normalized && gestureLabels.includes(normalized)) {
-                setLabelHint(
-                  `O gesto "${normalized}" já existe neste dataset. ` +
-                  `Gravar adicionará mais sequências a ele.`
-                );
+                setLabelHint(t('collect_dynamic.label_hint', { normalized }));
               } else {
                 setLabelHint(null);
               }
@@ -309,20 +308,20 @@ export default function CollectDynamicScreen() {
             >
               <MaterialIcons name={isRecording ? "radio-button-checked" : "fiber-manual-record"} size={24} color={isRecording ? "red" : "#000"} />
               <Text style={[styles.captureBtnText, isRecording && { color: "#888" }]}>
-                {isRecording ? "Gravando Sequência..." : "Gravar Sequência"}
+                {isRecording ? t('collect_dynamic.recording_btn') : t('collect_dynamic.record_btn')}
               </Text>
             </TouchableOpacity>
 
             {sequences > 0 && !isRecording && (
               <TouchableOpacity style={styles.finalizeBtn} onPress={finalizeDataset}>
                 <MaterialIcons name="check-circle" size={24} color="#fff" />
-                <Text style={styles.finalizeBtnText}>Finalizar Coleta</Text>
+                <Text style={styles.finalizeBtnText}>{t('collect_static.finalize_btn')}</Text>
               </TouchableOpacity>
             )}
           </View>
 
           <Text style={styles.stats}>
-            Sequências gravadas: {sequences}
+            {t('collect_dynamic.stats', { count: sequences })}
           </Text>
         </View>
       </ScrollView>

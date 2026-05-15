@@ -15,6 +15,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { trainingService } from "@/services/trainingService";
+import { useTranslation } from "react-i18next";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -23,6 +24,7 @@ export default function HomeScreen() {
   const [activeModelName, setActiveModelName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [ranking, setRanking] = useState<any[]>([]);
+  const { t } = useTranslation();
 
   useFocusEffect(
     useCallback(() => {
@@ -95,13 +97,12 @@ export default function HomeScreen() {
           <Text style={styles.title}>Li-Vision</Text>
 
           <Text style={styles.subtitle}>
-            Sistema de reconhecimento de gestos da mão utilizando OpenCV +
-            MediaPipe para interação natural e acessibilidade.
+            {t('home.subtitle')}
           </Text>
 
           <TouchableOpacity style={styles.mainButton} onPress={() => router.push("/screens/cam")}>
             <MaterialIcons name="videocam" size={20} color="#00363d" />
-            <Text style={styles.buttonText}>Iniciar câmera</Text>
+            <Text style={styles.buttonText}>{t('home.start_camera')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -113,9 +114,9 @@ export default function HomeScreen() {
             <MaterialIcons name="language" size={34} color="#b388ff" />
             <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
               <View>
-                <Text style={[styles.cardTitle, { color: "#b388ff" }]}>Idioma Base (IA)</Text>
+                <Text style={[styles.cardTitle, { color: "#b388ff" }]}>{t('home.base_language')}</Text>
                 <Text style={styles.cardTextSmall}>
-                  Selecionado: {activeModelName || "Padrão"}
+                  {t('home.selected')}{activeModelName || t('home.default')}
                 </Text>
               </View>
               <MaterialIcons name="chevron-right" size={24} color="#b388ff" />
@@ -125,9 +126,9 @@ export default function HomeScreen() {
           {/* Ranking Compacto */}
           <View style={styles.rankingContainer}>
             <View style={styles.rankingHeader}>
-              <Text style={styles.rankingTitle}>Top Contribuidores</Text>
+              <Text style={styles.rankingTitle}>{t('home.top_contributors')}</Text>
               <TouchableOpacity onPress={() => router.push("/screens/ranking")}>
-                <Text style={styles.seeAllText}>Ver tudo</Text>
+                <Text style={styles.seeAllText}>{t('home.see_all')}</Text>
               </TouchableOpacity>
             </View>
 

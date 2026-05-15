@@ -4,6 +4,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { trainingService } from "../../services/trainingService";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTranslation } from "react-i18next";
 
 export default function ManageDatasetsScreen() {
   const [datasets, setDatasets] = useState<any[]>([]);
@@ -16,6 +17,7 @@ export default function ManageDatasetsScreen() {
   const [editContext, setEditContext] = useState<any>(null);
   const [editValue, setEditValue] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadDatasets();
@@ -56,12 +58,12 @@ export default function ManageDatasetsScreen() {
 
   const confirmDeleteDataset = (dataset: any) => {
     Alert.alert(
-      "Apagar Dataset",
-      `Tem certeza que deseja apagar permanentemente o dataset '${dataset.name}' e todas as suas capturas?`,
+      t('manage_datasets.delete_dataset_title'),
+      t('manage_datasets.delete_dataset_msg', { name: dataset.name }),
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: t('manage_datasets.cancel'), style: "cancel" },
         { 
-          text: "Apagar", 
+          text: t('manage_datasets.delete'), 
           style: "destructive", 
           onPress: async () => {
             try {
@@ -70,10 +72,10 @@ export default function ManageDatasetsScreen() {
                 if (expandedId === dataset.id) setExpandedId(null);
                 loadDatasets();
               } else {
-                Alert.alert("Erro", res.error || res.detail || "Falha ao apagar dataset.");
+                Alert.alert(t('manage_datasets.error'), res.error || res.detail || t('manage_datasets.error'));
               }
             } catch (e) {
-              Alert.alert("Erro de Rede", "Não foi possível conectar ao servidor: " + String(e));
+              Alert.alert(t('manage_datasets.network_error'), t('manage_datasets.network_error_msg', { error: String(e) }));
             }
           }
         }
@@ -83,12 +85,12 @@ export default function ManageDatasetsScreen() {
 
   const confirmDeleteLabel = (datasetId: string, label: string) => {
     Alert.alert(
-      "Apagar Gestos",
-      `Tem certeza que deseja apagar todas as amostras do gesto '${label}'?`,
+      t('manage_datasets.delete_label_title'),
+      t('manage_datasets.delete_label_msg', { label }),
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: t('manage_datasets.cancel'), style: "cancel" },
         { 
-          text: "Apagar", 
+          text: t('manage_datasets.delete'), 
           style: "destructive", 
           onPress: async () => {
             try {
@@ -99,10 +101,10 @@ export default function ManageDatasetsScreen() {
                 if (statsRes && statsRes.stats) setDatasetStats(statsRes.stats);
                 else setDatasetStats({});
               } else {
-                Alert.alert("Erro", res.error || res.detail || "Falha ao apagar gesto.");
+                Alert.alert(t('manage_datasets.error'), res.error || res.detail || t('manage_datasets.error'));
               }
             } catch (e) {
-              Alert.alert("Erro de Rede", "Não foi possível conectar ao servidor: " + String(e));
+              Alert.alert(t('manage_datasets.network_error'), t('manage_datasets.network_error_msg', { error: String(e) }));
             }
           }
         }
@@ -134,7 +136,7 @@ export default function ManageDatasetsScreen() {
       if (res.ok) {
         loadDatasets();
       } else {
-         Alert.alert("Erro ao renomear", res.error || res.detail || "Falha ao renomear dataset.");
+         Alert.alert(t('manage_datasets.rename_error'), res.error || res.detail || t('manage_datasets.rename_error'));
       }
     } else if (editType === "label") {
       const res = await trainingService.renameLabel(editContext.datasetId, editContext.oldLabel, normalizedValue);
@@ -143,7 +145,7 @@ export default function ManageDatasetsScreen() {
         const statsRes = await trainingService.getDatasetStats(editContext.datasetId);
         if (statsRes && statsRes.stats) setDatasetStats(statsRes.stats);
       } else {
-         Alert.alert("Erro ao renomear", res.error || res.detail || "Falha ao renomear gesto.");
+         Alert.alert(t('manage_datasets.rename_error'), res.error || res.detail || t('manage_datasets.rename_error'));
       }
     }
   };
@@ -154,12 +156,12 @@ export default function ManageDatasetsScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <MaterialIcons name="arrow-back" size={28} color="#00e5ff" />
         </TouchableOpacity>
-        <Text style={styles.title}>Gerenciar Gestos</Text>
+        <Text style={styles.title}>{t('manage_datasets.title')}</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
         {datasets.length === 0 ? (
-          <Text style={styles.emptyText}>Nenhum dataset encontrado.</Text>
+          <Text style={styles.emptyText}>{t('manage_datasets.empty_text')}</Text>
         ) : (
           datasets.map((ds) => {
             const isExpanded = expandedId === ds.id;
@@ -173,7 +175,7 @@ export default function ManageDatasetsScreen() {
                   <View style={styles.datasetInfo}>
                     <Text style={styles.datasetName}>{ds.name}</Text>
                     <View style={styles.chipWrapper}>
-                       <Text style={styles.typeText}>{ds.type === 'static' ? '🖼️ Estático' : '🎬 Dinâmico'}</Text>
+                       <Text style={styles.typeText}>{ds.type === 'static' ? t('manage_datasets.static_type') : t('manage_datasets.dynamic_type')}</Text>
                     </View>
                   </View>
                   <MaterialIcons name={isExpanded ? "expand-less" : "expand-more"} size={28} color="#00e5ff" />
@@ -185,21 +187,21 @@ export default function ManageDatasetsScreen() {
                       <View style={styles.datasetActions}>
                         <TouchableOpacity style={styles.actionBtn} onPress={() => openEditDataset(ds)}>
                           <MaterialIcons name="edit" size={18} color="#fff" />
-                          <Text style={styles.actionText}>Renomear</Text>
+                          <Text style={styles.actionText}>{t('manage_datasets.rename_btn')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={[styles.actionBtn, {backgroundColor: '#e53935'}]} onPress={() => confirmDeleteDataset(ds)}>
                           <MaterialIcons name="delete" size={18} color="#fff" />
-                          <Text style={styles.actionText}>Excluir Dataset</Text>
+                          <Text style={styles.actionText}>{t('manage_datasets.delete_dataset_btn')}</Text>
                         </TouchableOpacity>
                       </View>
                     )}
                     
-                    <Text style={styles.labelsTitle}>Gestos / Labels Cadastrados:</Text>
+                    <Text style={styles.labelsTitle}>{t('manage_datasets.labels_title')}</Text>
                     
                     {!datasetStats ? (
-                       <Text style={styles.loadingText}>Carregando gestos...</Text>
+                       <Text style={styles.loadingText}>{t('manage_datasets.loading_labels')}</Text>
                     ) : Object.keys(datasetStats).length === 0 ? (
-                       <Text style={styles.emptyTextInner}>Nenhuma amostra salva ainda.</Text>
+                       <Text style={styles.emptyTextInner}>{t('manage_datasets.no_samples')}</Text>
                     ) : (
                        Object.keys(datasetStats).map(label => (
                          <View key={label} style={styles.labelRow}>
@@ -247,10 +249,10 @@ export default function ManageDatasetsScreen() {
               />
               <View style={styles.modalBtns}>
                 <TouchableOpacity style={styles.modalBtnCancel} onPress={() => setModalVisible(false)}>
-                   <Text style={{color: '#888', fontWeight: 'bold'}}>Cancelar</Text>
+                   <Text style={{color: '#888', fontWeight: 'bold'}}>{t('manage_datasets.cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.modalBtnSave} onPress={saveEdit}>
-                   <Text style={{color: '#000', fontWeight: 'bold'}}>Salvar</Text>
+                   <Text style={{color: '#000', fontWeight: 'bold'}}>{t('manage_datasets.save')}</Text>
                 </TouchableOpacity>
               </View>
            </View>

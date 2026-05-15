@@ -36,6 +36,7 @@ import { useSpellingDetector } from "@/hooks/useSpellingDetector";
 import SpellingPanel from "@/components/voice/SpellingPanel";
 import VoiceSettingsModal from "@/components/voice/VoiceSettingsModal";
 import { camStyles as styles } from "@/styles/cam.styles";
+import { useTranslation } from "react-i18next";
 
 const DETECTION_MODES: { key: DetectionMode; label: string; desc: string; icon: string }[] = [
   { key: "hybrid",     label: "Híbrido",        desc: "Combina regras + ML estático + ML dinâmico",   icon: "merge-type" },
@@ -63,6 +64,7 @@ export default function CameraScreen() {
   const [detectionMode, setDetectionMode] = useState<DetectionMode>("hybrid");
   const [showModeModal, setShowModeModal] = useState<boolean>(false);
   const [activeModelName, setActiveModelName] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   // Voz / Soletração
   const [speechPrefs, setSpeechPrefs] = useState<SpeechPreferences>(speechService.getPreferences());
@@ -150,8 +152,8 @@ export default function CameraScreen() {
       setConnectionStatus(status);
       if (status === "failed") {
         Alert.alert(
-          "Erro de Conexão",
-          `Falha ao conectar à API após várias tentativas.\n${message ?? ""}`,
+          t('cam.connection_error'),
+          `${t('cam.api_fail')}\n${message ?? ""}`,
           [{ text: "OK" }]
         );
       }
@@ -323,11 +325,11 @@ export default function CameraScreen() {
         <TouchableOpacity
           onPress={() => setShowModeModal(true)}
           style={[styles.iconBtn, styles.modeBtnActive]}
-          accessibilityLabel="Selecionar modo de detecção"
+          accessibilityLabel={t('cam.mode_title')}
         >
           <MaterialIcons name={(currentModeConfig?.icon as any) || "memory"} size={18} color="#00e5ff" />
           <Text style={styles.modeBtnText} numberOfLines={1} ellipsizeMode="tail">
-            {currentModeConfig?.label || detectionMode}
+            {currentModeConfig ? t(`cam.mode_${currentModeConfig.key}`) : detectionMode}
           </Text>
         </TouchableOpacity>
 
@@ -378,7 +380,7 @@ export default function CameraScreen() {
         ) : (
           <View style={styles.permissionBox}>
             <MaterialIcons name="videocam-off" size={48} color="#888" />
-            <Text style={styles.warn}>Aguardando permissão da câmera...</Text>
+            <Text style={styles.warn}>{t('cam.permission_waiting')}</Text>
           </View>
         )}
 
@@ -462,7 +464,7 @@ export default function CameraScreen() {
         <View style={styles.edgeBadge}>
           <MaterialIcons name="developer-board" size={12} color={modelStatus === "ready" ? "#00e5ff" : "#ff6b6b"} />
           <Text style={[styles.edgeBadgeText, modelStatus !== "ready" && { color: "#ff6b6b" }]}>
-            {modelStatus === "ready" ? "Edge" : "Edge ✗"}
+            {modelStatus === "ready" ? t('cam.edge_ready') : t('cam.edge_error')}
           </Text>
         </View>
 
@@ -488,9 +490,9 @@ export default function CameraScreen() {
           <View style={styles.modelErrorBanner}>
             <MaterialIcons name="error" size={20} color="#ff6b6b" />
             <View style={{ flex: 1 }}>
-              <Text style={styles.modelErrorTitle}>Modelo Edge indisponível</Text>
+              <Text style={styles.modelErrorTitle}>{t('cam.edge_unavailable')}</Text>
               <Text style={styles.modelErrorDesc} numberOfLines={2}>
-                {modelError || "HandLandmarker não carregou. Detecção local desativada."}
+                {modelError || t('cam.edge_unavailable_desc')}
               </Text>
             </View>
           </View>
@@ -506,7 +508,7 @@ export default function CameraScreen() {
         {showLandmarks && landmarks.length === 0 && hasPermission && !apiError && (
           <View style={styles.noHandBadge}>
             <MaterialIcons name="pan-tool" size={14} color="#888" />
-            <Text style={styles.noHandText}>Nenhuma mão detectada</Text>
+            <Text style={styles.noHandText}>{t('cam.no_hand')}</Text>
           </View>
         )}
       </View>
@@ -517,10 +519,10 @@ export default function CameraScreen() {
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
               <MaterialIcons name="memory" size={28} color="#00e5ff" />
-              <Text style={styles.modalTitle}>Modo de Detecção</Text>
+              <Text style={styles.modalTitle}>{t('cam.mode_title')}</Text>
             </View>
             <Text style={styles.modalSubtitle}>
-              Escolha o cérebro de reconhecimento para esta sessão.
+              {t('cam.mode_subtitle')}
             </Text>
 
             {DETECTION_MODES.map((mode) => {
@@ -540,9 +542,9 @@ export default function CameraScreen() {
                     />
                     <View>
                       <Text style={[styles.modeLabel, isActive && styles.modeLabelActive]}>
-                        {mode.label}
+                        {t(`cam.mode_${mode.key}`)}
                       </Text>
-                      <Text style={styles.modeDesc}>{mode.desc}</Text>
+                      <Text style={styles.modeDesc}>{t(`cam.mode_${mode.key}_desc`)}</Text>
                     </View>
                   </View>
                   {isActive && (
@@ -555,7 +557,7 @@ export default function CameraScreen() {
             })}
 
             <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setShowModeModal(false)}>
-              <Text style={styles.modalCloseBtnText}>Fechar</Text>
+              <Text style={styles.modalCloseBtnText}>{t('cam.close')}</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -4,12 +4,14 @@ import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { trainingService } from "../../services/trainingService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 export default function ModelsScreen() {
   const [models, setModels] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activatingId, setActivatingId] = useState<string | null>(null);
   const [activeModelId, setActiveModelId] = useState<string | null>(null);
+  const { t } = useTranslation();
   
   // Controle de accordion/collapse para ver os submodelos
   const [expandedModels, setExpandedModels] = useState<Record<string, boolean>>({});
@@ -48,14 +50,14 @@ export default function ModelsScreen() {
         await AsyncStorage.setItem("activeModelName", name);
         setActiveModelId(id);
         Alert.alert(
-          "✅ Modelo Ativo",
-          `O grupo "${name}" foi ativado no servidor.`
+          t('models.active_success_title'),
+          t('models.active_success_msg', { name })
         );
       } else {
-        Alert.alert("Erro", res.error || "Falha ao ativar o modelo.");
+        Alert.alert(t('models.error'), res.error || t('models.error'));
       }
     } catch (e) {
-      Alert.alert("Erro de conexão", "Não foi possível conectar ao servidor: " + String(e));
+      Alert.alert(t('models.connection_error'), t('models.connection_error_msg', { error: String(e) }));
     } finally {
       setActivatingId(null);
     }
@@ -67,11 +69,11 @@ export default function ModelsScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <MaterialIcons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.title}>Modelos Treinados</Text>
+        <Text style={styles.title}>{t('models.title')}</Text>
       </View>
 
       <Text style={styles.subtitle}>
-        Abaixo estão os seus modelos base. Ao ativar um modelo mestre, tanto suas capacidades estáticas quanto dinâmicas serão carregadas e disponibilizadas globalmente no servidor.
+        {t('models.subtitle')}
       </Text>
 
       {isLoading ? (
@@ -79,8 +81,8 @@ export default function ModelsScreen() {
       ) : models.length === 0 ? (
         <View style={styles.emptyBox}>
           <MaterialIcons name="model-training" size={48} color="#333" />
-          <Text style={styles.emptyText}>Nenhum modelo treinado ainda.</Text>
-          <Text style={styles.emptyHint}>Vá à tela de Treinar Modelo para iniciar um agora.</Text>
+          <Text style={styles.emptyText}>{t('models.empty_text')}</Text>
+          <Text style={styles.emptyHint}>{t('models.empty_hint')}</Text>
         </View>
       ) : (
         <View style={styles.list}>
@@ -125,10 +127,10 @@ export default function ModelsScreen() {
                 {/* Subtítulos rápidos e tags */}
                 <View style={{ flexDirection: "row", gap: 10, marginBottom: 16 }}>
                    {hasStatic && (
-                     <View style={styles.typeBadge}><Text style={styles.modelType}>Estático Incluído</Text></View>
+                     <View style={styles.typeBadge}><Text style={styles.modelType}>{t('models.static_included')}</Text></View>
                    )}
                    {hasDynamic && (
-                     <View style={styles.typeBadge}><Text style={styles.modelType}>Dinâmico Incluído</Text></View>
+                     <View style={styles.typeBadge}><Text style={styles.modelType}>{t('models.dynamic_included')}</Text></View>
                    )}
                 </View>
 
@@ -139,7 +141,7 @@ export default function ModelsScreen() {
                       <View style={styles.submodelRow}>
                         <MaterialIcons name="camera-alt" size={16} color="#00e5ff" />
                         <Text style={styles.submodelText}>
-                          Estático: precisão de {(m.static_model.accuracy * 100).toFixed(1)}% com {m.static_model.total_samples_trained} amostras.
+                          {t('models.static_info', { accuracy: (m.static_model.accuracy * 100).toFixed(1), samples: m.static_model.total_samples_trained })}
                         </Text>
                       </View>
                     )}
@@ -147,7 +149,7 @@ export default function ModelsScreen() {
                       <View style={styles.submodelRow}>
                         <MaterialIcons name="videocam" size={16} color="#ffab00" />
                         <Text style={styles.submodelText}>
-                          Dinâmico: precisão de {(m.dynamic_model.accuracy * 100).toFixed(1)}% com {m.dynamic_model.total_samples_trained} amostras.
+                          {t('models.dynamic_info', { accuracy: (m.dynamic_model.accuracy * 100).toFixed(1), samples: m.dynamic_model.total_samples_trained })}
                         </Text>
                       </View>
                     )}
@@ -160,14 +162,14 @@ export default function ModelsScreen() {
                     <Text style={styles.metricValue}>
                       {m.total_samples}
                     </Text>
-                    <Text style={styles.metricLabel}>Total Amostras</Text>
+                    <Text style={styles.metricLabel}>{t('models.total_samples')}</Text>
                   </View>
                   <View style={styles.metricDivider} />
                   <View style={styles.metricBox}>
                     <Text style={[styles.metricValue, { color: "#fff" }]}>
                       {hasStatic && hasDynamic ? "2" : "1"}
                     </Text>
-                    <Text style={styles.metricLabel}>Sub-redes MLPs</Text>
+                    <Text style={styles.metricLabel}>{t('models.subnets')}</Text>
                   </View>
                 </View>
 
@@ -175,7 +177,7 @@ export default function ModelsScreen() {
                 {isActive && (
                   <View style={styles.activeBadge}>
                     <MaterialIcons name="check-circle" size={14} color="#4caf50" />
-                    <Text style={styles.activeBadgeText}>Grupo Mestre Ativo</Text>
+                    <Text style={styles.activeBadgeText}>{t('models.active_group')}</Text>
                   </View>
                 )}
 
@@ -204,10 +206,10 @@ export default function ModelsScreen() {
                     isActive && styles.activateBtnTextActive,
                   ]}>
                     {isActivating
-                      ? "Ativando Mestre..."
+                      ? t('models.activating')
                       : isActive
-                        ? "Mestre Ativo"
-                        : "Ativar Modelo Mestre"}
+                        ? t('models.active_btn')
+                        : t('models.activate_btn')}
                   </Text>
                 </TouchableOpacity>
               </View>
