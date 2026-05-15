@@ -16,7 +16,6 @@ function ProfileScreen() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [myRank, setMyRank] = useState<any>(null);
-  const [isRulesEnabled, setIsRulesEnabled] = useState(true);
   const [langModalVisible, setLangModalVisible] = useState(false);
   const { t, i18n } = useTranslation();
 
@@ -73,9 +72,6 @@ function ProfileScreen() {
           }
         }
       } catch { /* use cached */ }
-
-      const rulesStored = await AsyncStorage.getItem("config_rules_enabled");
-      setIsRulesEnabled(rulesStored !== "false");
     } catch (e) {
       console.log(e);
     } finally {
@@ -86,12 +82,6 @@ function ProfileScreen() {
   const logout = async () => {
     await AsyncStorage.clear();
     router.replace("/screens/login");
-  };
-
-  const toggleRulesMode = async () => {
-    const nextValue = !isRulesEnabled;
-    setIsRulesEnabled(nextValue);
-    await AsyncStorage.setItem("config_rules_enabled", String(nextValue));
   };
 
   const getLevel = (samples: number) => {
@@ -145,6 +135,18 @@ function ProfileScreen() {
             <Text style={styles.nameText}>{userName}</Text>
             <Text style={styles.roleText}>{userRole === "admin" ? t('profile.role_admin') : t('profile.role_member')}</Text>
             
+            {/* Botão Admin Config (apenas se for admin) */}
+            {userRole === "admin" && (
+              <TouchableOpacity
+                style={styles.adminLinkBtn}
+                onPress={() => router.push("/screens/admin-config")}
+              >
+                <MaterialIcons name="admin-panel-settings" size={20} color="#ff6b6b" />
+                <Text style={styles.adminLinkText}>{t('profile.admin.title')}</Text>
+                <MaterialIcons name="chevron-right" size={20} color="#ff6b6b" />
+              </TouchableOpacity>
+            )}
+
             <TouchableOpacity
               style={styles.editProfileBtn}
               onPress={() => router.push("/screens/edit-profile")}
@@ -153,35 +155,6 @@ function ProfileScreen() {
               <Text style={styles.editProfileBtnText}>{t('profile.edit_profile')}</Text>
             </TouchableOpacity>
           </View>
-
-          {/* ADMIN SETTINGS */}
-          {userRole === "admin" && (
-            <View style={styles.adminSection}>
-              <View style={styles.sectionHeader}>
-                <MaterialIcons name="admin-panel-settings" size={20} color="#ff6b6b" />
-                <Text style={styles.sectionTitle}>{t('profile.admin.title')}</Text>
-              </View>
-              
-              <TouchableOpacity 
-                style={styles.menuItem} 
-                onPress={toggleRulesMode}
-                activeOpacity={0.7}
-              >
-                <View style={styles.menuItemLeft}>
-                  <View style={styles.menuIcon}>
-                    <MaterialIcons name="rule" size={20} color="#ff6b6b" />
-                  </View>
-                  <View>
-                    <Text style={styles.menuText}>{t('profile.admin.rules_toggle')}</Text>
-                    <Text style={styles.menuSubtext}>{t('profile.admin.rules_desc')}</Text>
-                  </View>
-                </View>
-                <View style={[styles.toggleOuter, isRulesEnabled && styles.toggleOuterActive]}>
-                  <View style={[styles.toggleInner, isRulesEnabled && styles.toggleInnerActive]} />
-                </View>
-              </TouchableOpacity>
-            </View>
-          )}
 
           <View style={styles.statsCard}>
             <Text style={styles.statsTitle}>{t('profile.contributions')}</Text>
@@ -245,7 +218,7 @@ function ProfileScreen() {
                 ]}
                 onPress={() => handleSelectLanguage(lang.code)}
               >
-                <Text style={styles.langFlag}>{lang.flag}</Text>
+                <Text style={lang.code === i18n.language ? styles.langFlagActive : styles.langFlag}>{lang.flag}</Text>
                 <Text style={[
                   styles.langNameText,
                   i18n.language === lang.code && styles.langNameActive
@@ -278,6 +251,8 @@ const styles = StyleSheet.create({
   editAvatarBadge: { position: "absolute", top: -2, right: -2, backgroundColor: "rgba(0, 229, 255, 0.8)", width: 24, height: 24, borderRadius: 12, justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: "#1c2026" },
   nameText: { fontSize: 22, color: "#fff", fontWeight: "700", marginBottom: 5 },
   roleText: { fontSize: 14, color: "#888", fontWeight: "600", marginBottom: 16 },
+  adminLinkBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255, 107, 107, 0.1)", padding: 12, borderRadius: 12, gap: 10, marginBottom: 15, borderWidth: 1, borderColor: "rgba(255, 107, 107, 0.2)", width: "100%" },
+  adminLinkText: { color: "#ff6b6b", fontWeight: "bold", fontSize: 14 },
   editProfileBtn: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "rgba(0, 229, 255, 0.1)", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 12, borderWidth: 1, borderColor: "rgba(0, 229, 255, 0.3)" },
   editProfileBtnText: { color: "#00e5ff", fontWeight: "700", fontSize: 13 },
   statsCard: { backgroundColor: "#1c2026", borderRadius: 20, padding: 20, marginBottom: 20 },
@@ -293,24 +268,13 @@ const styles = StyleSheet.create({
   aboutBtnText: { color: "#888", fontWeight: "600", fontSize: 14 },
   logoutBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 16, borderRadius: 15, backgroundColor: "rgba(255, 68, 68, 0.1)", gap: 10, marginTop: 20 },
   logoutText: { color: "#ff4444", fontWeight: "bold", fontSize: 16 },
-  adminSection: { marginBottom: 20 },
-  sectionHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 },
-  sectionTitle: { color: "#ff6b6b", fontSize: 13, fontWeight: "bold", textTransform: "uppercase" },
-  menuItem: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: "#1c2026", padding: 16, borderRadius: 16, borderWidth: 1, borderColor: "#2a3548" },
-  menuItemLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
-  menuIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: "rgba(255, 107, 107, 0.1)", justifyContent: "center", alignItems: "center" },
-  menuText: { color: "#fff", fontSize: 15, fontWeight: "600" },
-  menuSubtext: { color: "#697688", fontSize: 12 },
-  toggleOuter: { width: 44, height: 24, borderRadius: 12, backgroundColor: "#2a3548", padding: 2, justifyContent: "center" },
-  toggleOuterActive: { backgroundColor: "#ff6b6b" },
-  toggleInner: { width: 20, height: 20, borderRadius: 10, backgroundColor: "#fff" },
-  toggleInnerActive: { transform: [{ translateX: 20 }] },
   modalBg: { flex: 1, backgroundColor: "rgba(0,0,0,0.85)", justifyContent: "center", alignItems: "center" },
   langModal: { width: "80%", maxWidth: 300, backgroundColor: "#1c2026", borderRadius: 20, padding: 20, borderWidth: 1, borderColor: "rgba(0, 229, 255, 0.3)" },
   modalTitleText: { color: "#fff", fontSize: 18, fontWeight: "bold", marginBottom: 20, textAlign: "center" },
   langItem: { flexDirection: "row", alignItems: "center", paddingVertical: 12, paddingHorizontal: 15, borderRadius: 12, marginBottom: 8, gap: 12 },
   langItemActive: { backgroundColor: "rgba(0, 229, 255, 0.1)" },
   langFlag: { fontSize: 20 },
+  langFlagActive: { fontSize: 20 },
   langNameText: { flex: 1, color: "#888", fontSize: 16, fontWeight: "600" },
   langNameActive: { color: "#fff" },
 });

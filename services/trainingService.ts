@@ -15,7 +15,6 @@ const fetchWithAuth = async (endpoint: string, options: RequestInit = {}) => {
     headers
   });
   const data = await response.json();
-  // Se o servidor retornou erro HTTP, mapeia o 'detail' do FastAPI para 'error'
   if (!response.ok && data.detail && !data.error) {
     data.error = typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail);
     data.ok = false;
@@ -141,8 +140,6 @@ export const trainingService = {
     return fetchWithAuth("/collect/ranking");
   },
 
-  // ── Profile ──────────────────────────────────────
-
   async getProfile() {
     return fetchWithAuth("/auth/profile");
   },
@@ -184,5 +181,17 @@ export const trainingService = {
     } catch (e: any) {
       return { ok: false, detail: "Erro de conexão: " + e.message };
     }
+  },
+
+  async exportSamples() {
+    return fetchWithAuth("/admin/export-samples");
+  },
+
+  async importSamples(payload: any) {
+    return fetchWithAuth("/admin/import-samples", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
   }
 };
