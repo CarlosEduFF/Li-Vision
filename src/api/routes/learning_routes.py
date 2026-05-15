@@ -11,6 +11,7 @@ class LearningGesturePayload(BaseModel):
     name: str
     level: Literal["iniciante", "intermediario", "avancado"]
     category: str
+    module: Optional[str] = "Libras"
     description: str
     svg_initial: Optional[str] = ""
     svg_movement: Optional[str] = ""
@@ -46,6 +47,7 @@ def require_admin(user: dict = Depends(verify_token)):
 def list_learning_gestures(
     level: Optional[str] = None,
     category: Optional[str] = None,
+    module: Optional[str] = None,
     include_inactive: bool = False,
     user: dict = Depends(verify_token),
 ):
@@ -55,6 +57,8 @@ def list_learning_gestures(
             query = query.eq("level", level)
         if category:
             query = query.eq("category", category)
+        if module:
+            query = query.eq("module", module)
         if not include_inactive:
             query = query.eq("is_active", True)
 
