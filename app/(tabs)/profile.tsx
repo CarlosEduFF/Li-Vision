@@ -7,6 +7,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { trainingService } from "@/services/trainingService";
 import { useTranslation } from "react-i18next";
 import { changeLanguage } from "../../services/i18n";
+import { Modal, ScrollView as RNScrollView } from "react-native";
 
 function ProfileScreen() {
   const [userName, setUserName] = useState("Usuário");
@@ -14,11 +15,21 @@ function ProfileScreen() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [myRank, setMyRank] = useState<any>(null);
+  const [langModalVisible, setLangModalVisible] = useState(false);
   const { t, i18n } = useTranslation();
 
-  const toggleLanguage = () => {
-    const newLang = i18n.language === 'pt' ? 'en' : 'pt';
-    changeLanguage(newLang);
+  const languages = [
+    { code: 'pt', name: 'Português', flag: '🇧🇷' },
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+    { code: 'fr', name: 'Français', flag: '🇫🇷' },
+    { code: 'ja', name: '日本語', flag: '🇯🇵' },
+    { code: 'es', name: 'Español', flag: '🇪🇸' },
+  ];
+
+  const handleSelectLanguage = (code: string) => {
+    changeLanguage(code);
+    setLangModalVisible(false);
   };
 
   // Recarrega os dados toda vez que a tela recebe foco (ex: voltando de edit-profile)
@@ -89,9 +100,9 @@ function ProfileScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>{t('profile.title')}</Text>
-        <TouchableOpacity style={styles.langBtn} onPress={toggleLanguage}>
+        <TouchableOpacity style={styles.langBtn} onPress={() => setLangModalVisible(true)}>
           <MaterialIcons name="language" size={20} color="#00e5ff" />
-          <Text style={styles.langText}>{i18n.language === 'en' ? 'EN' : 'PT'}</Text>
+          <Text style={styles.langText}>{i18n.language.toUpperCase()}</Text>
         </TouchableOpacity>
       </View>
 
@@ -182,6 +193,40 @@ function ProfileScreen() {
           </TouchableOpacity>
         </>
       )}
+
+      {/* Modal de Idioma */}
+      <Modal transparent visible={langModalVisible} animationType="fade">
+        <TouchableOpacity 
+          style={styles.modalBg} 
+          activeOpacity={1} 
+          onPress={() => setLangModalVisible(false)}
+        >
+          <View style={styles.langModal}>
+            <Text style={styles.modalTitle}>{t('profile.language')}</Text>
+            {languages.map((lang) => (
+              <TouchableOpacity 
+                key={lang.code}
+                style={[
+                  styles.langItem, 
+                  i18n.language === lang.code && styles.langItemActive
+                ]}
+                onPress={() => handleSelectLanguage(lang.code)}
+              >
+                <Text style={styles.langFlag}>{lang.flag}</Text>
+                <Text style={[
+                  styles.langName,
+                  i18n.language === lang.code && styles.langNameActive
+                ]}>
+                  {lang.name}
+                </Text>
+                {i18n.language === lang.code && (
+                  <MaterialIcons name="check" size={20} color="#00e5ff" />
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }
@@ -213,7 +258,16 @@ const styles = StyleSheet.create({
   aboutBtn: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: "rgba(255, 255, 255, 0.03)", padding: 15, borderRadius: 12, borderWidth: 1, borderColor: "rgba(255, 255, 255, 0.05)" },
   aboutBtnText: { color: "#888", fontWeight: "600", fontSize: 14 },
   logoutBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 16, borderRadius: 15, backgroundColor: "rgba(255, 68, 68, 0.1)", gap: 10, alignSelf:"center", width:"100%", marginBottom: 30, borderWidth: 1, borderColor: "rgba(255, 68, 68, 0.3)" },
-  logoutText: { color: "#ff4444", fontWeight: "bold", fontSize: 16 }
+  logoutText: { color: "#ff4444", fontWeight: "bold", fontSize: 16 },
+  // Modal Idioma
+  modalBg: { flex: 1, backgroundColor: "rgba(0,0,0,0.85)", justifyContent: "center", alignItems: "center" },
+  langModal: { width: "80%", maxWidth: 300, backgroundColor: "#1c2026", borderRadius: 20, padding: 20, borderWidth: 1, borderColor: "rgba(0, 229, 255, 0.3)" },
+  modalTitle: { color: "#fff", fontSize: 18, fontWeight: "bold", marginBottom: 20, textAlign: "center" },
+  langItem: { flexDirection: "row", alignItems: "center", paddingVertical: 12, paddingHorizontal: 15, borderRadius: 12, marginBottom: 8, gap: 12 },
+  langItemActive: { backgroundColor: "rgba(0, 229, 255, 0.1)" },
+  langFlag: { fontSize: 20 },
+  langName: { flex: 1, color: "#888", fontSize: 16, fontWeight: "600" },
+  langNameActive: { color: "#fff" },
 });
 
 export default ProfileScreen;

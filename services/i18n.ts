@@ -4,10 +4,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import en from './locales/en.json';
 import pt from './locales/pt.json';
+import de from './locales/de.json';
+import fr from './locales/fr.json';
+import ja from './locales/ja.json';
+import es from './locales/es.json';
 
 const resources = {
   en: { translation: en },
   pt: { translation: pt },
+  de: { translation: de },
+  fr: { translation: fr },
+  ja: { translation: ja },
+  es: { translation: es },
 };
 
 const LANGUAGE_KEY = 'appLanguage';
@@ -35,7 +43,8 @@ const loadSavedLanguage = async () => {
         // Tenta carregar o módulo nativo apenas aqui dentro
         const Localization = require('expo-localization');
         const deviceLocale = Localization.getLocales()[0]?.languageCode;
-        if (deviceLocale === 'en' || deviceLocale === 'pt') {
+        const supported = ['en', 'pt', 'de', 'fr', 'ja', 'es'];
+        if (supported.includes(deviceLocale)) {
           i18n.changeLanguage(deviceLocale);
         }
       } catch (e) {
