@@ -4,10 +4,22 @@
  * Usa o MediaPipe Tasks SDK no Android via Frame Processor Plugin
  * do VisionCamera para detectar os 21 landmarks da mão localmente.
  *
- * Retorna coordenadas normalizadas [0, 1] para cada ponto.
+ * Retorna coordenadas normalizadas [0, 1] para cada ponto,
+ * além da classificação de lateralidade (Left/Right).
+ *
+ * @see https://github.com/CarlosEduFF/expo-vision-camera-v4-mediapipe
  */
 
 import { VisionCameraProxy, Frame } from "react-native-vision-camera";
+
+// Re-exporta tipos do plugin para uso no app
+export type {
+  HandLandmark as LandmarkPoint,
+  HandDetectionResult as HandLandmarkResult,
+  HandednessCategory,
+} from "expo-vision-camera-v4-mediapipe";
+
+export { HandLandmarkIndex } from "expo-vision-camera-v4-mediapipe";
 
 // ── Estado do plugin ──────────────────────────────────
 let plugin: ReturnType<typeof VisionCameraProxy.initFrameProcessorPlugin> | null = null;
@@ -21,19 +33,6 @@ try {
 } catch (e: any) {
   pluginError = e.message || "Erro desconhecido ao inicializar o plugin HandLandmarker.";
 }
-
-/** Um ponto 3D normalizado [0, 1] */
-export type LandmarkPoint = {
-  x: number;
-  y: number;
-  z: number;
-};
-
-/** Resultado da detecção de mão */
-export type HandLandmarkResult = {
-  /** Array de mãos, cada mão com 21 LandmarkPoints */
-  hands: LandmarkPoint[][];
-};
 
 /**
  * Retorna o estado atual do plugin nativo.
@@ -53,9 +52,9 @@ export function getPluginStatus(): { ready: boolean; error: string | null } {
  * DEVE ser chamado dentro de um useFrameProcessor (worklet).
  *
  * @param frame - Frame da câmera do VisionCamera
- * @returns Resultado com os landmarks ou null se o plugin não carregou
+ * @returns Resultado com os landmarks, handedness, ou null se o plugin não carregou
  */
-export function detectHandLandmarks(frame: Frame): HandLandmarkResult | null {
+export function detectHandLandmarks(frame: Frame): import("expo-vision-camera-v4-mediapipe").HandDetectionResult | null {
   "worklet";
 
   if (plugin == null) {
@@ -64,6 +63,6 @@ export function detectHandLandmarks(frame: Frame): HandLandmarkResult | null {
     return null;
   }
 
-  const result = plugin.call(frame) as unknown as HandLandmarkResult | null;
+  const result = plugin.call(frame) as unknown as import("expo-vision-camera-v4-mediapipe").HandDetectionResult | null;
   return result;
 }

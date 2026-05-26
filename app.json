@@ -43,7 +43,12 @@
           }
         }
       ],
-      "./plugins/withHandLandmarker",
+      ["expo-vision-camera-v4-mediapipe/plugin", {
+        "numHands": 2,
+        "minDetectionConfidence": 0.4,
+        "minPresenceConfidence": 0.4,
+        "minTrackingConfidence": 0.4
+      }],
       "expo-localization"
     ],
     "experiments": {
