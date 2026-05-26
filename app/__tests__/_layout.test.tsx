@@ -18,6 +18,7 @@ jest.mock('expo-router', () => {
   return {
     Stack: MockStack,
     useRouter: jest.fn(),
+    usePathname: jest.fn(() => '/'),
   };
 });
 jest.mock('@/hooks/use-color-scheme', () => ({
