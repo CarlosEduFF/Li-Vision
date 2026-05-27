@@ -101,9 +101,23 @@ export default function CameraScreen() {
     speechService.init().then((prefs) => { if (mounted) setSpeechPrefs(prefs); });
 
     const checkRulesConfig = async () => {
-      const rulesStored = await AsyncStorage.getItem("config_rules_enabled");
+      let rulesEnabled = true;
+      try {
+        const rulesState = await trainingService.getRulesEnabled();
+        if (rulesState !== undefined) {
+          rulesEnabled = rulesState;
+          await AsyncStorage.setItem("config_rules_enabled", String(rulesEnabled));
+        } else {
+          const rulesStored = await AsyncStorage.getItem("config_rules_enabled");
+          rulesEnabled = rulesStored !== "false";
+        }
+      } catch (e) {
+        console.log("Erro ao carregar rules da API no cam, usando local:", e);
+        const rulesStored = await AsyncStorage.getItem("config_rules_enabled");
+        rulesEnabled = rulesStored !== "false";
+      }
+
       const userRole = await AsyncStorage.getItem("userRole");
-      const rulesEnabled = rulesStored !== "false";
       
       // Filtra os modos baseados no papel do usuário e config global
       const filtered = DETECTION_MODES.filter(m => {
@@ -232,8 +246,20 @@ export default function CameraScreen() {
         }
 
         if (!cancelled) {
-          const rulesStored = await AsyncStorage.getItem("config_rules_enabled");
-          const rulesEnabled = rulesStored !== "false";
+          let rulesEnabled = true;
+          try {
+            const rulesState = await trainingService.getRulesEnabled();
+            if (rulesState !== undefined) {
+              rulesEnabled = rulesState;
+              await AsyncStorage.setItem("config_rules_enabled", String(rulesEnabled));
+            } else {
+              const rulesStored = await AsyncStorage.getItem("config_rules_enabled");
+              rulesEnabled = rulesStored !== "false";
+            }
+          } catch (e) {
+            const rulesStored = await AsyncStorage.getItem("config_rules_enabled");
+            rulesEnabled = rulesStored !== "false";
+          }
 
           gestureWS.connect(
             (result) => handleGestureRef.current(result),

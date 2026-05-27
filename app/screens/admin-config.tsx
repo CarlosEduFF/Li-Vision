@@ -20,14 +20,41 @@ export default function AdminConfigScreen() {
   }, []);
 
   const loadConfig = async () => {
+    try {
+      const serverEnabled = await trainingService.getRulesEnabled();
+      if (serverEnabled !== undefined) {
+        setIsRulesEnabled(serverEnabled);
+        await AsyncStorage.setItem("config_rules_enabled", String(serverEnabled));
+        return;
+      }
+    } catch (e) {
+      console.log("Erro ao carregar configuração do servidor:", e);
+    }
     const rulesStored = await AsyncStorage.getItem("config_rules_enabled");
     setIsRulesEnabled(rulesStored !== "false");
   };
 
   const toggleRulesMode = async () => {
     const nextValue = !isRulesEnabled;
+    
+    // Otimista: assume sucesso no app primeiro
     setIsRulesEnabled(nextValue);
     await AsyncStorage.setItem("config_rules_enabled", String(nextValue));
+    
+    try {
+      const res = await trainingService.setRulesEnabled(nextValue);
+      if (!res.ok) {
+        throw new Error(res.detail || res.error || "Erro desconhecido ao salvar no servidor");
+      }
+    } catch (e: any) {
+      Alert.alert(
+        "Erro ao sincronizar",
+        e.message || "Não foi possível salvar no servidor. A configuração foi revertida."
+      );
+      // Reverte se falhar
+      setIsRulesEnabled(!nextValue);
+      await AsyncStorage.setItem("config_rules_enabled", String(!nextValue));
+    }
   };
 
   const handleExportBackup = async () => {
