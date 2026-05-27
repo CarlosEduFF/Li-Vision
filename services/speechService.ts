@@ -22,6 +22,37 @@ const STORAGE_KEY = "@livision/speech_prefs";
 const DEFAULT_LANGUAGE = "pt-BR";
 const DEFAULT_RATE = 1.0;
 const DEFAULT_PITCH = 1.05;
+const APP_LANGUAGE_KEY = "appLanguage";
+
+export const SPEECH_LANGUAGES = [
+  { appCode: "pt", speechCode: "pt-BR", label: "Português", testText: "Olá! Eu falo os gestos que você realizar." },
+  { appCode: "en", speechCode: "en-US", label: "English", testText: "Hello! I speak the gestures you perform." },
+  { appCode: "es", speechCode: "es-ES", label: "Español", testText: "Hola! Hablo los gestos que realizas." },
+  { appCode: "fr", speechCode: "fr-FR", label: "Français", testText: "Bonjour! Je prononce les gestes que vous réalisez." },
+  { appCode: "de", speechCode: "de-DE", label: "Deutsch", testText: "Hallo! Ich spreche die Gesten aus, die Sie ausführen." },
+  { appCode: "ja", speechCode: "ja-JP", label: "日本語", testText: "こんにちは。実行したジェスチャを読み上げます。" },
+] as const;
+
+export type SpeechLanguageCode = (typeof SPEECH_LANGUAGES)[number]["speechCode"];
+
+const APP_TO_SPEECH_LANGUAGE: Record<string, SpeechLanguageCode> = {
+  pt: "pt-BR",
+  en: "en-US",
+  es: "es-ES",
+  fr: "fr-FR",
+  de: "de-DE",
+  ja: "ja-JP",
+};
+
+export function getSpeechLanguageByAppLanguage(appLanguage?: string | null): SpeechLanguageCode {
+  if (!appLanguage) return DEFAULT_LANGUAGE;
+  const normalized = appLanguage.split("-")[0];
+  return APP_TO_SPEECH_LANGUAGE[normalized] ?? DEFAULT_LANGUAGE;
+}
+
+export function getSpeechLanguageConfig(speechCode: string) {
+  return SPEECH_LANGUAGES.find((lang) => lang.speechCode === speechCode) ?? SPEECH_LANGUAGES[0];
+}
 
 // Mapa de letras para fala "natural" em pt-BR.
 // Em Libras alfabeto, letras vêm como "A", "B" etc.
@@ -89,6 +120,12 @@ class SpeechService {
       if (raw) {
         const parsed = JSON.parse(raw);
         this.prefs = { ...DEFAULT_PREFERENCES, ...parsed };
+      } else {
+        const appLanguage = await AsyncStorage.getItem(APP_LANGUAGE_KEY);
+        this.prefs = {
+          ...DEFAULT_PREFERENCES,
+          language: getSpeechLanguageByAppLanguage(appLanguage),
+        };
       }
     } catch (e) {
       console.log("[SpeechService] Falha ao carregar preferências:", e);
@@ -135,6 +172,12 @@ class SpeechService {
     const next = !this.prefs.spellingEnabled;
     await this.setPreferences({ spellingEnabled: next });
     return next;
+  }
+
+  /** Define o idioma usado pelo expo-speech. */
+  async setLanguage(language: string): Promise<SpeechPreferences> {
+    const next = getSpeechLanguageConfig(language).speechCode;
+    return this.setPreferences({ language: next });
   }
 
   /** Registra callback de mudança de preferências (para UI reativa). */

@@ -407,5 +407,211 @@
     "review_btn": "Review Again",
     "conclude_btn": "Conclude Learning",
     "svg_note": "SVG illustrations only (no video)."
+  },
+  "about_modal": {
+    "1": {
+      "title": "App Overview",
+      "slides": {
+        "overview": {
+          "title": "Overview",
+          "items": [
+            "Li-Vision is a real-time gesture recognition system",
+            "Combines local (Edge) processing with cloud processing",
+            "Multi-tenant architecture: each user has an isolated session"
+          ]
+        },
+        "home": {
+          "title": "Home Tab",
+          "items": [
+            "Main application dashboard",
+            "Overview of activities and statistics",
+            "Quick access to the main features"
+          ]
+        },
+        "camera": {
+          "title": "Camera Tab",
+          "items": [
+            "Real-time inference with the device camera",
+            "Hand detection and gesture recognition",
+            "Mode selector: Hybrid, Rules, Static ML, Dynamic ML"
+          ]
+        },
+        "studio": {
+          "title": "ML Studio Tab",
+          "items": [
+            "Static and dynamic data collection",
+            "Dataset management",
+            "Custom model training"
+          ]
+        },
+        "ranking": {
+          "title": "Ranking Tab",
+          "items": [
+            "Contributor leaderboard",
+            "Score visualization",
+            "Track progress in the system"
+          ]
+        },
+        "profile": {
+          "title": "Profile Tab",
+          "items": [
+            "User information",
+            "Personal settings",
+            "Activity history"
+          ]
+        }
+      }
+    },
+    "2": {
+      "title": "How to Run Inference",
+      "slides": {
+        "access_camera": {
+          "title": "Step 1: Open the Camera",
+          "items": [
+            "Tap the 'Camera' button in the bottom navigation bar",
+            "Or use the shortcut on the home screen if available",
+            "Allow camera access when prompted"
+          ]
+        },
+        "position_hand": {
+          "title": "Step 2: Position Your Hand",
+          "items": [
+            "Place your hand inside the frame",
+            "Keep your hand at a comfortable distance (30-50 cm)",
+            "Avoid backgrounds that are too bright or too dark",
+            "Good lighting improves accuracy"
+          ]
+        },
+        "select_mode": {
+          "title": "Step 3: Select the Mode",
+          "items": [
+            "Tap the mode button at the top of the screen",
+            "Choose between: Hybrid, Rules, Static ML, or Dynamic ML",
+            "Each mode uses a different recognition technique",
+            "The selected mode is saved for your session"
+          ]
+        },
+        "detection_modes": {
+          "title": "Detection Modes",
+          "items": [
+            "Hybrid: Combines rules and machine learning",
+            "Rules: Based on predefined geometric rules",
+            "Static ML: Model trained with static poses",
+            "Dynamic ML: Model trained with dynamic movements/gestures"
+          ]
+        },
+        "usage_tips": {
+          "title": "Usage Tips",
+          "items": [
+            "Move your hand smoothly for better detection",
+            "Avoid sudden movements",
+            "If the gesture is not recognized, adjust your position",
+            "Accuracy depends on the quality of the trained model"
+          ]
+        }
+      }
+    },
+    "3": {
+      "title": "How to Train Models",
+      "slides": {
+        "data_collection": {
+          "title": "Step 1: Data Collection",
+          "items": [
+            "Open ML Studio from its tab",
+            "Choose between Static or Dynamic collection",
+            "Static collection: captures single hand poses",
+            "Dynamic collection: captures movement sequences"
+          ]
+        },
+        "create_dataset": {
+          "title": "Step 2: Create a Dataset",
+          "items": [
+            "Define a name for your dataset (e.g. ALPHABET_V1)",
+            "Create labels for each gesture (e.g. A, B, C)",
+            "Collect enough samples for each label",
+            "More samples improve model accuracy"
+          ]
+        },
+        "organize_data": {
+          "title": "Step 3: Organize Data",
+          "items": [
+            "View dataset statistics",
+            "Check sample distribution by label",
+            "Add more samples if needed",
+            "Keep classes balanced"
+          ]
+        },
+        "training": {
+          "title": "Step 4: Training",
+          "items": [
+            "Select the dataset for training",
+            "Choose the model type (Static or Dynamic)",
+            "Start training and wait for completion",
+            "The trained model will appear in the model list"
+          ]
+        },
+        "use_model": {
+          "title": "Step 5: Use the Model",
+          "items": [
+            "Go to the model selection screen",
+            "Choose the newly trained model",
+            "Activate it for inference",
+            "Test it in the camera to validate results"
+          ]
+        }
+      }
+    },
+    "4": {
+      "title": "Scoring and Ranking",
+      "slides": {
+        "scoring": {
+          "title": "How Scoring Works",
+          "items": [
+            "Each activity in the app generates points",
+            "Data collection: 10 points per sample",
+            "Model training: 100 points per training run",
+            "Camera usage: 1 point per minute of inference"
+          ]
+        },
+        "point_sources": {
+          "title": "What Counts for Points",
+          "items": [
+            "Static gesture collection",
+            "Dynamic movement collection",
+            "Dataset creation",
+            "Model training",
+            "Contributions to public datasets"
+          ]
+        },
+        "ranking_system": {
+          "title": "Ranking System",
+          "items": [
+            "Global ranking for all users",
+            "Real-time updates",
+            "Position based on total accumulated points",
+            "Weekly/monthly progress history"
+          ]
+        },
+        "benefits": {
+          "title": "Benefits of Contributing",
+          "items": [
+            "Recognition in the Li-Vision community",
+            "Early access to new features",
+            "Special badges and achievements",
+            "Contribution to science and accessibility"
+          ]
+        },
+        "ranking_tips": {
+          "title": "Tips to Climb the Ranking",
+          "items": [
+            "Collect data regularly",
+            "Create diverse datasets",
+            "Train high-quality models",
+            "Share datasets with the community",
+            "Use the app frequently for inference"
+          ]
+        }
+      }
+    }
   }
 }

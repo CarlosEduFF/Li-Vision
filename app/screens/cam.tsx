@@ -31,7 +31,7 @@ import {
 } from "@/services/handLandmarkerPlugin";
 import { useModelStatus } from "@/hooks/useModelStatus";
 import { trainingService } from "@/services/trainingService";
-import speechService, { SpeechPreferences } from "@/services/speechService";
+import speechService, { getSpeechLanguageConfig, SpeechPreferences } from "@/services/speechService";
 import { useSpellingDetector } from "@/hooks/useSpellingDetector";
 import SpellingPanel from "@/components/voice/SpellingPanel";
 import VoiceSettingsModal from "@/components/voice/VoiceSettingsModal";
@@ -367,8 +367,11 @@ export default function CameraScreen() {
     const next = Math.min(0.95, Math.max(0.3, +(speechPrefs.minConfidence + d).toFixed(2)));
     speechService.setPreferences({ minConfidence: next });
   };
+  const setSpeechLanguage = (language: string) => {
+    speechService.setLanguage(language);
+  };
   const testVoice = () => {
-    speechService.speak("Olá! Eu falo os gestos que você realizar.", { interrupt: true });
+    speechService.speak(getSpeechLanguageConfig(speechPrefs.language).testText, { interrupt: true });
   };
 
   return (
@@ -631,6 +634,7 @@ export default function CameraScreen() {
         onAdjustIdle={adjustIdle}
         onAdjustStable={adjustStable}
         onAdjustConfidence={adjustConfidence}
+        onSetLanguage={setSpeechLanguage}
         onTestVoice={testVoice}
       />
     </View>

@@ -407,5 +407,211 @@
     "review_btn": "Nochmals wiederholen",
     "conclude_btn": "Lernen abschließen",
     "svg_note": "Nur SVG-Illustrationen (kein Video)."
+  },
+  "about_modal": {
+    "1": {
+      "title": "App-Vorstellung",
+      "slides": {
+        "overview": {
+          "title": "?berblick",
+          "items": [
+            "Li-Vision ist ein System zur Gestenerkennung in Echtzeit",
+            "Kombiniert lokale Verarbeitung (Edge) mit Cloud-Verarbeitung",
+            "Multi-Tenant-Architektur: Jeder Benutzer hat eine isolierte Sitzung"
+          ]
+        },
+        "home": {
+          "title": "Home-Tab",
+          "items": [
+            "Haupt-Dashboard der Anwendung",
+            "?berblick ?ber Aktivit?ten und Statistiken",
+            "Schneller Zugriff auf die wichtigsten Funktionen"
+          ]
+        },
+        "camera": {
+          "title": "Kamera-Tab",
+          "items": [
+            "Echtzeit-Inferenz mit der Ger?tekamera",
+            "Handerkennung und Gestenerkennung",
+            "Modusauswahl: Hybrid, Regeln, Statisches ML, Dynamisches ML"
+          ]
+        },
+        "studio": {
+          "title": "ML Studio-Tab",
+          "items": [
+            "Statische und dynamische Datenerfassung",
+            "Dataset-Verwaltung",
+            "Training benutzerdefinierter Modelle"
+          ]
+        },
+        "ranking": {
+          "title": "Ranking-Tab",
+          "items": [
+            "Bestenliste der Beitragenden",
+            "Visualisierung von Punktzahlen",
+            "Verfolgung des Fortschritts im System"
+          ]
+        },
+        "profile": {
+          "title": "Profil-Tab",
+          "items": [
+            "Benutzerinformationen",
+            "Pers?nliche Einstellungen",
+            "Aktivit?tsverlauf"
+          ]
+        }
+      }
+    },
+    "2": {
+      "title": "So f?hren Sie Inferenz aus",
+      "slides": {
+        "access_camera": {
+          "title": "Schritt 1: Kamera ?ffnen",
+          "items": [
+            "Tippen Sie in der unteren Navigation auf 'Kamera'",
+            "Oder verwenden Sie die Verkn?pfung auf dem Startbildschirm, falls verf?gbar",
+            "Erlauben Sie den Kamerazugriff, wenn Sie dazu aufgefordert werden"
+          ]
+        },
+        "position_hand": {
+          "title": "Schritt 2: Hand positionieren",
+          "items": [
+            "Positionieren Sie Ihre Hand im Bildausschnitt",
+            "Halten Sie die Hand in einem angenehmen Abstand (30-50 cm)",
+            "Vermeiden Sie zu helle oder zu dunkle Hintergr?nde",
+            "Gute Beleuchtung verbessert die Genauigkeit"
+          ]
+        },
+        "select_mode": {
+          "title": "Schritt 3: Modus ausw?hlen",
+          "items": [
+            "Tippen Sie oben auf dem Bildschirm auf die Modus-Schaltfl?che",
+            "W?hlen Sie zwischen: Hybrid, Regeln, Statisches ML oder Dynamisches ML",
+            "Jeder Modus verwendet eine andere Erkennungstechnik",
+            "Der ausgew?hlte Modus wird f?r Ihre Sitzung gespeichert"
+          ]
+        },
+        "detection_modes": {
+          "title": "Erkennungsmodi",
+          "items": [
+            "Hybrid: Kombiniert Regeln und Machine Learning",
+            "Regeln: Basiert auf vordefinierten geometrischen Regeln",
+            "Statisches ML: Modell, das mit statischen Posen trainiert wurde",
+            "Dynamisches ML: Modell, das mit dynamischen Bewegungen/Gesten trainiert wurde"
+          ]
+        },
+        "usage_tips": {
+          "title": "Nutzungstipps",
+          "items": [
+            "Bewegen Sie die Hand sanft f?r eine bessere Erkennung",
+            "Vermeiden Sie abrupte Bewegungen",
+            "Wenn die Geste nicht erkannt wird, passen Sie die Position an",
+            "Die Genauigkeit h?ngt von der Qualit?t des trainierten Modells ab"
+          ]
+        }
+      }
+    },
+    "3": {
+      "title": "So trainieren Sie Modelle",
+      "slides": {
+        "data_collection": {
+          "title": "Schritt 1: Datenerfassung",
+          "items": [
+            "?ffnen Sie ML Studio ?ber den entsprechenden Tab",
+            "W?hlen Sie zwischen statischer oder dynamischer Erfassung",
+            "Statische Erfassung: erfasst einzelne Handposen",
+            "Dynamische Erfassung: erfasst Bewegungssequenzen"
+          ]
+        },
+        "create_dataset": {
+          "title": "Schritt 2: Dataset erstellen",
+          "items": [
+            "Legen Sie einen Namen f?r Ihr Dataset fest (z. B. ALPHABET_V1)",
+            "Erstellen Sie Labels f?r jede Geste (z. B. A, B, C)",
+            "Sammeln Sie gen?gend Samples f?r jedes Label",
+            "Mehr Samples verbessern die Genauigkeit des Modells"
+          ]
+        },
+        "organize_data": {
+          "title": "Schritt 3: Daten organisieren",
+          "items": [
+            "Zeigen Sie Dataset-Statistiken an",
+            "Pr?fen Sie die Sample-Verteilung pro Label",
+            "F?gen Sie bei Bedarf weitere Samples hinzu",
+            "Halten Sie die Klassen ausgewogen"
+          ]
+        },
+        "training": {
+          "title": "Schritt 4: Training",
+          "items": [
+            "W?hlen Sie das Dataset f?r das Training aus",
+            "W?hlen Sie den Modelltyp (statisch oder dynamisch)",
+            "Starten Sie das Training und warten Sie auf den Abschluss",
+            "Das trainierte Modell erscheint in der Modellliste"
+          ]
+        },
+        "use_model": {
+          "title": "Schritt 5: Modell verwenden",
+          "items": [
+            "Gehen Sie zur Modellauswahl",
+            "W?hlen Sie das neu trainierte Modell",
+            "Aktivieren Sie es f?r die Inferenz",
+            "Testen Sie es in der Kamera, um die Ergebnisse zu validieren"
+          ]
+        }
+      }
+    },
+    "4": {
+      "title": "Punkte und Ranking",
+      "slides": {
+        "scoring": {
+          "title": "So funktioniert die Punktevergabe",
+          "items": [
+            "Jede Aktivit?t in der App erzeugt Punkte",
+            "Datenerfassung: 10 Punkte pro Sample",
+            "Modelltraining: 100 Punkte pro Training",
+            "Kameranutzung: 1 Punkt pro Minute Inferenz"
+          ]
+        },
+        "point_sources": {
+          "title": "Was Punkte bringt",
+          "items": [
+            "Statische Gestenerfassung",
+            "Dynamische Bewegungserfassung",
+            "Erstellung von Datasets",
+            "Training von Modellen",
+            "Beitr?ge zu ?ffentlichen Datasets"
+          ]
+        },
+        "ranking_system": {
+          "title": "Ranking-System",
+          "items": [
+            "Globales Ranking aller Benutzer",
+            "Aktualisierung in Echtzeit",
+            "Position basierend auf der Gesamtpunktzahl",
+            "W?chentlicher/monatlicher Fortschrittsverlauf"
+          ]
+        },
+        "benefits": {
+          "title": "Vorteile des Beitragens",
+          "items": [
+            "Anerkennung in der Li-Vision-Community",
+            "Fr?her Zugriff auf neue Funktionen",
+            "Spezielle Badges und Erfolge",
+            "Beitrag zu Wissenschaft und Barrierefreiheit"
+          ]
+        },
+        "ranking_tips": {
+          "title": "Tipps zum Aufstieg im Ranking",
+          "items": [
+            "Sammeln Sie regelm??ig Daten",
+            "Erstellen Sie vielf?ltige Datasets",
+            "Trainieren Sie hochwertige Modelle",
+            "Teilen Sie Datasets mit der Community",
+            "Nutzen Sie die App h?ufig f?r Inferenz"
+          ]
+        }
+      }
+    }
   }
 }

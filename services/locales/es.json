@@ -407,5 +407,211 @@
     "review_btn": "Repasar de nuevo",
     "conclude_btn": "Concluir aprendizaje",
     "svg_note": "Solo ilustraciones SVG (sin video)."
+  },
+  "about_modal": {
+    "1": {
+      "title": "Presentaci?n de la app",
+      "slides": {
+        "overview": {
+          "title": "Visi?n general",
+          "items": [
+            "Li-Vision es un sistema de reconocimiento de gestos en tiempo real",
+            "Combina procesamiento local (Edge) y procesamiento en la nube",
+            "Arquitectura multi-tenant: cada usuario tiene una sesi?n aislada"
+          ]
+        },
+        "home": {
+          "title": "Pesta?a Inicio",
+          "items": [
+            "Panel principal de la aplicaci?n",
+            "Resumen de actividades y estad?sticas",
+            "Acceso r?pido a las funciones principales"
+          ]
+        },
+        "camera": {
+          "title": "Pesta?a C?mara",
+          "items": [
+            "Inferencia en tiempo real con la c?mara del dispositivo",
+            "Detecci?n de manos y reconocimiento de gestos",
+            "Selector de modo: H?brido, Reglas, ML Est?tico, ML Din?mico"
+          ]
+        },
+        "studio": {
+          "title": "Pesta?a ML Studio",
+          "items": [
+            "Recolecci?n de datos est?ticos y din?micos",
+            "Gesti?n de datasets",
+            "Entrenamiento de modelos personalizados"
+          ]
+        },
+        "ranking": {
+          "title": "Pesta?a Ranking",
+          "items": [
+            "Tabla de contribuidores",
+            "Visualizaci?n de puntuaciones",
+            "Seguimiento de evoluci?n en el sistema"
+          ]
+        },
+        "profile": {
+          "title": "Pesta?a Perfil",
+          "items": [
+            "Informaci?n del usuario",
+            "Configuraciones personales",
+            "Historial de actividades"
+          ]
+        }
+      }
+    },
+    "2": {
+      "title": "C?mo hacer inferencia",
+      "slides": {
+        "access_camera": {
+          "title": "Paso 1: Acceder a la c?mara",
+          "items": [
+            "Toca el bot?n 'C?mara' en la barra de navegaci?n inferior",
+            "O usa el acceso directo en la pantalla inicial si est? disponible",
+            "Permite el acceso a la c?mara cuando se solicite"
+          ]
+        },
+        "position_hand": {
+          "title": "Paso 2: Posicionar la mano",
+          "items": [
+            "Coloca tu mano dentro del encuadre",
+            "Mant?n la mano a una distancia c?moda (30-50 cm)",
+            "Evita fondos demasiado claros u oscuros",
+            "Una buena iluminaci?n mejora la precisi?n"
+          ]
+        },
+        "select_mode": {
+          "title": "Paso 3: Seleccionar el modo",
+          "items": [
+            "Toca el bot?n de modo en la parte superior de la pantalla",
+            "Elige entre: H?brido, Reglas, ML Est?tico o ML Din?mico",
+            "Cada modo usa una t?cnica diferente de reconocimiento",
+            "El modo seleccionado se guarda para tu sesi?n"
+          ]
+        },
+        "detection_modes": {
+          "title": "Modos de detecci?n",
+          "items": [
+            "H?brido: combina reglas y machine learning",
+            "Reglas: basado en reglas geom?tricas predefinidas",
+            "ML Est?tico: modelo entrenado con poses est?ticas",
+            "ML Din?mico: modelo entrenado con movimientos/gestos din?micos"
+          ]
+        },
+        "usage_tips": {
+          "title": "Consejos de uso",
+          "items": [
+            "Mueve la mano suavemente para una mejor detecci?n",
+            "Evita movimientos bruscos",
+            "Si el gesto no se reconoce, ajusta la posici?n",
+            "La precisi?n depende de la calidad del modelo entrenado"
+          ]
+        }
+      }
+    },
+    "3": {
+      "title": "C?mo entrenar modelos",
+      "slides": {
+        "data_collection": {
+          "title": "Paso 1: Recolecci?n de datos",
+          "items": [
+            "Accede a ML Studio desde la pesta?a correspondiente",
+            "Elige entre recolecci?n Est?tica o Din?mica",
+            "Recolecci?n Est?tica: captura poses ?nicas de la mano",
+            "Recolecci?n Din?mica: captura secuencias de movimiento"
+          ]
+        },
+        "create_dataset": {
+          "title": "Paso 2: Crear dataset",
+          "items": [
+            "Define un nombre para tu dataset (ej.: ALFABETO_V1)",
+            "Crea labels para cada gesto (ej.: A, B, C)",
+            "Recolecta suficientes muestras para cada label",
+            "Cuantas m?s muestras, mejor ser? la precisi?n del modelo"
+          ]
+        },
+        "organize_data": {
+          "title": "Paso 3: Organizar datos",
+          "items": [
+            "Visualiza estad?sticas del dataset",
+            "Verifica la distribuci?n de muestras por label",
+            "Agrega m?s muestras si es necesario",
+            "Mant?n balanceadas las clases"
+          ]
+        },
+        "training": {
+          "title": "Paso 4: Entrenamiento",
+          "items": [
+            "Selecciona el dataset para el entrenamiento",
+            "Elige el tipo de modelo (Est?tico o Din?mico)",
+            "Inicia el entrenamiento y espera la conclusi?n",
+            "El modelo entrenado estar? disponible en la lista de modelos"
+          ]
+        },
+        "use_model": {
+          "title": "Paso 5: Usar el modelo",
+          "items": [
+            "Ve a la pantalla de selecci?n de modelos",
+            "Elige el modelo reci?n entrenado",
+            "Act?valo para usarlo en inferencia",
+            "Pru?balo en la c?mara para validar los resultados"
+          ]
+        }
+      }
+    },
+    "4": {
+      "title": "Puntuaci?n y ranking",
+      "slides": {
+        "scoring": {
+          "title": "C?mo funciona la puntuaci?n",
+          "items": [
+            "Cada actividad en la app genera puntos",
+            "Recolecci?n de datos: 10 puntos por muestra",
+            "Entrenamiento de modelo: 100 puntos por entrenamiento",
+            "Uso de la c?mara: 1 punto por minuto de inferencia"
+          ]
+        },
+        "point_sources": {
+          "title": "Qu? suma puntos",
+          "items": [
+            "Recolecci?n est?tica de gestos",
+            "Recolecci?n din?mica de movimientos",
+            "Creaci?n de datasets",
+            "Entrenamiento de modelos",
+            "Contribuciones a datasets p?blicos"
+          ]
+        },
+        "ranking_system": {
+          "title": "Sistema de ranking",
+          "items": [
+            "Ranking global de todos los usuarios",
+            "Actualizaci?n en tiempo real",
+            "Posici?n basada en el total de puntos acumulados",
+            "Historial de evoluci?n semanal/mensual"
+          ]
+        },
+        "benefits": {
+          "title": "Beneficios de contribuir",
+          "items": [
+            "Reconocimiento en la comunidad Li-Vision",
+            "Acceso anticipado a nuevas funciones",
+            "Badges y logros especiales",
+            "Contribuci?n a la ciencia y la accesibilidad"
+          ]
+        },
+        "ranking_tips": {
+          "title": "Consejos para subir en el ranking",
+          "items": [
+            "Recolecta datos regularmente",
+            "Crea datasets diversos",
+            "Entrena modelos de calidad",
+            "Comparte datasets con la comunidad",
+            "Usa la app con frecuencia para inferencia"
+          ]
+        }
+      }
+    }
   }
 }

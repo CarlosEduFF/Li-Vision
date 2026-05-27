@@ -5,7 +5,7 @@
  *   - Tempo de estabilidade da letra (letterStableMs)
  *   - Confiança mínima (minConfidence)
  */
-import { SpeechPreferences } from "@/services/speechService";
+import { SPEECH_LANGUAGES, SpeechPreferences } from "@/services/speechService";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import {
@@ -28,6 +28,7 @@ type Props = {
   onAdjustIdle: (delta: number) => void;
   onAdjustStable: (delta: number) => void;
   onAdjustConfidence: (delta: number) => void;
+  onSetLanguage: (language: string) => void;
   onTestVoice?: () => void;
 };
 
@@ -41,6 +42,7 @@ export default function VoiceSettingsModal({
   onAdjustIdle,
   onAdjustStable,
   onAdjustConfidence,
+  onSetLanguage,
   onTestVoice,
 }: Props) {
   return (
@@ -103,6 +105,31 @@ export default function VoiceSettingsModal({
             </View>
 
             {/* ── Sliders simples (+/-) ── */}
+            <View style={[styles.languageBlock, !prefs.enabled && { opacity: 0.4 }]}>
+              <Text style={styles.languageTitle}>Idioma da voz</Text>
+              <Text style={styles.languageDesc}>
+                Escolha a voz usada para falar gestos e palavras soletradas.
+              </Text>
+              <View style={styles.languageGrid}>
+                {SPEECH_LANGUAGES.map((language) => {
+                  const isActive = prefs.language === language.speechCode;
+
+                  return (
+                    <TouchableOpacity
+                      key={language.speechCode}
+                      style={[styles.languageChip, isActive && styles.languageChipActive]}
+                      onPress={() => onSetLanguage(language.speechCode)}
+                      disabled={!prefs.enabled}
+                    >
+                      <Text style={[styles.languageChipText, isActive && styles.languageChipTextActive]}>
+                        {language.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+
             <Stepper
               label="Finalizar palavra após"
               value={`${(prefs.spellingIdleMs / 1000).toFixed(1)} s`}
@@ -249,6 +276,48 @@ const styles = StyleSheet.create({
     color: "#888",
     fontSize: 11,
     marginTop: 2,
+  },
+  languageBlock: {
+    backgroundColor: "#1c2026",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
+  },
+  languageTitle: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  languageDesc: {
+    color: "#888",
+    fontSize: 11,
+    marginTop: 2,
+    marginBottom: 10,
+  },
+  languageGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  languageChip: {
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    backgroundColor: "#272c34",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+  },
+  languageChipActive: {
+    backgroundColor: "rgba(0,229,255,0.14)",
+    borderColor: "rgba(0,229,255,0.5)",
+  },
+  languageChipText: {
+    color: "#a0aab5",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  languageChipTextActive: {
+    color: "#00e5ff",
   },
   stepperRow: {
     flexDirection: "row",

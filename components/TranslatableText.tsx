@@ -2,8 +2,8 @@ import React from 'react';
 import { Text as RNText, TextProps } from 'react-native';
 import { VLibrasController } from './GlobalVLibras';
 
-export default function TranslatableText({ children, ...props }: TextProps) {
-  const handlePress = () => {
+export default function TranslatableText({ children, onLongPress, ...props }: TextProps) {
+  const translate = () => {
     if (typeof children === 'string') {
       VLibrasController.translate(children);
     } else if (Array.isArray(children)) {
@@ -13,7 +13,13 @@ export default function TranslatableText({ children, ...props }: TextProps) {
   };
 
   return (
-    <RNText {...props} onPress={handlePress}>
+    <RNText
+      {...props}
+      onLongPress={(event) => {
+        onLongPress?.(event);
+        translate();
+      }}
+    >
       {children}
     </RNText>
   );

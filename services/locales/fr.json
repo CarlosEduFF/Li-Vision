@@ -407,5 +407,211 @@
     "review_btn": "Revoir à nouveau",
     "conclude_btn": "Terminer l'apprentissage",
     "svg_note": "Illustrations SVG uniquement (pas de vidéo)."
+  },
+  "about_modal": {
+    "1": {
+      "title": "Pr?sentation de l'application",
+      "slides": {
+        "overview": {
+          "title": "Vue d'ensemble",
+          "items": [
+            "Li-Vision est un syst?me de reconnaissance de gestes en temps r?el",
+            "Combine le traitement local (Edge) et le traitement dans le cloud",
+            "Architecture multi-tenant : chaque utilisateur dispose d'une session isol?e"
+          ]
+        },
+        "home": {
+          "title": "Onglet Accueil",
+          "items": [
+            "Tableau de bord principal de l'application",
+            "Vue d'ensemble des activit?s et statistiques",
+            "Acc?s rapide aux principales fonctionnalit?s"
+          ]
+        },
+        "camera": {
+          "title": "Onglet Cam?ra",
+          "items": [
+            "Inf?rence en temps r?el avec la cam?ra de l'appareil",
+            "D?tection des mains et reconnaissance des gestes",
+            "S?lecteur de mode : Hybride, R?gles, ML statique, ML dynamique"
+          ]
+        },
+        "studio": {
+          "title": "Onglet ML Studio",
+          "items": [
+            "Collecte de donn?es statiques et dynamiques",
+            "Gestion des datasets",
+            "Entra?nement de mod?les personnalis?s"
+          ]
+        },
+        "ranking": {
+          "title": "Onglet Classement",
+          "items": [
+            "Classement des contributeurs",
+            "Visualisation des scores",
+            "Suivi de l'?volution dans le syst?me"
+          ]
+        },
+        "profile": {
+          "title": "Onglet Profil",
+          "items": [
+            "Informations utilisateur",
+            "Param?tres personnels",
+            "Historique des activit?s"
+          ]
+        }
+      }
+    },
+    "2": {
+      "title": "Comment faire une inf?rence",
+      "slides": {
+        "access_camera": {
+          "title": "?tape 1 : Acc?der ? la cam?ra",
+          "items": [
+            "Appuyez sur le bouton 'Cam?ra' dans la barre de navigation inf?rieure",
+            "Ou utilisez le raccourci sur l'?cran d'accueil s'il est disponible",
+            "Autorisez l'acc?s ? la cam?ra lorsque cela est demand?"
+          ]
+        },
+        "position_hand": {
+          "title": "?tape 2 : Positionner la main",
+          "items": [
+            "Placez votre main dans le cadre",
+            "Gardez la main ? une distance confortable (30-50 cm)",
+            "?vitez les arri?re-plans trop clairs ou trop sombres",
+            "Un bon ?clairage am?liore la pr?cision"
+          ]
+        },
+        "select_mode": {
+          "title": "?tape 3 : S?lectionner le mode",
+          "items": [
+            "Appuyez sur le bouton de mode en haut de l'?cran",
+            "Choisissez entre : Hybride, R?gles, ML statique ou ML dynamique",
+            "Chaque mode utilise une technique de reconnaissance diff?rente",
+            "Le mode s?lectionn? est enregistr? pour votre session"
+          ]
+        },
+        "detection_modes": {
+          "title": "Modes de d?tection",
+          "items": [
+            "Hybride : combine r?gles et machine learning",
+            "R?gles : bas? sur des r?gles g?om?triques pr?d?finies",
+            "ML statique : mod?le entra?n? avec des poses statiques",
+            "ML dynamique : mod?le entra?n? avec des mouvements/gestes dynamiques"
+          ]
+        },
+        "usage_tips": {
+          "title": "Conseils d'utilisation",
+          "items": [
+            "Bougez la main doucement pour une meilleure d?tection",
+            "?vitez les mouvements brusques",
+            "Si le geste n'est pas reconnu, ajustez la position",
+            "La pr?cision d?pend de la qualit? du mod?le entra?n?"
+          ]
+        }
+      }
+    },
+    "3": {
+      "title": "Comment entra?ner des mod?les",
+      "slides": {
+        "data_collection": {
+          "title": "?tape 1 : Collecte de donn?es",
+          "items": [
+            "Acc?dez ? ML Studio depuis l'onglet correspondant",
+            "Choisissez entre collecte statique ou dynamique",
+            "Collecte statique : capture des poses uniques de la main",
+            "Collecte dynamique : capture des s?quences de mouvement"
+          ]
+        },
+        "create_dataset": {
+          "title": "?tape 2 : Cr?er un dataset",
+          "items": [
+            "D?finissez un nom pour votre dataset (ex. : ALPHABET_V1)",
+            "Cr?ez des labels pour chaque geste (ex. : A, B, C)",
+            "Collectez suffisamment d'?chantillons pour chaque label",
+            "Plus il y a d'?chantillons, meilleure est la pr?cision du mod?le"
+          ]
+        },
+        "organize_data": {
+          "title": "?tape 3 : Organiser les donn?es",
+          "items": [
+            "Consultez les statistiques du dataset",
+            "V?rifiez la distribution des ?chantillons par label",
+            "Ajoutez d'autres ?chantillons si n?cessaire",
+            "Gardez les classes ?quilibr?es"
+          ]
+        },
+        "training": {
+          "title": "?tape 4 : Entra?nement",
+          "items": [
+            "S?lectionnez le dataset pour l'entra?nement",
+            "Choisissez le type de mod?le (statique ou dynamique)",
+            "Lancez l'entra?nement et attendez la fin",
+            "Le mod?le entra?n? sera disponible dans la liste des mod?les"
+          ]
+        },
+        "use_model": {
+          "title": "?tape 5 : Utiliser le mod?le",
+          "items": [
+            "Allez ? l'?cran de s?lection des mod?les",
+            "Choisissez le mod?le r?cemment entra?n?",
+            "Activez-le pour l'inf?rence",
+            "Testez-le dans la cam?ra pour valider les r?sultats"
+          ]
+        }
+      }
+    },
+    "4": {
+      "title": "Score et classement",
+      "slides": {
+        "scoring": {
+          "title": "Fonctionnement du score",
+          "items": [
+            "Chaque activit? dans l'app g?n?re des points",
+            "Collecte de donn?es : 10 points par ?chantillon",
+            "Entra?nement de mod?le : 100 points par entra?nement",
+            "Utilisation de la cam?ra : 1 point par minute d'inf?rence"
+          ]
+        },
+        "point_sources": {
+          "title": "Ce qui rapporte des points",
+          "items": [
+            "Collecte statique de gestes",
+            "Collecte dynamique de mouvements",
+            "Cr?ation de datasets",
+            "Entra?nement de mod?les",
+            "Contributions aux datasets publics"
+          ]
+        },
+        "ranking_system": {
+          "title": "Syst?me de classement",
+          "items": [
+            "Classement global de tous les utilisateurs",
+            "Mise ? jour en temps r?el",
+            "Position bas?e sur le total des points accumul?s",
+            "Historique d'?volution hebdomadaire/mensuel"
+          ]
+        },
+        "benefits": {
+          "title": "Avantages de contribuer",
+          "items": [
+            "Reconnaissance dans la communaut? Li-Vision",
+            "Acc?s anticip? aux nouvelles fonctionnalit?s",
+            "Badges et r?ussites sp?ciales",
+            "Contribution ? la science et ? l'accessibilit?"
+          ]
+        },
+        "ranking_tips": {
+          "title": "Conseils pour monter dans le classement",
+          "items": [
+            "Collectez des donn?es r?guli?rement",
+            "Cr?ez des datasets diversifi?s",
+            "Entra?nez des mod?les de qualit?",
+            "Partagez des datasets avec la communaut?",
+            "Utilisez souvent l'app pour l'inf?rence"
+          ]
+        }
+      }
+    }
   }
 }
