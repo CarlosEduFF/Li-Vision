@@ -1,17 +1,24 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from pydantic import BaseModel
 from typing import Optional
 
 from src.api.app_state import state
 from src.core.model_cache import ModelCache
 from src.core.supabase_client import supabase
+from src.api.routes.learning_routes import require_admin
 
 class ModePayload(BaseModel):
     run_mode: str  # "collect" | "train" | "inference"
 
 class DetectionPayload(BaseModel):
-    confidence_threshold: float = None
-    window_size: int = None
+    mode: Optional[str] = None
+    confidence_threshold: Optional[float] = None
+    window_size: Optional[int] = None
+    ml_model_path: Optional[str] = None
+    dynamic_model_path: Optional[str] = None
+
+class RulesPayload(BaseModel):
+    enabled: bool
 
 class ImportPayload(BaseModel):
     datasets: list
@@ -25,8 +32,22 @@ def get_state():
     return {
         "default_detection_mode": state.config["detection"].get("mode", "hybrid"),
         "detection": state.config["detection"],
+        "rules_enabled": state.rules_enabled,
         "info": "Cada sessão WebSocket possui seu próprio modo. Este é apenas o padrão."
     }
+
+@router.post("/rules")
+def set_rules(payload: RulesPayload, admin: dict = Depends(require_admin)):
+    """
+    Habilita ou desabilita as regras lógicas globalmente.
+    Salva no banco de dados e atualiza o estado em memória.
+    """
+    with state.lock:
+        state.set_rules_enabled(payload.enabled)
+        return {
+            "ok": True,
+            "rules_enabled": state.rules_enabled
+        }
 
 @router.post("/mode")
 def set_mode(payload: ModePayload):

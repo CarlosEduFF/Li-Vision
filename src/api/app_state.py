@@ -38,6 +38,37 @@ class AppState:
         # Inicializa o cache global de modelos ML
         ModelCache.initialize(self.config)
 
+        # Inicializa o valor de rules_enabled do banco ou usa o do config.yaml como fallback
+        self.rules_enabled = self.config["rules"].get("enabled", True)
+        try:
+            from src.core.supabase_client import supabase
+            res = supabase.table("system_settings").select("value").eq("key", "rules_enabled").execute()
+            if res.data:
+                self.rules_enabled = res.data[0]["value"] == "true"
+                self.config["rules"]["enabled"] = self.rules_enabled
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"[AppState] Erro ao carregar rules_enabled do banco, usando config.yaml: {e}")
+
+    def set_rules_enabled(self, enabled: bool):
+        """Habilita ou desabilita as regras lógicas globalmente."""
+        with self.lock:
+            self.rules_enabled = enabled
+            self.config["rules"]["enabled"] = enabled
+            try:
+                from src.core.supabase_client import supabase
+                supabase.table("system_settings").upsert({
+                    "key": "rules_enabled",
+                    "value": str(enabled).lower()
+                }).execute()
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).error(f"[AppState] Erro ao salvar rules_enabled no banco: {e}")
+
+    def get_rules_enabled(self) -> bool:
+        with self.lock:
+            return self.rules_enabled
+
     def start_pipeline(self):
         """Cria e abre o HandPipeline (se não existir)."""
         with self.lock:
