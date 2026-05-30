@@ -14,6 +14,8 @@
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Speech from "expo-speech";
+import * as IntentLauncher from "expo-intent-launcher";
+import { Linking, Platform } from "react-native";
 
 // ──────────────────────────────────────────────
 // Constantes
@@ -111,6 +113,10 @@ class SpeechService {
   private speaking = false;
   private lastText: string | null = null;
   private lastTimestamp = 0;
+  /** Vozes disponíveis no dispositivo (carregadas sob demanda). */
+  private availableVoices: Speech.Voice[] | null = null;
+  /** Cache: idioma → identifier de voz escolhido (ou null se usar padrão do motor). */
+  private voiceCache: Map<string, string | null> = new Map();
 
   /** Carrega preferências persistidas. Chamar uma vez no boot da tela. */
   async init(): Promise<SpeechPreferences> {
@@ -132,7 +138,67 @@ class SpeechService {
     } finally {
       this.prefsLoaded = true;
     }
+    // Pré-carrega as vozes do dispositivo para que a resolução de idioma
+    // na hora de falar seja síncrona e confiável.
+    this.loadVoices();
     return this.prefs;
+  }
+
+  /**
+   * Carrega (uma vez) a lista de vozes disponíveis no dispositivo.
+   * Necessário porque, passando apenas `language` ao expo-speech, motores
+   * TTS recaem na voz padrão do sistema quando não há correspondência exata
+   * — fazendo a fala sair no idioma errado. Selecionar a `voice` explícita
+   * resolve isso.
+   */
+  private async loadVoices(): Promise<void> {
+    if (this.availableVoices) return;
+    try {
+      this.availableVoices = await Speech.getAvailableVoicesAsync();
+    } catch (e) {
+      this.availableVoices = [];
+      console.log("[SpeechService] Falha ao listar vozes:", e);
+    }
+  }
+
+  /**
+   * Escolhe o identifier da melhor voz disponível para o idioma pedido.
+   * Tenta correspondência exata (ex.: "en-US"), depois apenas o idioma base
+   * (ex.: "en"). Resultado é cacheado por idioma. Retorna `undefined` se
+   * nenhuma voz combinar — nesse caso só o `language` é usado.
+   */
+  private resolveVoiceForLanguage(language: string): string | undefined {
+    if (this.voiceCache.has(language)) {
+      return this.voiceCache.get(language) ?? undefined;
+    }
+    const voices = this.availableVoices;
+    if (!voices || voices.length === 0) return undefined;
+
+    const base = language.split("-")[0].toLowerCase();
+    const exact = voices.find((v) => v.language?.toLowerCase() === language.toLowerCase());
+    const sameBase = voices.find((v) => v.language?.split("-")[0].toLowerCase() === base);
+    const chosen = exact ?? sameBase ?? null;
+
+    this.voiceCache.set(language, chosen?.identifier ?? null);
+    return chosen?.identifier ?? undefined;
+  }
+
+  /**
+   * Garante (await) que a lista de vozes do dispositivo esteja carregada.
+   * Útil para a UI decidir se mostra o botão de "baixar voz".
+   */
+  async ensureVoicesLoaded(): Promise<void> {
+    await this.loadVoices();
+  }
+
+  /**
+   * Indica se há uma voz instalada no dispositivo para o idioma dado.
+   * Retorna `true` de forma otimista enquanto as vozes ainda não carregaram,
+   * para não exibir o aviso de download indevidamente.
+   */
+  isVoiceAvailable(language: string): boolean {
+    if (!this.availableVoices || this.availableVoices.length === 0) return true;
+    return this.resolveVoiceForLanguage(language) !== undefined;
   }
 
   /** Retorna snapshot atual das preferências. */
@@ -177,6 +243,9 @@ class SpeechService {
   /** Define o idioma usado pelo expo-speech. */
   async setLanguage(language: string): Promise<SpeechPreferences> {
     const next = getSpeechLanguageConfig(language).speechCode;
+    // Garante que as vozes do dispositivo já estejam carregadas, para que a
+    // próxima fala use a voz correta do novo idioma (e não a padrão do sistema).
+    await this.loadVoices();
     return this.setPreferences({ language: next });
   }
 
@@ -241,8 +310,10 @@ class SpeechService {
         Speech.stop();
       }
       this.speaking = true;
+      const voice = this.resolveVoiceForLanguage(this.prefs.language);
       Speech.speak(text, {
         language: this.prefs.language,
+        ...(voice ? { voice } : {}),
         rate: this.prefs.rate,
         pitch: this.prefs.pitch,
         onDone: () => {
@@ -273,6 +344,35 @@ class SpeechService {
   /** Verifica se está falando no momento. */
   isSpeaking(): boolean {
     return this.speaking;
+  }
+}
+
+/**
+ * Abre a tela do sistema onde o usuário pode baixar/instalar pacotes de voz.
+ * O expo-speech não permite baixar vozes programaticamente — quem gerencia
+ * isso é o motor TTS do sistema operacional.
+ *
+ * - Android: abre direto as configurações de "Texto para voz" (TTS).
+ * - Outras plataformas / falha: cai na busca por um motor TTS na loja.
+ */
+export async function openVoiceDownloadSettings(): Promise<void> {
+  if (Platform.OS === "android") {
+    try {
+      await IntentLauncher.startActivityAsync(
+        IntentLauncher.ActivityAction.TTS_SETTINGS
+      );
+      return;
+    } catch (e) {
+      console.log("[SpeechService] Falha ao abrir TTS settings:", e);
+    }
+  }
+  // Fallback: leva o usuário a instalar/atualizar um motor TTS.
+  try {
+    await Linking.openURL(
+      "https://play.google.com/store/apps/details?id=com.google.android.tts"
+    );
+  } catch (e) {
+    console.log("[SpeechService] Falha ao abrir fallback de TTS:", e);
   }
 }
 

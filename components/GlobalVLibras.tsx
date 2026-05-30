@@ -8,6 +8,7 @@ import {
   DeviceEventEmitter,
   Dimensions,
   Animated,
+  PanResponder,
 } from "react-native";
 import { WebView } from "react-native-webview";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -157,6 +158,49 @@ export default function GlobalVLibras() {
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
+  // Posição da janela (deslocamento a partir do canto inferior direito).
+  // pan.x negativo move para a esquerda; pan.y negativo move para cima.
+  const pan = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+  // Guarda o deslocamento acumulado entre gestos de arraste.
+  const panOffset = useRef({ x: 0, y: 0 });
+
+  // Limites de movimento para manter a janela dentro da tela.
+  // Posição base: bottom 100, right 20, janela de 220x300.
+  const WINDOW_W = 220;
+  const WINDOW_H = 300;
+  const BASE_RIGHT = 20;
+  const BASE_BOTTOM = 100;
+  const minX = -(screenWidth - WINDOW_W - BASE_RIGHT); // até a borda esquerda
+  const maxX = BASE_RIGHT; // até a borda direita
+  const minY = -(screenHeight - WINDOW_H - BASE_BOTTOM); // até o topo
+  const maxY = BASE_BOTTOM; // até a borda inferior
+
+  const clamp = (value: number, min: number, max: number) =>
+    Math.min(Math.max(value, min), max);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_evt, gesture) =>
+        Math.abs(gesture.dx) > 3 || Math.abs(gesture.dy) > 3,
+      onPanResponderGrant: () => {
+        pan.setOffset({ x: panOffset.current.x, y: panOffset.current.y });
+        pan.setValue({ x: 0, y: 0 });
+      },
+      onPanResponderMove: (_evt, gesture) => {
+        const nextX = clamp(panOffset.current.x + gesture.dx, minX, maxX);
+        const nextY = clamp(panOffset.current.y + gesture.dy, minY, maxY);
+        pan.setValue({ x: nextX - panOffset.current.x, y: nextY - panOffset.current.y });
+      },
+      onPanResponderRelease: (_evt, gesture) => {
+        panOffset.current = {
+          x: clamp(panOffset.current.x + gesture.dx, minX, maxX),
+          y: clamp(panOffset.current.y + gesture.dy, minY, maxY),
+        };
+        pan.flattenOffset();
+      },
+    })
+  ).current;
+
   // Hides button on transcription to avoid redundancy
   const isTranscriptionScreen = pathname === "/transcription" || pathname === "/(tabs)/transcription";
 
@@ -215,17 +259,31 @@ export default function GlobalVLibras() {
     } catch (e) {}
   };
 
+  // Renderiza o botão flutuante isoladamente, sem um container de tela cheia
+  // que intercepte o touch dos elementos abaixo.
+  if (!visible) {
+    if (isTranscriptionScreen) return null;
+    return (
+      <TouchableOpacity style={styles.floatingBtn} onPress={showWidget} activeOpacity={0.8}>
+        <MaterialIcons name="sign-language" size={28} color="#081018" />
+      </TouchableOpacity>
+    );
+  }
+
   return (
     <View style={styles.container} pointerEvents="box-none">
-      {!visible && !isTranscriptionScreen && (
-        <TouchableOpacity style={styles.floatingBtn} onPress={showWidget} activeOpacity={0.8}>
-          <MaterialIcons name="sign-language" size={28} color="#081018" />
-        </TouchableOpacity>
-      )}
-
       {visible && (
-        <Animated.View style={[styles.window, { opacity: fadeAnim }]}>
-          <View style={styles.windowHeader}>
+        <Animated.View
+          style={[
+            styles.window,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateX: pan.x }, { translateY: pan.y }],
+            },
+          ]}
+        >
+          <View style={styles.windowHeader} {...panResponder.panHandlers}>
+            <MaterialIcons name="drag-indicator" size={16} color="#8a92a3" />
             <MaterialIcons name="accessibility" size={14} color="#00e5ff" />
             <Text style={styles.windowTitle}>Acessibilidade</Text>
             <TouchableOpacity onPress={hideWidget} style={styles.closeBtn}>
@@ -271,6 +329,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 8,
+    zIndex: 9999,
   },
   window: {
     position: "absolute",

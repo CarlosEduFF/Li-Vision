@@ -5,7 +5,12 @@
  *   - Tempo de estabilidade da letra (letterStableMs)
  *   - Confiança mínima (minConfidence)
  */
-import { SPEECH_LANGUAGES, SpeechPreferences } from "@/services/speechService";
+import {
+    SPEECH_LANGUAGES,
+    SpeechPreferences,
+    openVoiceDownloadSettings,
+    speechService,
+} from "@/services/speechService";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import {
@@ -45,6 +50,25 @@ export default function VoiceSettingsModal({
   onSetLanguage,
   onTestVoice,
 }: Props) {
+  // Mapa idioma → voz instalada no dispositivo. Recalculado ao abrir o modal.
+  const [voiceAvailability, setVoiceAvailability] = React.useState<Record<string, boolean>>({});
+
+  React.useEffect(() => {
+    if (!visible) return;
+    let active = true;
+    speechService.ensureVoicesLoaded().then(() => {
+      if (!active) return;
+      const map: Record<string, boolean> = {};
+      SPEECH_LANGUAGES.forEach((lang) => {
+        map[lang.speechCode] = speechService.isVoiceAvailable(lang.speechCode);
+      });
+      setVoiceAvailability(map);
+    });
+    return () => {
+      active = false;
+    };
+  }, [visible]);
+
   return (
     <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
       <View style={styles.bg}>
@@ -113,21 +137,38 @@ export default function VoiceSettingsModal({
               <View style={styles.languageGrid}>
                 {SPEECH_LANGUAGES.map((language) => {
                   const isActive = prefs.language === language.speechCode;
+                  // undefined enquanto carrega → tratamos como disponível.
+                  const installed = voiceAvailability[language.speechCode] !== false;
 
                   return (
                     <TouchableOpacity
                       key={language.speechCode}
-                      style={[styles.languageChip, isActive && styles.languageChipActive]}
-                      onPress={() => onSetLanguage(language.speechCode)}
+                      style={[
+                        styles.languageChip,
+                        isActive && styles.languageChipActive,
+                        !installed && styles.languageChipMissing,
+                      ]}
+                      onPress={() =>
+                        installed ? onSetLanguage(language.speechCode) : openVoiceDownloadSettings()
+                      }
                       disabled={!prefs.enabled}
                     >
                       <Text style={[styles.languageChipText, isActive && styles.languageChipTextActive]}>
                         {language.label}
                       </Text>
+                      {!installed && (
+                        <MaterialIcons name="file-download" size={14} color="#ffb74d" />
+                      )}
                     </TouchableOpacity>
                   );
                 })}
               </View>
+              {Object.values(voiceAvailability).some((v) => v === false) && (
+                <Text style={styles.languageMissingHint}>
+                  Idiomas com ⬇ não têm voz instalada. Toque para abrir as configurações de
+                  voz do sistema e baixar o pacote.
+                </Text>
+              )}
             </View>
 
             <Stepper
@@ -300,6 +341,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   languageChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
     paddingVertical: 8,
     paddingHorizontal: 10,
     borderRadius: 10,
@@ -310,6 +354,15 @@ const styles = StyleSheet.create({
   languageChipActive: {
     backgroundColor: "rgba(0,229,255,0.14)",
     borderColor: "rgba(0,229,255,0.5)",
+  },
+  languageChipMissing: {
+    borderColor: "rgba(255,183,77,0.5)",
+  },
+  languageMissingHint: {
+    color: "#ffb74d",
+    fontSize: 10,
+    marginTop: 10,
+    lineHeight: 14,
   },
   languageChipText: {
     color: "#a0aab5",
