@@ -541,8 +541,10 @@ export default function CameraScreen() {
             buffer={spelling.buffer}
             candidate={spelling.candidate}
             lastSpokenWord={lastSpokenWord}
+            letterStableMs={speechPrefs.letterStableMs}
             onFinalize={spelling.finalize}
             onClear={spelling.clear}
+            onAdjustStable={adjustStable}
           />
         )}
 

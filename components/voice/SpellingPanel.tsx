@@ -12,8 +12,10 @@ type Props = {
   buffer: string[];
   candidate: string | null;
   lastSpokenWord: string | null;
+  letterStableMs: number;
   onFinalize: () => void;
   onClear: () => void;
+  onAdjustStable: (delta: number) => void;
 };
 
 export default function SpellingPanel({
@@ -21,10 +23,18 @@ export default function SpellingPanel({
   buffer,
   candidate,
   lastSpokenWord,
+  letterStableMs,
   onFinalize,
   onClear,
+  onAdjustStable,
 }: Props) {
   const hasBuffer = buffer.length > 0;
+
+  const speedLabel =
+    letterStableMs <= 400 ? "Rápido" :
+    letterStableMs <= 800 ? "Médio" :
+    letterStableMs <= 1200 ? "Lento" : "Muito lento";
+
   return (
     <View style={styles.panel}>
       <View style={styles.header}>
@@ -79,6 +89,30 @@ export default function SpellingPanel({
             Mostre letras em sequência. A palavra é falada ao terminar.
           </Text>
         )}
+      </View>
+
+      {/* Controle de velocidade inline */}
+      <View style={styles.speedRow}>
+        <MaterialIcons name="speed" size={13} color="#8a92a3" />
+        <Text style={styles.speedLabel}>Velocidade:</Text>
+        <TouchableOpacity
+          style={styles.speedBtn}
+          onPress={() => onAdjustStable(100)}
+          accessibilityLabel="Diminuir velocidade"
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 4 }}
+        >
+          <MaterialIcons name="remove" size={14} color="#ffb74d" />
+        </TouchableOpacity>
+        <Text style={styles.speedValue}>{speedLabel}</Text>
+        <TouchableOpacity
+          style={styles.speedBtn}
+          onPress={() => onAdjustStable(-100)}
+          accessibilityLabel="Aumentar velocidade"
+          hitSlop={{ top: 8, bottom: 8, left: 4, right: 8 }}
+        >
+          <MaterialIcons name="add" size={14} color="#ffb74d" />
+        </TouchableOpacity>
+        <Text style={styles.speedMs}>{letterStableMs}ms</Text>
       </View>
 
       {lastSpokenWord && (
@@ -164,6 +198,42 @@ const styles = StyleSheet.create({
     color: "#777",
     fontSize: 12,
     fontStyle: "italic",
+  },
+  speedRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(255,183,77,0.07)",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: "rgba(255,183,77,0.15)",
+  },
+  speedLabel: {
+    color: "#8a92a3",
+    fontSize: 11,
+    flex: 1,
+  },
+  speedBtn: {
+    backgroundColor: "#1c2026",
+    borderRadius: 8,
+    padding: 4,
+    borderWidth: 1,
+    borderColor: "rgba(255,183,77,0.25)",
+  },
+  speedValue: {
+    color: "#ffb74d",
+    fontSize: 11,
+    fontWeight: "700",
+    minWidth: 62,
+    textAlign: "center",
+  },
+  speedMs: {
+    color: "#555",
+    fontSize: 10,
+    minWidth: 36,
+    textAlign: "right",
   },
   spokenRow: {
     flexDirection: "row",
