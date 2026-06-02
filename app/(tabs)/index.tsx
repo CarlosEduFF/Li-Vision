@@ -124,10 +124,10 @@ export default function HomeScreen() {
           </TouchableOpacity>
 
           {/* Ranking Compacto */}
-          <View style={styles.rankingContainer}>
+          <TouchableOpacity style={styles.rankingContainer} activeOpacity={0.85} onPress={() => router.push("/screens/ranking")}>
             <View style={styles.rankingHeader}>
               <Text style={styles.rankingTitle}>{t('home.top_contributors')}</Text>
-              <TouchableOpacity onPress={() => router.push("/screens/ranking")}>
+              <TouchableOpacity onPress={() => router.push("/screens/ranking")} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
                 <Text style={styles.seeAllText}>{t('home.see_all')}</Text>
               </TouchableOpacity>
             </View>
@@ -191,7 +191,7 @@ export default function HomeScreen() {
                 </View>
               ))}
             </View>
-          </View>
+          </TouchableOpacity>
         </View>
 
       </ScrollView>
