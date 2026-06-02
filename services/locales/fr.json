@@ -410,38 +410,38 @@
   },
   "about_modal": {
     "1": {
-      "title": "Pr?sentation de l'application",
+      "title": "Présentation de l'application",
       "slides": {
         "overview": {
           "title": "Vue d'ensemble",
           "items": [
-            "Li-Vision est un syst?me de reconnaissance de gestes en temps r?el",
+            "Li-Vision est un système de reconnaissance de gestes en temps réel",
             "Combine le traitement local (Edge) et le traitement dans le cloud",
-            "Architecture multi-tenant : chaque utilisateur dispose d'une session isol?e"
+            "Architecture multi-tenant : chaque utilisateur dispose d'une session isolée"
           ]
         },
         "home": {
           "title": "Onglet Accueil",
           "items": [
             "Tableau de bord principal de l'application",
-            "Vue d'ensemble des activit?s et statistiques",
-            "Acc?s rapide aux principales fonctionnalit?s"
+            "Vue d'ensemble des activités et statistiques",
+            "Accès rapide aux principales fonctionnalités"
           ]
         },
         "camera": {
-          "title": "Onglet Cam?ra",
+          "title": "Onglet Caméra",
           "items": [
-            "Inf?rence en temps r?el avec la cam?ra de l'appareil",
-            "D?tection des mains et reconnaissance des gestes",
-            "S?lecteur de mode : Hybride, R?gles, ML statique, ML dynamique"
+            "Inférence en temps réel avec la caméra de l'appareil",
+            "Détection des mains et reconnaissance des gestes",
+            "Sélecteur de mode : Hybride, Règles, ML statique, ML dynamique"
           ]
         },
         "studio": {
           "title": "Onglet ML Studio",
           "items": [
-            "Collecte de donn?es statiques et dynamiques",
+            "Collecte de données statiques et dynamiques",
             "Gestion des datasets",
-            "Entra?nement de mod?les personnalis?s"
+            "Entraînement de modèles personnalisés"
           ]
         },
         "ranking": {
@@ -449,114 +449,114 @@
           "items": [
             "Classement des contributeurs",
             "Visualisation des scores",
-            "Suivi de l'?volution dans le syst?me"
+            "Suivi de l'évolution dans le système"
           ]
         },
         "profile": {
           "title": "Onglet Profil",
           "items": [
             "Informations utilisateur",
-            "Param?tres personnels",
-            "Historique des activit?s"
+            "Paramètres personnels",
+            "Historique des activités"
           ]
         }
       }
     },
     "2": {
-      "title": "Comment faire une inf?rence",
+      "title": "Comment faire une inférence",
       "slides": {
         "access_camera": {
-          "title": "?tape 1 : Acc?der ? la cam?ra",
+          "title": "Étape 1 : Accéder à la caméra",
           "items": [
-            "Appuyez sur le bouton 'Cam?ra' dans la barre de navigation inf?rieure",
-            "Ou utilisez le raccourci sur l'?cran d'accueil s'il est disponible",
-            "Autorisez l'acc?s ? la cam?ra lorsque cela est demand?"
+            "Appuyez sur le bouton 'Caméra' dans la barre de navigation inférieure",
+            "Ou utilisez le raccourci sur l'écran d'accueil s'il est disponible",
+            "Autorisez l'accès à la caméra lorsque cela est demandé"
           ]
         },
         "position_hand": {
-          "title": "?tape 2 : Positionner la main",
+          "title": "Étape 2 : Positionner la main",
           "items": [
             "Placez votre main dans le cadre",
-            "Gardez la main ? une distance confortable (30-50 cm)",
-            "?vitez les arri?re-plans trop clairs ou trop sombres",
-            "Un bon ?clairage am?liore la pr?cision"
+            "Gardez la main à une distance confortable (30-50 cm)",
+            "Évitez les arrière-plans trop clairs ou trop sombres",
+            "Un bon éclairage améliore la précision"
           ]
         },
         "select_mode": {
-          "title": "?tape 3 : S?lectionner le mode",
+          "title": "Étape 3 : Sélectionner le mode",
           "items": [
-            "Appuyez sur le bouton de mode en haut de l'?cran",
-            "Choisissez entre : Hybride, R?gles, ML statique ou ML dynamique",
-            "Chaque mode utilise une technique de reconnaissance diff?rente",
-            "Le mode s?lectionn? est enregistr? pour votre session"
+            "Appuyez sur le bouton de mode en haut de l'écran",
+            "Choisissez entre : Hybride, Règles, ML statique ou ML dynamique",
+            "Chaque mode utilise une technique de reconnaissance différente",
+            "Le mode sélectionné est enregistré pour votre session"
           ]
         },
         "detection_modes": {
-          "title": "Modes de d?tection",
+          "title": "Modes de détection",
           "items": [
-            "Hybride : combine r?gles et machine learning",
-            "R?gles : bas? sur des r?gles g?om?triques pr?d?finies",
-            "ML statique : mod?le entra?n? avec des poses statiques",
-            "ML dynamique : mod?le entra?n? avec des mouvements/gestes dynamiques"
+            "Hybride : combine règles et machine learning",
+            "Règles : basé sur des règles géométriques prédéfinies",
+            "ML statique : modèle entraîné avec des poses statiques",
+            "ML dynamique : modèle entraîné avec des mouvements/gestes dynamiques"
           ]
         },
         "usage_tips": {
           "title": "Conseils d'utilisation",
           "items": [
-            "Bougez la main doucement pour une meilleure d?tection",
-            "?vitez les mouvements brusques",
+            "Bougez la main doucement pour une meilleure détection",
+            "Évitez les mouvements brusques",
             "Si le geste n'est pas reconnu, ajustez la position",
-            "La pr?cision d?pend de la qualit? du mod?le entra?n?"
+            "La précision dépend de la qualité du modèle entraîné"
           ]
         }
       }
     },
     "3": {
-      "title": "Comment entra?ner des mod?les",
+      "title": "Comment entraîner des modèles",
       "slides": {
         "data_collection": {
-          "title": "?tape 1 : Collecte de donn?es",
+          "title": "Étape 1 : Collecte de données",
           "items": [
-            "Acc?dez ? ML Studio depuis l'onglet correspondant",
+            "Accédez à ML Studio depuis l'onglet correspondant",
             "Choisissez entre collecte statique ou dynamique",
             "Collecte statique : capture des poses uniques de la main",
-            "Collecte dynamique : capture des s?quences de mouvement"
+            "Collecte dynamique : capture des séquences de mouvement"
           ]
         },
         "create_dataset": {
-          "title": "?tape 2 : Cr?er un dataset",
+          "title": "Étape 2 : Créer un dataset",
           "items": [
-            "D?finissez un nom pour votre dataset (ex. : ALPHABET_V1)",
-            "Cr?ez des labels pour chaque geste (ex. : A, B, C)",
-            "Collectez suffisamment d'?chantillons pour chaque label",
-            "Plus il y a d'?chantillons, meilleure est la pr?cision du mod?le"
+            "Définissez un nom pour votre dataset (ex. : ALPHABET_V1)",
+            "Créez des labels pour chaque geste (ex. : A, B, C)",
+            "Collectez suffisamment d'échantillons pour chaque label",
+            "Plus il y a d'échantillons, meilleure est la précision du modèle"
           ]
         },
         "organize_data": {
-          "title": "?tape 3 : Organiser les donn?es",
+          "title": "Étape 3 : Organiser les données",
           "items": [
             "Consultez les statistiques du dataset",
-            "V?rifiez la distribution des ?chantillons par label",
-            "Ajoutez d'autres ?chantillons si n?cessaire",
-            "Gardez les classes ?quilibr?es"
+            "Vérifiez la distribution des échantillons par label",
+            "Ajoutez d'autres échantillons si nécessaire",
+            "Gardez les classes équilibrées"
           ]
         },
         "training": {
-          "title": "?tape 4 : Entra?nement",
+          "title": "Étape 4 : Entraînement",
           "items": [
-            "S?lectionnez le dataset pour l'entra?nement",
-            "Choisissez le type de mod?le (statique ou dynamique)",
-            "Lancez l'entra?nement et attendez la fin",
-            "Le mod?le entra?n? sera disponible dans la liste des mod?les"
+            "Sélectionnez le dataset pour l'entraînement",
+            "Choisissez le type de modèle (statique ou dynamique)",
+            "Lancez l'entraînement et attendez la fin",
+            "Le modèle entraîné sera disponible dans la liste des modèles"
           ]
         },
         "use_model": {
-          "title": "?tape 5 : Utiliser le mod?le",
+          "title": "Étape 5 : Utiliser le modèle",
           "items": [
-            "Allez ? l'?cran de s?lection des mod?les",
-            "Choisissez le mod?le r?cemment entra?n?",
-            "Activez-le pour l'inf?rence",
-            "Testez-le dans la cam?ra pour valider les r?sultats"
+            "Allez à l'écran de sélection des modèles",
+            "Choisissez le modèle récemment entraîné",
+            "Activez-le pour l'inférence",
+            "Testez-le dans la caméra pour valider les résultats"
           ]
         }
       }
@@ -567,10 +567,10 @@
         "scoring": {
           "title": "Fonctionnement du score",
           "items": [
-            "Chaque activit? dans l'app g?n?re des points",
-            "Collecte de donn?es : 10 points par ?chantillon",
-            "Entra?nement de mod?le : 100 points par entra?nement",
-            "Utilisation de la cam?ra : 1 point par minute d'inf?rence"
+            "Chaque activité dans l'app génère des points",
+            "Collecte de données : 10 points par échantillon",
+            "Entraînement de modèle : 100 points par entraînement",
+            "Utilisation de la caméra : 1 point par minute d'inférence"
           ]
         },
         "point_sources": {
@@ -578,37 +578,37 @@
           "items": [
             "Collecte statique de gestes",
             "Collecte dynamique de mouvements",
-            "Cr?ation de datasets",
-            "Entra?nement de mod?les",
+            "Création de datasets",
+            "Entraînement de modèles",
             "Contributions aux datasets publics"
           ]
         },
         "ranking_system": {
-          "title": "Syst?me de classement",
+          "title": "Système de classement",
           "items": [
             "Classement global de tous les utilisateurs",
-            "Mise ? jour en temps r?el",
-            "Position bas?e sur le total des points accumul?s",
-            "Historique d'?volution hebdomadaire/mensuel"
+            "Mise à jour en temps réel",
+            "Position basée sur le total des points accumulés",
+            "Historique d'évolution hebdomadaire/mensuel"
           ]
         },
         "benefits": {
           "title": "Avantages de contribuer",
           "items": [
-            "Reconnaissance dans la communaut? Li-Vision",
-            "Acc?s anticip? aux nouvelles fonctionnalit?s",
-            "Badges et r?ussites sp?ciales",
-            "Contribution ? la science et ? l'accessibilit?"
+            "Reconnaissance dans la communauté Li-Vision",
+            "Accès anticipé aux nouvelles fonctionnalités",
+            "Badges et réussites spéciales",
+            "Contribution à la science et à l'accessibilité"
           ]
         },
         "ranking_tips": {
           "title": "Conseils pour monter dans le classement",
           "items": [
-            "Collectez des donn?es r?guli?rement",
-            "Cr?ez des datasets diversifi?s",
-            "Entra?nez des mod?les de qualit?",
-            "Partagez des datasets avec la communaut?",
-            "Utilisez souvent l'app pour l'inf?rence"
+            "Collectez des données régulièrement",
+            "Créez des datasets diversifiés",
+            "Entraînez des modèles de qualité",
+            "Partagez des datasets avec la communauté",
+            "Utilisez souvent l'app pour l'inférence"
           ]
         }
       }

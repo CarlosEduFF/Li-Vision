@@ -415,36 +415,36 @@
   },
   "about_modal": {
     "1": {
-      "title": "Apresenta??o do App",
+      "title": "Apresentação do App",
       "slides": {
         "overview": {
-          "title": "Vis?o Geral",
+          "title": "Visão Geral",
           "items": [
-            "Li-Vision ? um sistema de reconhecimento de gestos em tempo real",
+            "Li-Vision é um sistema de reconhecimento de gestos em tempo real",
             "Combina processamento local (Edge) e processamento em nuvem",
-            "Arquitetura multi-tenant: cada usu?rio tem sess?o isolada"
+            "Arquitetura multi-tenant: cada usuário tem sessão isolada"
           ]
         },
         "home": {
-          "title": "Aba Home (In?cio)",
+          "title": "Aba Home (Início)",
           "items": [
             "Dashboard principal do aplicativo",
-            "Vis?o geral das atividades e estat?sticas",
-            "Acesso r?pido ?s principais funcionalidades"
+            "Visão geral das atividades e estatísticas",
+            "Acesso rápido às principais funcionalidades"
           ]
         },
         "camera": {
-          "title": "Aba C?mera",
+          "title": "Aba Câmera",
           "items": [
-            "Infer?ncia em tempo real com a c?mera do dispositivo",
-            "Detec??o de m?os e reconhecimento de gestos",
-            "Seletor de modo: H?brido, Regras, ML Est?tico, ML Din?mico"
+            "Inferência em tempo real com a câmera do dispositivo",
+            "Detecção de mãos e reconhecimento de gestos",
+            "Seletor de modo: Híbrido, Regras, ML Estático, ML Dinâmico"
           ]
         },
         "studio": {
           "title": "Aba ML Studio",
           "items": [
-            "Coleta de dados est?ticos e din?micos",
+            "Coleta de dados estáticos e dinâmicos",
             "Gerenciamento de datasets",
             "Treinamento de modelos personalizados"
           ]
@@ -453,65 +453,65 @@
           "title": "Aba Ranking",
           "items": [
             "Leaderboard de contribuidores",
-            "Visualiza??o de pontua??es",
-            "Acompanhamento de evolu??o no sistema"
+            "Visualização de pontuações",
+            "Acompanhamento de evolução no sistema"
           ]
         },
         "profile": {
           "title": "Aba Perfil",
           "items": [
-            "Informa??es do usu?rio",
-            "Configura??es pessoais",
-            "Hist?rico de atividades"
+            "Informações do usuário",
+            "Configurações pessoais",
+            "Histórico de atividades"
           ]
         }
       }
     },
     "2": {
-      "title": "Como Fazer Infer?ncia",
+      "title": "Como Fazer Inferência",
       "slides": {
         "access_camera": {
-          "title": "Passo 1: Acessar a C?mera",
+          "title": "Passo 1: Acessar a Câmera",
           "items": [
-            "Toque no bot?o 'C?mera' na barra de navega??o inferior",
-            "Ou use o atalho na tela inicial se dispon?vel",
-            "Permita o acesso ? c?mera quando solicitado"
+            "Toque no botão 'Câmera' na barra de navegação inferior",
+            "Ou use o atalho na tela inicial se disponível",
+            "Permita o acesso à câmera quando solicitado"
           ]
         },
         "position_hand": {
-          "title": "Passo 2: Posicionar a M?o",
+          "title": "Passo 2: Posicionar a Mão",
           "items": [
-            "Posicione sua m?o dentro do enquadramento",
-            "Mantenha a m?o a uma dist?ncia confort?vel (30-50cm)",
+            "Posicione sua mão dentro do enquadramento",
+            "Mantenha a mão a uma distância confortável (30-50cm)",
             "Evite fundos muito claros ou escuros",
-            "A ilumina??o adequada melhora a precis?o"
+            "A iluminação adequada melhora a precisão"
           ]
         },
         "select_mode": {
           "title": "Passo 3: Selecionar o Modo",
           "items": [
-            "Toque no bot?o de modo no topo da tela",
-            "Escolha entre: H?brido, Regras, ML Est?tico ou ML Din?mico",
-            "Cada modo usa uma t?cnica diferente de reconhecimento",
-            "O modo selecionado ? salvo para sua sess?o"
+            "Toque no botão de modo no topo da tela",
+            "Escolha entre: Híbrido, Regras, ML Estático ou ML Dinâmico",
+            "Cada modo usa uma técnica diferente de reconhecimento",
+            "O modo selecionado é salvo para sua sessão"
           ]
         },
         "detection_modes": {
-          "title": "Modos de Detec??o",
+          "title": "Modos de Detecção",
           "items": [
-            "H?brido: Combina regras e machine learning",
-            "Regras: Baseado em regras geom?tricas predefinidas",
-            "ML Est?tico: Modelo treinado com poses est?ticas",
-            "ML Din?mico: Modelo treinado com movimentos/gestos din?micos"
+            "Híbrido: Combina regras e machine learning",
+            "Regras: Baseado em regras geométricas predefinidas",
+            "ML Estático: Modelo treinado com poses estáticas",
+            "ML Dinâmico: Modelo treinado com movimentos/gestos dinâmicos"
           ]
         },
         "usage_tips": {
           "title": "Dicas de Uso",
           "items": [
-            "Movimente a m?o suavemente para melhor detec??o",
+            "Movimente a mão suavemente para melhor detecção",
             "Evite movimentos bruscos",
-            "Se o gesto n?o for reconhecido, ajuste a posi??o",
-            "A precis?o depende da qualidade do modelo treinado"
+            "Se o gesto não for reconhecido, ajuste a posição",
+            "A precisão depende da qualidade do modelo treinado"
           ]
         }
       }
@@ -523,26 +523,26 @@
           "title": "Passo 1: Coleta de Dados",
           "items": [
             "Acesse o ML Studio pela aba correspondente",
-            "Escolha entre coleta Est?tica ou Din?mica",
-            "Coleta Est?tica: captura poses ?nicas de m?o",
-            "Coleta Din?mica: captura sequ?ncias de movimento"
+            "Escolha entre coleta Estática ou Dinâmica",
+            "Coleta Estática: captura poses únicas de mão",
+            "Coleta Dinâmica: captura sequências de movimento"
           ]
         },
         "create_dataset": {
           "title": "Passo 2: Criar Dataset",
           "items": [
             "Defina um nome para seu dataset (ex: ALFABETO_V1)",
-            "Crie labels (r?tulos) para cada gesto (ex: A, B, C)",
+            "Crie labels (rótulos) para cada gesto (ex: A, B, C)",
             "Colete amostras suficientes para cada label",
-            "Quanto mais amostras, melhor a precis?o do modelo"
+            "Quanto mais amostras, melhor a precisão do modelo"
           ]
         },
         "organize_data": {
           "title": "Passo 3: Organizar Dados",
           "items": [
-            "Visualize estat?sticas do dataset",
-            "Verifique a distribui??o de amostras por label",
-            "Adicione mais amostras se necess?rio",
+            "Visualize estatísticas do dataset",
+            "Verifique a distribuição de amostras por label",
+            "Adicione mais amostras se necessário",
             "Mantenha balanceamento entre as classes"
           ]
         },
@@ -550,60 +550,60 @@
           "title": "Passo 4: Treinamento",
           "items": [
             "Selecione o dataset para treinamento",
-            "Escolha o tipo de modelo (Est?tico ou Din?mico)",
-            "Inicie o treinamento e aguarde a conclus?o",
-            "O modelo treinado ficar? dispon?vel na lista de modelos"
+            "Escolha o tipo de modelo (Estático ou Dinâmico)",
+            "Inicie o treinamento e aguarde a conclusão",
+            "O modelo treinado ficará disponível na lista de modelos"
           ]
         },
         "use_model": {
           "title": "Passo 5: Usar o Modelo",
           "items": [
-            "V? para a tela de sele??o de modelos",
-            "Escolha o modelo rec?m-treinado",
-            "Ative-o para uso na infer?ncia",
-            "Teste na c?mera para validar os resultados"
+            "Vá para a tela de seleção de modelos",
+            "Escolha o modelo recém-treinado",
+            "Ative-o para uso na inferência",
+            "Teste na câmera para validar os resultados"
           ]
         }
       }
     },
     "4": {
-      "title": "Pontua??o e Ranking",
+      "title": "Pontuação e Ranking",
       "slides": {
         "scoring": {
-          "title": "Como Funciona a Pontua??o",
+          "title": "Como Funciona a Pontuação",
           "items": [
             "Cada atividade no app gera pontos",
             "Coleta de dados: 10 pontos por amostra",
             "Treinamento de modelo: 100 pontos por treino",
-            "Uso da c?mera: 1 ponto por minuto de infer?ncia"
+            "Uso da câmera: 1 ponto por minuto de inferência"
           ]
         },
         "point_sources": {
           "title": "O que Conta Pontos",
           "items": [
-            "Coleta est?tica de gestos",
-            "Coleta din?mica de movimentos",
-            "Cria??o de datasets",
+            "Coleta estática de gestos",
+            "Coleta dinâmica de movimentos",
+            "Criação de datasets",
             "Treinamento de modelos",
-            "Contribui??es para datasets p?blicos"
+            "Contribuições para datasets públicos"
           ]
         },
         "ranking_system": {
           "title": "Sistema de Ranking",
           "items": [
-            "Ranking global de todos os usu?rios",
-            "Atualiza??o em tempo real",
-            "Posi??o baseada no total de pontos acumulados",
-            "Hist?rico de evolu??o semanal/mensal"
+            "Ranking global de todos os usuários",
+            "Atualização em tempo real",
+            "Posição baseada no total de pontos acumulados",
+            "Histórico de evolução semanal/mensal"
           ]
         },
         "benefits": {
-          "title": "Benef?cios de Contribuir",
+          "title": "Benefícios de Contribuir",
           "items": [
             "Reconhecimento na comunidade Li-Vision",
             "Acesso antecipado a novas funcionalidades",
             "Badges e conquistas especiais",
-            "Contribui??o para a ci?ncia e acessibilidade"
+            "Contribuição para a ciência e acessibilidade"
           ]
         },
         "ranking_tips": {
@@ -613,7 +613,7 @@
             "Crie datasets diversificados",
             "Treine modelos de qualidade",
             "Compartilhe datasets com a comunidade",
-            "Use o app frequentemente para infer?ncia"
+            "Use o app frequentemente para inferência"
           ]
         }
       }
