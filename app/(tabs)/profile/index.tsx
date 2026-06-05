@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { profileStyles as styles } from "./profile.styles";
 import { changeLanguage } from "@/services/i18n";
 import { Modal, ScrollView as RNScrollView } from "react-native";
+import { useAppTheme } from "@/context/ThemeContext";
 
 function ProfileScreen() {
   const [userName, setUserName] = useState("UsuÃ¡rio");
@@ -19,6 +20,7 @@ function ProfileScreen() {
   const [myRank, setMyRank] = useState<any>(null);
   const [langModalVisible, setLangModalVisible] = useState(false);
   const { t, i18n } = useTranslation();
+  const { scheme, setScheme, isSystemControlled } = useAppTheme();
 
   const languages = [
     { code: 'pt', name: 'PortuguÃªs', flag: 'ðŸ‡§ðŸ‡·' },
@@ -103,10 +105,22 @@ function ProfileScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>{t('profile.title')}</Text>
-        <TouchableOpacity style={styles.langBtn} onPress={() => setLangModalVisible(true)}>
-          <MaterialIcons name="language" size={20} color="#00e5ff" />
-          <Text style={styles.langText}>{i18n.language.toUpperCase()}</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <TouchableOpacity
+            style={styles.langBtn}
+            onPress={() => setScheme(scheme === "dark" ? "light" : "dark")}
+          >
+            <MaterialIcons
+              name={scheme === "dark" ? "light-mode" : "dark-mode"}
+              size={20}
+              color="#00e5ff"
+            />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.langBtn} onPress={() => setLangModalVisible(true)}>
+            <MaterialIcons name="language" size={20} color="#00e5ff" />
+            <Text style={styles.langText}>{i18n.language.toUpperCase()}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {loading ? (

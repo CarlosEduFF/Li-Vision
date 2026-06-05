@@ -1,33 +1,46 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+// ─── Semantic token shape ────────────────────────────────────────────────────
+export interface AppColorTokens {
+  primary: string;
+  background: string;
+  backgroundAlt: string;
+  surface: string;
+  surfaceAlt: string;
+  text: {
+    primary: string;
+    secondary: string;
+    tertiary: string;
+    alt: string;
+    muted: string;
+  };
+  accent: {
+    purple: string;
+    gold: string;
+    green: string;
+    warning: string;
+    error: string;
+    danger: string;
+  };
+  border: {
+    cyan: string;
+    cyanMedium: string;
+    cyanStrong: string;
+    subtle: string;
+    faint: string;
+  };
+  podium: {
+    gold: string;
+    goldDark: string;
+    silver: string;
+    silverDark: string;
+    bronze: string;
+    bronzeDark: string;
+  };
+}
 
-export const Colors = {
-  light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
-  },
-  dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
-  },
-};
-
-export const AppColors = {
+// ─── Dark palette ─────────────────────────────────────────────────────────────
+export const AppColorsDark: AppColorTokens = {
   primary: "#00e5ff",
   background: "#10141a",
   backgroundAlt: "#0b0e14",
@@ -63,7 +76,69 @@ export const AppColors = {
     bronze: "#cd7f32",
     bronzeDark: "#8b4513",
   },
-} as const;
+};
+
+// ─── Light palette ────────────────────────────────────────────────────────────
+export const AppColorsLight: AppColorTokens = {
+  primary: "#0097a7",
+  background: "#f0f4f8",
+  backgroundAlt: "#e4eaf0",
+  surface: "#ffffff",
+  surfaceAlt: "#f7f9fc",
+  text: {
+    primary: "#0d1117",
+    secondary: "#4a5568",
+    tertiary: "#718096",
+    alt: "#2d3748",
+    muted: "#718096",
+  },
+  accent: {
+    purple: "#7c3aed",
+    gold: "#d97706",
+    green: "#16a34a",
+    warning: "#d97706",
+    error: "#dc2626",
+    danger: "#b91c1c",
+  },
+  border: {
+    cyan: "rgba(0, 151, 167, 0.15)",
+    cyanMedium: "rgba(0, 151, 167, 0.3)",
+    cyanStrong: "rgba(0, 151, 167, 0.5)",
+    subtle: "rgba(0, 0, 0, 0.06)",
+    faint: "rgba(0, 0, 0, 0.03)",
+  },
+  podium: {
+    gold: "#f59e0b",
+    goldDark: "#b45309",
+    silver: "#9ca3af",
+    silverDark: "#6b7280",
+    bronze: "#b45309",
+    bronzeDark: "#78350f",
+  },
+};
+
+// Default export kept as dark for backwards compatibility with static imports
+export const AppColors: AppColorTokens = AppColorsDark;
+
+// Legacy Colors object — kept for Expo UI template components (tabs/_layout, collapsible, use-theme-color)
+export const Colors = {
+  light: {
+    text: "#0d1117",
+    background: "#f0f4f8",
+    tint: "#0097a7",
+    icon: "#4a5568",
+    tabIconDefault: "#4a5568",
+    tabIconSelected: "#0097a7",
+  },
+  dark: {
+    text: "#ffffff",
+    background: "#10141a",
+    tint: "#00e5ff",
+    icon: "#888888",
+    tabIconDefault: "#888888",
+    tabIconSelected: "#00e5ff",
+  },
+};
 
 export const AppSpacing = {
   xs: 4,

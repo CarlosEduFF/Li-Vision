@@ -6,16 +6,15 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import '../services/i18n';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { AppThemeProvider, useAppTheme } from '@/context/ThemeContext';
+import GlobalVLibras from '@/components/GlobalVLibras';
 
 export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-import GlobalVLibras from '@/components/GlobalVLibras';
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+function RootLayoutInner() {
+  const { scheme } = useAppTheme();
   const router = useRouter();
 
   useEffect(() => {
@@ -29,7 +28,7 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={scheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="screens/cam" options={{ headerShown: false }} />
@@ -47,10 +46,18 @@ export default function RootLayout() {
         <Stack.Screen name="screens/ranking" options={{ headerShown: false }} />
         <Stack.Screen name="screens/about" options={{ headerShown: false }} />
         <Stack.Screen name="screens/levels-info" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/admin-config" options={{headerShown: false}}/>
+        <Stack.Screen name="screens/admin-config" options={{ headerShown: false }} />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <GlobalVLibras />
     </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AppThemeProvider>
+      <RootLayoutInner />
+    </AppThemeProvider>
   );
 }
