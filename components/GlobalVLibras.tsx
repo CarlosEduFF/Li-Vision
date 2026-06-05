@@ -259,14 +259,14 @@ export default function GlobalVLibras() {
     } catch (e) {}
   };
 
-  // Renderiza o botão flutuante isoladamente, sem um container de tela cheia
-  // que intercepte o touch dos elementos abaixo.
   if (!visible) {
     if (isTranscriptionScreen) return null;
     return (
-      <TouchableOpacity style={styles.floatingBtn} onPress={showWidget} activeOpacity={0.8}>
-        <MaterialIcons name="sign-language" size={28} color="#081018" />
-      </TouchableOpacity>
+      <View style={styles.container} pointerEvents="box-none">
+        <TouchableOpacity style={styles.floatingBtn} onPress={showWidget} activeOpacity={0.8}>
+          <MaterialIcons name="sign-language" size={28} color="#081018" />
+        </TouchableOpacity>
+      </View>
     );
   }
 
