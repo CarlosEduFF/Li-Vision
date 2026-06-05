@@ -1,0 +1,92 @@
+import { StyleSheet } from "react-native";
+import { AppColors, AppRadius, AppShadow, AppSpacing } from "@/constants/theme";
+
+export const buttons = StyleSheet.create({
+  primary: {
+    backgroundColor: AppColors.primary,
+    borderRadius: AppRadius.md,
+    paddingVertical: 16,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    marginTop: AppSpacing.md,
+    ...AppShadow.cyan,
+  },
+  primaryRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    gap: AppSpacing.sm,
+    backgroundColor: AppColors.primary,
+    paddingVertical: 16,
+    borderRadius: AppRadius.md,
+    ...AppShadow.cyan,
+  },
+  primaryText: {
+    color: "#000",
+    fontSize: 16,
+    fontWeight: "bold" as const,
+  },
+  primaryTextSm: {
+    color: "#000",
+    fontWeight: "bold" as const,
+    fontSize: 14,
+  },
+  secondary: {
+    marginTop: 25,
+    alignSelf: "center" as const,
+    padding: AppSpacing.md,
+  },
+  secondaryText: {
+    color: AppColors.text.secondary,
+    fontSize: 14,
+    fontWeight: "600" as const,
+    textDecorationLine: "underline" as const,
+  },
+  ghost: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: AppSpacing.xs,
+    backgroundColor: AppColors.border.cyan,
+    paddingVertical: AppSpacing.sm + 2,
+    paddingHorizontal: AppSpacing.xl,
+    borderRadius: AppRadius.md,
+    borderWidth: 1,
+    borderColor: AppColors.border.cyanStrong,
+  },
+  ghostText: {
+    color: AppColors.primary,
+    fontWeight: "700" as const,
+    fontSize: 13,
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: AppRadius.md,
+    backgroundColor: AppColors.surface,
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+  },
+  backBtnRound: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: AppColors.surface,
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+  },
+  logoutBtn: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    padding: AppSpacing.lg,
+    borderRadius: 15,
+    backgroundColor: "rgba(255, 68, 68, 0.1)",
+    gap: AppSpacing.md,
+    marginTop: AppSpacing.xl,
+  },
+  logoutText: {
+    color: AppColors.accent.danger,
+    fontWeight: "bold" as const,
+    fontSize: 16,
+  },
+});
