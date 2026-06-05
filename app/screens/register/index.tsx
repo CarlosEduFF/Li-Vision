@@ -51,7 +51,7 @@ export default function RegisterScreen() {
       
       <View style={styles.card}>
         <View style={styles.iconCircle}>
-          <Image source={require('../../assets/images/Li-Vision-Logo-BackgroundOff.png')} style={{ width: 50, height: 50 }} resizeMode="contain" />
+          <Image source={require('../../../assets/images/Li-Vision-Logo-BackgroundOff.png')} style={{ width: 50, height: 50 }} resizeMode="contain" />
         </View>
         <Text style={styles.title}>{t('register.new_researcher')}</Text>
         <Text style={styles.subtitle}>{t('register.subtitle')}</Text>
@@ -135,6 +135,7 @@ export default function RegisterScreen() {
     </KeyboardAvoidingView>
   );
 }
+
 
 
 
