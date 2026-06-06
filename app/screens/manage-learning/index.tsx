@@ -10,7 +10,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter, useFocusEffect } from "expo-router";
 import React, { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { manageLearningStyles as styles } from "./manage-learning.styles";
+import { manageLearningStyles as styles } from "@/styles/manage-learning.styles";
 import {
   Alert,
   Modal,

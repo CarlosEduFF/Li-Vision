@@ -4,7 +4,7 @@ import { router } from "expo-router";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
-import { studioStyles as styles } from "./studio.styles";
+import { studioStyles as styles } from "@/styles/studio.styles";
 
 export default function StudioScreen() {
   const [isAdmin, setIsAdmin] = useState(false);

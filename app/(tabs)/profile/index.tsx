@@ -7,7 +7,7 @@ import { router } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { trainingService } from "@/services/trainingService";
 import { useTranslation } from "react-i18next";
-import { profileStyles as styles } from "./profile.styles";
+import { profileStyles as styles } from "@/styles/profile.styles";
 import { changeLanguage } from "@/services/i18n";
 import { Modal, ScrollView as RNScrollView } from "react-native";
 import { useAppTheme } from "@/context/ThemeContext";

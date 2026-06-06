@@ -5,7 +5,7 @@ import { trainingService } from "@/services/trainingService";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
-import { manageDatasetsStyles as styles } from "./manage-datasets.styles";
+import { manageDatasetsStyles as styles } from "@/styles/manage-datasets.styles";
 
 export default function ManageDatasetsScreen() {
   const [datasets, setDatasets] = useState<any[]>([]);

@@ -9,7 +9,7 @@ import { Worklets } from "react-native-worklets-core";
 import { detectHandLandmarks, LandmarkPoint } from "@/services/handLandmarkerPlugin";
 import { gestureWS } from "@/services/gestureWebSocket";
 import { useTranslation } from "react-i18next";
-import { collectDynamicStyles as styles } from "./collect-dynamic.styles";
+import { collectDynamicStyles as styles } from "@/styles/collect-dynamic.styles";
 
 export default function CollectDynamicScreen() {
   const [label, setLabel] = useState("");

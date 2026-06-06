@@ -10,7 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { trainingService } from "@/services/trainingService";
 import { useTranslation } from "react-i18next";
-import { editProfileStyles as styles } from "./edit-profile.styles";
+import { editProfileStyles as styles } from "@/styles/edit-profile.styles";
 
 export default function EditProfileScreen() {
   const [fullName, setFullName] = useState("");

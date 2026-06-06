@@ -6,7 +6,7 @@ import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { authService } from '@/features/auth/authService';
 import { ApiError } from '@/lib/http';
 import { useTranslation } from 'react-i18next';
-import { registerStyles as styles } from "./register.styles";
+import { registerStyles as styles } from "@/styles/register.styles";
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState('');

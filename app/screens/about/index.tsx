@@ -4,7 +4,7 @@ import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { router } from "expo-router";
 import AboutModal from "@/components/AboutModal";
 import { useTranslation } from "react-i18next";
-import { aboutStyles as styles } from "./about.styles";
+import { aboutStyles as styles } from "@/styles/about.styles";
 
 export default function AboutScreen() {
   const [modalVisible, setModalVisible] = useState(false);

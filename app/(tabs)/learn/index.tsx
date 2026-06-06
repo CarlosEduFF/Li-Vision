@@ -12,7 +12,7 @@ import { TouchableOpacity, ScrollView, View } from "react-native";
 import Text from "@/components/TranslatableText";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { learnStyles as styles } from "./learn.styles";
+import { learnStyles as styles } from "@/styles/learn.styles";
 
 type LevelProgress = { total: number; learned: number; percent: number };
 

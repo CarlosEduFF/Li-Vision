@@ -11,7 +11,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { gestureDetailStyles as styles } from "./gesture-detail.styles";
+import { gestureDetailStyles as styles } from "@/styles/gesture-detail.styles";
 import {
   ScrollView,
   StyleSheet,

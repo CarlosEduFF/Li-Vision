@@ -5,7 +5,7 @@ import { trainingService } from "@/services/trainingService";
 import { router } from "expo-router";
 import TrainingProgressModal from "@/components/TrainingProgressModal";
 import { useTranslation } from "react-i18next";
-import { trainStyles as styles } from "./train.styles";
+import { trainStyles as styles } from "@/styles/train.styles";
 
 export default function TrainScreen() {
   const [datasets, setDatasets] = useState<any[]>([]);

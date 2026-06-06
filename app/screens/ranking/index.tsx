@@ -5,7 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { trainingService } from "@/services/trainingService";
 import { useTranslation } from "react-i18next";
-import { rankingStyles as styles } from "./ranking.styles";
+import { rankingStyles as styles } from "@/styles/ranking.styles";
 
 export default function RankingScreen() {
   const router = useRouter();

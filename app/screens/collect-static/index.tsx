@@ -8,7 +8,7 @@ import { Camera, useCameraDevice, useFrameProcessor } from "react-native-vision-
 import { Worklets } from "react-native-worklets-core";
 import { trainingService } from "@/services/trainingService";
 import { useTranslation } from "react-i18next";
-import { collectStaticStyles as styles } from "./collect-static.styles";
+import { collectStaticStyles as styles } from "@/styles/collect-static.styles";
 
 export default function CollectStaticScreen() {
   const [label, setLabel] = useState("");

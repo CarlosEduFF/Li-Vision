@@ -1,7 +1,7 @@
 ﻿import { MaterialIcons } from "@expo/vector-icons";
 import React, { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { transcriptionStyles as styles } from "./transcription.styles";
+import { transcriptionStyles as styles } from "@/styles/transcription.styles";
 import {
     ActivityIndicator,
     KeyboardAvoidingView,

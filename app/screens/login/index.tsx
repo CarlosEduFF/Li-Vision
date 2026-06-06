@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
-import { loginStyles as styles } from "./login.styles";
+import { loginStyles as styles } from "@/styles/login.styles";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');

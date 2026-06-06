@@ -13,7 +13,7 @@ import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { homeStyles as styles } from "./index.styles";
+import { homeStyles as styles } from "@/styles/index.styles";
 import { useProfile } from "@/features/profile/useProfile";
 import { PodiumDisplay } from "@/components/ranking/PodiumDisplay";
 

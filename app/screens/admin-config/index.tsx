@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
-import { adminConfigStyles as styles } from "./admin-config.styles";
+import { adminConfigStyles as styles } from "@/styles/admin-config.styles";
 
 export default function AdminConfigScreen() {
   const [isRulesEnabled, setIsRulesEnabled] = useState(true);

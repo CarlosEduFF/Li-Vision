@@ -4,7 +4,7 @@ import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { APP_LEVELS } from "@/constants/levels";
 import { useTranslation } from "react-i18next";
-import { levelsInfoStyles as styles } from "./levels-info.styles";
+import { levelsInfoStyles as styles } from "@/styles/levels-info.styles";
 
 export default function LevelsInfoScreen() {
   const { t } = useTranslation();

@@ -5,7 +5,7 @@ import { trainingService } from "@/services/trainingService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { modelsStyles as styles } from "./models.styles";
+import { modelsStyles as styles } from "@/styles/models.styles";
 
 export default function ModelsScreen() {
   const [models, setModels] = useState<any[]>([]);
