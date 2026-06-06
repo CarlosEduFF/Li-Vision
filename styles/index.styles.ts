@@ -1,8 +1,9 @@
 import { StyleSheet } from "react-native";
-import { AppColors, AppRadius, AppShadow, AppSpacing } from "@/constants/theme";
+import { AppColorTokens, AppRadius, AppShadow, AppSpacing } from "@/constants/theme";
 
-export const homeStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: AppColors.backgroundAlt },
+export function makeHomeStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.backgroundAlt },
   iconCircle: {
     width: 40,
     height: 30,
@@ -13,14 +14,14 @@ export const homeStyles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: AppSpacing.xl,
     borderWidth: 1,
-    borderColor: AppColors.primary,
+    borderColor: colors.primary,
   },
   avatarImage: {
     width: 50,
     height: 50,
     borderRadius: 60,
     borderWidth: 3,
-    borderColor: AppColors.primary,
+    borderColor: colors.primary,
   },
   topBar: {
     flexDirection: "row",
@@ -42,12 +43,12 @@ export const homeStyles = StyleSheet.create({
   avatar: { width: 40, height: 40, borderRadius: 20 },
   content: { padding: AppSpacing.xl, paddingBottom: 10 },
   hero: { marginBottom: AppSpacing.xxl },
-  title: { fontSize: 40, fontWeight: "bold", color: AppColors.text.primary },
+  title: { fontSize: 40, fontWeight: "bold", color: colors.text.primary },
   subtitle: { color: "#bac9cc", marginVertical: 12 },
   mainButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: AppColors.primary,
+    backgroundColor: colors.primary,
     padding: 12,
     borderRadius: AppRadius.sm,
     gap: AppSpacing.sm,
@@ -57,7 +58,7 @@ export const homeStyles = StyleSheet.create({
   buttonText: { fontWeight: "bold", color: "#00363d" },
   grid: { gap: AppSpacing.xl },
   cardLarge: {
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     padding: AppSpacing.xl,
     borderRadius: AppRadius.xl,
     borderWidth: 1,
@@ -95,16 +96,16 @@ export const homeStyles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     elevation: 4,
   },
-  cardTitle: { color: AppColors.text.primary, fontWeight: "bold", marginTop: AppSpacing.sm },
-  cardText: { color: AppColors.text.muted, marginTop: 4 },
-  cardTextSmall: { color: AppColors.text.muted, fontSize: 12 },
+  cardTitle: { color: colors.text.primary, fontWeight: "bold", marginTop: AppSpacing.sm },
+  cardText: { color: colors.text.muted, marginTop: 4 },
+  cardTextSmall: { color: colors.text.muted, fontSize: 12 },
   pipeline: { marginTop: 32 },
-  pipelineTitle: { color: AppColors.text.secondary, marginBottom: 12 },
+  pipelineTitle: { color: colors.text.secondary, marginBottom: 12 },
   tags: { flexDirection: "row", gap: AppSpacing.sm },
   tag: { backgroundColor: "#0a0e14", padding: AppSpacing.sm, borderRadius: 20 },
-  tagText: { color: AppColors.primary, fontSize: 12 },
+  tagText: { color: colors.primary, fontSize: 12 },
   rankingContainer: {
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     borderRadius: AppRadius.xxl,
     padding: AppSpacing.xl,
     marginTop: AppSpacing.sm,
@@ -118,11 +119,11 @@ export const homeStyles = StyleSheet.create({
     marginBottom: AppSpacing.xl,
   },
   rankingTitle: {
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     fontSize: 18,
     fontWeight: "bold",
   },
-  seeAllText: { color: AppColors.primary, fontSize: 12, fontWeight: "600" },
+  seeAllText: { color: colors.primary, fontSize: 12, fontWeight: "600" },
   rankRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -139,7 +140,7 @@ export const homeStyles = StyleSheet.create({
     flex: 1,
   },
   rankNum: {
-    color: AppColors.text.tertiary,
+    color: colors.text.tertiary,
     fontWeight: "bold",
     width: 20,
   },
@@ -157,10 +158,13 @@ export const homeStyles = StyleSheet.create({
     fontWeight: "600",
     flex: 1,
   },
-  rankPoints: { color: AppColors.primary, fontSize: 13, fontWeight: "bold" },
+  rankPoints: { color: colors.primary, fontSize: 13, fontWeight: "bold" },
   othersList: {
     borderTopWidth: 1,
     borderTopColor: "rgba(255,255,255,0.05)",
     paddingTop: AppSpacing.xl,
   },
 });
+}
+
+export const homeStyles = makeHomeStyles;

@@ -1,8 +1,9 @@
 import { StyleSheet } from "react-native";
-import { AppColors, AppRadius, AppSpacing } from "@/constants/theme";
+import { AppColorTokens, AppRadius, AppSpacing } from "@/constants/theme";
 
-export const gestureDetailStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: AppColors.backgroundAlt },
+export function makeGestureDetailStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.backgroundAlt },
   topBar: {
     paddingHorizontal: AppSpacing.xl,
     paddingTop: 12,
@@ -19,7 +20,7 @@ export const gestureDetailStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  title: { color: AppColors.text.primary, fontSize: AppSpacing.xl, fontWeight: "700" },
+  title: { color: colors.text.primary, fontSize: AppSpacing.xl, fontWeight: "700" },
   content: { padding: AppSpacing.xl, paddingBottom: 32, gap: 12 },
   subtitle: { color: "#aeb8c7", marginBottom: 10 },
   loadingText: { color: "#aeb8c7" },
@@ -32,7 +33,7 @@ export const gestureDetailStyles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
   },
-  emptyText: { color: AppColors.text.secondary },
+  emptyText: { color: colors.text.secondary },
   card: {
     backgroundColor: "#1a1f28",
     borderWidth: 1,
@@ -45,7 +46,7 @@ export const gestureDetailStyles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  letter: { color: AppColors.text.primary, fontSize: 22, fontWeight: "700" },
+  letter: { color: colors.text.primary, fontSize: 22, fontWeight: "700" },
   levelBadge: {
     borderWidth: 1,
     borderRadius: 99,
@@ -77,7 +78,7 @@ export const gestureDetailStyles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
   },
-  footerText: { color: AppColors.text.secondary, fontSize: 12 },
+  footerText: { color: colors.text.secondary, fontSize: 12 },
   previewImage: { width: "100%", height: "100%", resizeMode: "cover" },
   checkCircle: {
     width: 18,
@@ -96,7 +97,7 @@ export const gestureDetailStyles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 10,
   },
-  unlearnedBtn: { backgroundColor: AppColors.primary },
+  unlearnedBtn: { backgroundColor: colors.primary },
   learnedBtn: {
     backgroundColor: "rgba(138, 146, 163, 0.1)",
     borderWidth: 1,
@@ -104,5 +105,8 @@ export const gestureDetailStyles = StyleSheet.create({
   },
   learnBtnText: { fontSize: 14, fontWeight: "700" },
   unlearnedBtnText: { color: "#081018" },
-  learnedBtnText: { color: AppColors.text.secondary },
+  learnedBtnText: { color: colors.text.secondary },
 });
+}
+
+export const gestureDetailStyles = makeGestureDetailStyles;

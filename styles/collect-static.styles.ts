@@ -1,10 +1,11 @@
 import { StyleSheet } from "react-native";
-import { AppColors, AppRadius, AppSpacing } from "@/constants/theme";
+import { AppColorTokens, AppRadius, AppSpacing } from "@/constants/theme";
 
-export const collectStaticStyles = StyleSheet.create({
+export function makeCollectStaticStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppColors.backgroundAlt,
+    backgroundColor: colors.backgroundAlt,
     padding: AppSpacing.xl,
     paddingTop: 50,
   },
@@ -14,9 +15,9 @@ export const collectStaticStyles = StyleSheet.create({
     gap: 15,
     marginBottom: AppSpacing.xl,
   },
-  title: { fontSize: 24, fontWeight: "bold", color: AppColors.text.primary },
+  title: { fontSize: 24, fontWeight: "bold", color: colors.text.primary },
   cameraContainer: {
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 15,
     overflow: "hidden",
     position: "relative",
@@ -28,23 +29,23 @@ export const collectStaticStyles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 3.5,
-    backgroundColor: AppColors.primary,
+    backgroundColor: colors.primary,
   },
   form: { gap: 15 },
-  label: { color: AppColors.text.secondary, fontSize: 14, fontWeight: "bold" },
+  label: { color: colors.text.secondary, fontSize: 14, fontWeight: "bold" },
   input: {
-    backgroundColor: AppColors.surface,
-    color: AppColors.primary,
+    backgroundColor: colors.surface,
+    color: colors.primary,
     padding: 15,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: AppColors.border.cyan,
+    borderColor: colors.border.cyan,
     fontSize: 18,
     fontWeight: "bold",
   },
   buttonRow: { flexDirection: "column", gap: 10, marginTop: 10 },
   captureBtn: {
-    backgroundColor: AppColors.primary,
+    backgroundColor: colors.primary,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -54,7 +55,7 @@ export const collectStaticStyles = StyleSheet.create({
   },
   captureBtnText: { color: "#000", fontWeight: "bold", fontSize: 16 },
   finalizeBtn: {
-    backgroundColor: AppColors.accent.green,
+    backgroundColor: colors.accent.green,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -62,8 +63,8 @@ export const collectStaticStyles = StyleSheet.create({
     borderRadius: 10,
     gap: 10,
   },
-  finalizeBtnText: { color: AppColors.text.primary, fontWeight: "bold", fontSize: 16 },
-  stats: { color: AppColors.text.secondary, textAlign: "center", marginTop: 10 },
+  finalizeBtnText: { color: colors.text.primary, fontWeight: "bold", fontSize: 16 },
+  stats: { color: colors.text.secondary, textAlign: "center", marginTop: 10 },
   chipScroll: { marginBottom: 10 },
   chip: {
     backgroundColor: "#262a31",
@@ -75,11 +76,11 @@ export const collectStaticStyles = StyleSheet.create({
     borderColor: "transparent",
   },
   chipActive: {
-    borderColor: AppColors.primary,
+    borderColor: colors.primary,
     backgroundColor: "rgba(0, 229, 255, 0.15)",
   },
-  chipText: { color: AppColors.text.secondary, fontWeight: "bold" },
-  chipTextActive: { color: AppColors.primary },
+  chipText: { color: colors.text.secondary, fontWeight: "bold" },
+  chipTextActive: { color: colors.primary },
   labelHint: {
     flexDirection: "row",
     alignItems: "center",
@@ -92,9 +93,12 @@ export const collectStaticStyles = StyleSheet.create({
     marginTop: -5,
   },
   labelHintText: {
-    color: AppColors.accent.warning,
+    color: colors.accent.warning,
     fontSize: 12,
     flex: 1,
     lineHeight: 17,
   },
 });
+}
+
+export const collectStaticStyles = makeCollectStaticStyles;

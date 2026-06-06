@@ -1,4 +1,4 @@
-﻿import React from "react";
+﻿import React, { useMemo } from "react";
 import {
   View,
   StyleSheet,
@@ -13,11 +13,14 @@ import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { homeStyles as styles } from "@/styles/index.styles";
+import { makeHomeStyles as makeStyles } from "@/styles/index.styles";
 import { useProfile } from "@/features/profile/useProfile";
 import { PodiumDisplay } from "@/components/ranking/PodiumDisplay";
+import { useAppTheme } from "@/context/ThemeContext";
 
 export default function HomeScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const router = useRouter();
   const { fullName, avatarUrl, activeModelName, ranking, isLoading, refresh } = useProfile();
   const { t } = useTranslation();

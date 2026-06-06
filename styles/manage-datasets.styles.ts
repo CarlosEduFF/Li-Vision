@@ -1,10 +1,11 @@
 import { StyleSheet } from "react-native";
-import { AppColors, AppRadius, AppSpacing } from "@/constants/theme";
+import { AppColorTokens, AppRadius, AppSpacing } from "@/constants/theme";
 
-export const manageDatasetsStyles = StyleSheet.create({
+export function makeManageDatasetsStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppColors.backgroundAlt,
+    backgroundColor: colors.backgroundAlt,
     padding: AppSpacing.xl,
     paddingTop: 50,
   },
@@ -14,21 +15,21 @@ export const manageDatasetsStyles = StyleSheet.create({
     gap: 15,
     marginBottom: AppSpacing.xl,
   },
-  title: { fontSize: 24, fontWeight: "bold", color: AppColors.text.primary },
+  title: { fontSize: 24, fontWeight: "bold", color: colors.text.primary },
   scroll: { paddingBottom: 50 },
   emptyText: {
-    color: AppColors.text.secondary,
+    color: colors.text.secondary,
     textAlign: "center",
     marginTop: 40,
     fontSize: 16,
   },
   datasetCard: {
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     borderRadius: AppRadius.sm,
     marginBottom: 12,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: AppColors.border.cyan,
+    borderColor: colors.border.cyan,
   },
   datasetHeaderRow: {
     flexDirection: "row",
@@ -41,18 +42,18 @@ export const manageDatasetsStyles = StyleSheet.create({
   datasetName: {
     fontSize: 18,
     fontWeight: "bold",
-    color: AppColors.text.primary,
+    color: colors.text.primary,
   },
   chipWrapper: {
     alignSelf: "flex-start",
-    backgroundColor: AppColors.background,
+    backgroundColor: colors.background,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#333",
   },
-  typeText: { color: AppColors.text.secondary, fontSize: 12, fontWeight: "bold" },
+  typeText: { color: colors.text.secondary, fontSize: 12, fontWeight: "bold" },
   expandedContent: {
     padding: 18,
     borderTopWidth: 1,
@@ -68,16 +69,16 @@ export const manageDatasetsStyles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: AppSpacing.sm,
   },
-  actionText: { color: AppColors.text.primary, fontSize: 13, fontWeight: "bold" },
+  actionText: { color: colors.text.primary, fontSize: 13, fontWeight: "bold" },
   labelsTitle: {
     fontSize: 14,
-    color: AppColors.text.secondary,
+    color: colors.text.secondary,
     fontWeight: "bold",
     marginBottom: 10,
   },
-  loadingText: { color: AppColors.primary, fontStyle: "italic", marginTop: 5 },
+  loadingText: { color: colors.primary, fontStyle: "italic", marginTop: 5 },
   emptyTextInner: {
-    color: AppColors.text.tertiary,
+    color: colors.text.tertiary,
     fontStyle: "italic",
     marginTop: 5,
   },
@@ -89,8 +90,8 @@ export const manageDatasetsStyles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#2a2e35",
   },
-  labelText: { color: AppColors.text.primary, fontSize: 18, fontWeight: "bold" },
-  labelCount: { color: AppColors.primary, fontSize: 14 },
+  labelText: { color: colors.text.primary, fontSize: 18, fontWeight: "bold" },
+  labelCount: { color: colors.primary, fontSize: 14 },
   labelActions: { flexDirection: "row", gap: 15 },
   iconBtn: { padding: 4 },
   modalOverlay: {
@@ -100,22 +101,22 @@ export const manageDatasetsStyles = StyleSheet.create({
     alignItems: "center",
   },
   modalBox: {
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     width: "85%",
     borderRadius: 15,
     padding: 25,
     borderWidth: 1,
-    borderColor: AppColors.border.cyanStrong,
+    borderColor: colors.border.cyanStrong,
   },
   modalTitle: {
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 15,
   },
   modalInput: {
-    backgroundColor: AppColors.background,
-    color: AppColors.primary,
+    backgroundColor: colors.background,
+    color: colors.primary,
     fontSize: AppSpacing.xl,
     padding: 15,
     borderRadius: 10,
@@ -129,9 +130,12 @@ export const manageDatasetsStyles = StyleSheet.create({
   },
   modalBtnCancel: { padding: 12, paddingHorizontal: AppSpacing.xl },
   modalBtnSave: {
-    backgroundColor: AppColors.primary,
+    backgroundColor: colors.primary,
     padding: 12,
     paddingHorizontal: AppSpacing.xl,
     borderRadius: 10,
   },
 });
+}
+
+export const manageDatasetsStyles = makeManageDatasetsStyles;

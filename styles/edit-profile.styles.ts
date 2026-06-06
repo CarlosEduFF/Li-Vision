@@ -1,10 +1,11 @@
 import { StyleSheet } from "react-native";
-import { AppColors, AppRadius, AppShadow, AppSpacing } from "@/constants/theme";
+import { AppColorTokens, AppRadius, AppShadow, AppSpacing } from "@/constants/theme";
 
-export const editProfileStyles = StyleSheet.create({
+export function makeEditProfileStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppColors.backgroundAlt,
+    backgroundColor: colors.backgroundAlt,
     paddingHorizontal: AppSpacing.xl,
     paddingTop: 50,
   },
@@ -18,11 +19,11 @@ export const editProfileStyles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: AppRadius.sm,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     justifyContent: "center",
     alignItems: "center",
   },
-  headerTitle: { fontSize: 20, fontWeight: "800", color: AppColors.text.primary },
+  headerTitle: { fontSize: 20, fontWeight: "800", color: colors.text.primary },
   avatarSection: { alignItems: "center", marginBottom: 30 },
   avatarContainer: { position: "relative", marginBottom: 16 },
   avatarImage: {
@@ -30,17 +31,17 @@ export const editProfileStyles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     borderWidth: 3,
-    borderColor: AppColors.primary,
+    borderColor: colors.primary,
   },
   avatarPlaceholder: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderColor: AppColors.border.cyan,
+    borderColor: colors.border.cyan,
     borderStyle: "dashed",
   },
   editBadge: {
@@ -50,11 +51,11 @@ export const editProfileStyles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: AppColors.primary,
+    backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 3,
-    borderColor: AppColors.backgroundAlt,
+    borderColor: colors.backgroundAlt,
     ...AppShadow.cyan,
     elevation: 5,
   },
@@ -62,7 +63,7 @@ export const editProfileStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: AppSpacing.sm,
-    backgroundColor: AppColors.primary,
+    backgroundColor: colors.primary,
     paddingVertical: 12,
     paddingHorizontal: AppSpacing.xxl,
     borderRadius: AppRadius.sm,
@@ -71,15 +72,15 @@ export const editProfileStyles = StyleSheet.create({
   },
   uploadBtnText: { color: "#000", fontWeight: "bold", fontSize: 14 },
   formCard: {
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     borderRadius: AppRadius.xxl,
     padding: AppSpacing.xxl,
     marginBottom: AppSpacing.xl,
     borderWidth: 1,
-    borderColor: AppColors.border.cyan,
+    borderColor: colors.border.cyan,
   },
   fieldLabel: {
-    color: AppColors.text.secondary,
+    color: colors.text.secondary,
     fontSize: 13,
     fontWeight: "700",
     textTransform: "uppercase",
@@ -90,7 +91,7 @@ export const editProfileStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    backgroundColor: AppColors.background,
+    backgroundColor: colors.background,
     borderRadius: AppRadius.sm,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.05)",
@@ -99,7 +100,7 @@ export const editProfileStyles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: AppColors.primary,
+    color: colors.primary,
     fontSize: 16,
     paddingVertical: 16,
     fontWeight: "600",
@@ -109,7 +110,7 @@ export const editProfileStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: AppSpacing.sm,
-    backgroundColor: AppColors.primary,
+    backgroundColor: colors.primary,
     paddingVertical: 16,
     borderRadius: AppRadius.sm,
     ...AppShadow.cyan,
@@ -128,8 +129,11 @@ export const editProfileStyles = StyleSheet.create({
   },
   infoText: {
     fontSize: 13,
-    color: AppColors.text.muted,
+    color: colors.text.muted,
     flex: 1,
     lineHeight: 19,
   },
 });
+}
+
+export const editProfileStyles = makeEditProfileStyles;

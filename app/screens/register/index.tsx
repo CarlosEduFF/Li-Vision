@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useMemo, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Modal, Image, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -6,9 +6,12 @@ import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { authService } from '@/features/auth/authService';
 import { ApiError } from '@/lib/http';
 import { useTranslation } from 'react-i18next';
-import { registerStyles as styles } from "@/styles/register.styles";
+import { makeRegisterStyles as makeStyles } from "@/styles/register.styles";
+import { useAppTheme } from "@/context/ThemeContext";
 
 export default function RegisterScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');

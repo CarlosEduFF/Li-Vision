@@ -11,7 +11,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { gestureDetailStyles as styles } from "@/styles/gesture-detail.styles";
+import { makeGestureDetailStyles as makeStyles } from "@/styles/gesture-detail.styles";
+import { useAppTheme } from "@/context/ThemeContext";
 import {
   ScrollView,
   StyleSheet,
@@ -27,6 +28,8 @@ function isLearningLevel(value: string): value is LearningLevel {
 }
 
 export default function GestureDetailScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const router = useRouter();
   const params = useLocalSearchParams<{ level?: string; category?: string; module?: string }>();
   const level: LearningLevel = isLearningLevel(params.level || "")

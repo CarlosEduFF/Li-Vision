@@ -1,10 +1,11 @@
 import { StyleSheet } from "react-native";
-import { AppColors, AppRadius, AppShadow, AppSpacing } from "@/constants/theme";
+import { AppColorTokens, AppRadius, AppShadow, AppSpacing } from "@/constants/theme";
 
-export const trainStyles = StyleSheet.create({
+export function makeTrainStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppColors.backgroundAlt,
+    backgroundColor: colors.backgroundAlt,
     padding: AppSpacing.xl,
     paddingTop: 50,
   },
@@ -14,11 +15,11 @@ export const trainStyles = StyleSheet.create({
     gap: 15,
     marginBottom: AppSpacing.xl,
   },
-  title: { fontSize: 24, fontWeight: "bold", color: AppColors.text.primary },
+  title: { fontSize: 24, fontWeight: "bold", color: colors.text.primary },
   form: { gap: 15 },
   tabsRow: {
     flexDirection: "row",
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 10,
     padding: 4,
     marginBottom: 10,
@@ -30,27 +31,27 @@ export const trainStyles = StyleSheet.create({
     borderRadius: AppSpacing.sm,
   },
   tabActive: { backgroundColor: "rgba(0, 229, 255, 0.15)" },
-  tabText: { color: AppColors.text.secondary, fontWeight: "bold", fontSize: 13 },
-  tabTextActive: { color: AppColors.primary },
+  tabText: { color: colors.text.secondary, fontWeight: "bold", fontSize: 13 },
+  tabTextActive: { color: colors.primary },
   label: {
-    color: AppColors.text.secondary,
+    color: colors.text.secondary,
     fontSize: 14,
     fontWeight: "bold",
     marginTop: 10,
   },
   input: {
-    backgroundColor: AppColors.surface,
-    color: AppColors.primary,
+    backgroundColor: colors.surface,
+    color: colors.primary,
     padding: 15,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: AppColors.border.cyan,
+    borderColor: colors.border.cyan,
     fontSize: 18,
     fontWeight: "bold",
   },
   modelsScroll: { flexGrow: 0, marginBottom: 5 },
   chip: {
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     paddingHorizontal: AppSpacing.xl,
     paddingVertical: 12,
     borderRadius: 10,
@@ -59,24 +60,24 @@ export const trainStyles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.05)",
   },
   chipActive: {
-    borderColor: AppColors.primary,
+    borderColor: colors.primary,
     backgroundColor: "rgba(0, 229, 255, 0.1)",
   },
-  chipText: { color: AppColors.text.secondary, fontWeight: "bold" },
-  chipTextActive: { color: AppColors.primary },
+  chipText: { color: colors.text.secondary, fontWeight: "bold" },
+  chipTextActive: { color: colors.primary },
   dsButton: {
     padding: AppSpacing.xl,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     borderRadius: AppRadius.sm,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.05)",
   },
   dsButtonActive: {
-    borderColor: AppColors.primary,
+    borderColor: colors.primary,
     backgroundColor: "rgba(0, 229, 255, 0.05)",
   },
   captureBtn: {
-    backgroundColor: AppColors.primary,
+    backgroundColor: colors.primary,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -90,9 +91,12 @@ export const trainStyles = StyleSheet.create({
   statusBox: {
     marginTop: AppSpacing.xl,
     padding: AppSpacing.xl,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     borderRadius: AppRadius.sm,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.05)",
   },
 });
+}
+
+export const trainStyles = makeTrainStyles;

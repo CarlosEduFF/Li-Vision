@@ -1,8 +1,9 @@
 import { StyleSheet } from "react-native";
-import { AppColors, AppRadius, AppSpacing } from "@/constants/theme";
+import { AppColorTokens, AppRadius, AppSpacing } from "@/constants/theme";
 
-export const profileStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: AppColors.backgroundAlt },
+export function makeProfileStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.backgroundAlt },
   scrollContent: {
     padding: AppSpacing.xl,
     paddingTop: 60,
@@ -14,7 +15,7 @@ export const profileStyles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  title: { fontSize: 28, fontWeight: "800", color: AppColors.text.primary },
+  title: { fontSize: 28, fontWeight: "800", color: colors.text.primary },
   langBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -24,17 +25,17 @@ export const profileStyles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: AppColors.border.cyan,
+    borderColor: colors.border.cyan,
   },
-  langText: { color: AppColors.primary, fontWeight: "700", fontSize: 14 },
+  langText: { color: colors.primary, fontWeight: "700", fontSize: 14 },
   profileCard: {
     alignItems: "center",
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     padding: 30,
     borderRadius: AppRadius.xxl,
     marginBottom: AppSpacing.xl,
     borderWidth: 1,
-    borderColor: AppColors.border.cyan,
+    borderColor: colors.border.cyan,
   },
   avatar: {
     width: 90,
@@ -51,20 +52,20 @@ export const profileStyles = StyleSheet.create({
     height: 90,
     borderRadius: 45,
     borderWidth: 2,
-    borderColor: AppColors.primary,
+    borderColor: colors.primary,
   },
   adminBadge: {
     position: "absolute",
     bottom: 0,
     right: 0,
-    backgroundColor: AppColors.podium.gold,
+    backgroundColor: colors.podium.gold,
     width: 28,
     height: 28,
     borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderColor: AppColors.surface,
+    borderColor: colors.surface,
   },
   editAvatarBadge: {
     position: "absolute",
@@ -77,17 +78,17 @@ export const profileStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderColor: AppColors.surface,
+    borderColor: colors.surface,
   },
   nameText: {
     fontSize: 22,
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     fontWeight: "700",
     marginBottom: 5,
   },
   roleText: {
     fontSize: 14,
-    color: AppColors.text.secondary,
+    color: colors.text.secondary,
     fontWeight: "600",
     marginBottom: 16,
   },
@@ -104,7 +105,7 @@ export const profileStyles = StyleSheet.create({
     borderColor: "rgba(255, 107, 107, 0.2)",
     width: "100%",
   },
-  adminLinkText: { color: AppColors.accent.danger, fontWeight: "bold", fontSize: 14 },
+  adminLinkText: { color: colors.accent.danger, fontWeight: "bold", fontSize: 14 },
   editProfileBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -114,17 +115,17 @@ export const profileStyles = StyleSheet.create({
     paddingHorizontal: AppSpacing.xl,
     borderRadius: AppRadius.sm,
     borderWidth: 1,
-    borderColor: AppColors.border.cyan,
+    borderColor: colors.border.cyan,
   },
-  editProfileBtnText: { color: AppColors.primary, fontWeight: "700", fontSize: 13 },
+  editProfileBtnText: { color: colors.primary, fontWeight: "700", fontSize: 13 },
   statsCard: {
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     borderRadius: AppRadius.xxl,
     padding: AppSpacing.xl,
     marginBottom: AppSpacing.xl,
   },
   statsTitle: {
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     fontSize: 16,
     fontWeight: "700",
     marginBottom: AppSpacing.xl,
@@ -137,13 +138,13 @@ export const profileStyles = StyleSheet.create({
   },
   statBox: { flex: 1, alignItems: "center" },
   statValueText: {
-    color: AppColors.primary,
+    color: colors.primary,
     fontSize: 32,
     fontWeight: "800",
     marginBottom: 5,
   },
   statLabelText: {
-    color: AppColors.text.secondary,
+    color: colors.text.secondary,
     fontSize: 12,
     fontWeight: "600",
     textTransform: "uppercase",
@@ -163,7 +164,7 @@ export const profileStyles = StyleSheet.create({
     gap: 5,
     marginBottom: 12,
   },
-  rankingBtnText: { color: AppColors.primary, fontWeight: "bold" },
+  rankingBtnText: { color: colors.primary, fontWeight: "bold" },
   aboutBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -174,7 +175,7 @@ export const profileStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.05)",
   },
-  aboutBtnText: { color: AppColors.text.secondary, fontWeight: "600", fontSize: 14 },
+  aboutBtnText: { color: colors.text.secondary, fontWeight: "600", fontSize: 14 },
   logoutBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -195,14 +196,14 @@ export const profileStyles = StyleSheet.create({
   langModal: {
     width: "80%",
     maxWidth: 300,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     borderRadius: AppRadius.xxl,
     padding: AppSpacing.xl,
     borderWidth: 1,
-    borderColor: AppColors.border.cyanStrong,
+    borderColor: colors.border.cyanStrong,
   },
   modalTitleText: {
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: AppSpacing.xl,
@@ -222,9 +223,12 @@ export const profileStyles = StyleSheet.create({
   langFlagActive: { fontSize: AppSpacing.xl },
   langNameText: {
     flex: 1,
-    color: AppColors.text.secondary,
+    color: colors.text.secondary,
     fontSize: 16,
     fontWeight: "600",
   },
-  langNameActive: { color: AppColors.text.primary },
+  langNameActive: { color: colors.text.primary },
 });
+}
+
+export const profileStyles = makeProfileStyles;

@@ -1,10 +1,11 @@
 import { StyleSheet } from "react-native";
-import { AppColors, AppRadius, AppShadow, AppSpacing } from "@/constants/theme";
+import { AppColorTokens, AppRadius, AppShadow, AppSpacing } from "@/constants/theme";
 
-export const modelsStyles = StyleSheet.create({
+export function makeModelsStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppColors.backgroundAlt,
+    backgroundColor: colors.backgroundAlt,
     padding: AppSpacing.xl,
     paddingTop: 50,
   },
@@ -18,35 +19,35 @@ export const modelsStyles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: AppRadius.sm,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     justifyContent: "center",
     alignItems: "center",
   },
-  title: { fontSize: 24, fontWeight: "800", color: AppColors.text.primary },
+  title: { fontSize: 24, fontWeight: "800", color: colors.text.primary },
   subtitle: {
     fontSize: 13,
-    color: AppColors.text.secondary,
+    color: colors.text.secondary,
     marginBottom: AppSpacing.xxl,
     lineHeight: 19,
   },
   list: { gap: 16 },
   emptyBox: { alignItems: "center", marginTop: 60, gap: 10 },
-  emptyText: { color: AppColors.text.secondary, fontSize: 16, fontWeight: "600" },
+  emptyText: { color: colors.text.secondary, fontSize: 16, fontWeight: "600" },
   emptyHint: {
-    color: AppColors.text.tertiary,
+    color: colors.text.tertiary,
     fontSize: 13,
     textAlign: "center",
     paddingHorizontal: 40,
   },
   card: {
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     padding: AppSpacing.xl,
     borderRadius: 18,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.05)",
   },
   cardActive: {
-    borderColor: AppColors.border.cyan,
+    borderColor: colors.border.cyan,
     backgroundColor: "#1a2228",
     ...AppShadow.cyanSubtle,
     elevation: 6,
@@ -63,10 +64,10 @@ export const modelsStyles = StyleSheet.create({
     gap: 10,
     flex: 1,
   },
-  modelName: { color: AppColors.text.primary, fontWeight: "700", fontSize: 18 },
-  modelNameActive: { color: AppColors.primary },
+  modelName: { color: colors.text.primary, fontWeight: "700", fontSize: 18 },
+  modelNameActive: { color: colors.primary },
   typeBadge: {
-    backgroundColor: AppColors.background,
+    backgroundColor: colors.background,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: AppSpacing.sm,
@@ -74,32 +75,32 @@ export const modelsStyles = StyleSheet.create({
     borderColor: "#333",
   },
   modelType: {
-    color: AppColors.text.secondary,
+    color: colors.text.secondary,
     fontSize: 10,
     fontWeight: "bold",
     textTransform: "uppercase",
   },
   submodelsArea: {
-    backgroundColor: AppColors.background,
+    backgroundColor: colors.background,
     padding: 12,
     borderRadius: 10,
     marginBottom: 16,
     gap: AppSpacing.sm,
   },
   submodelRow: { flexDirection: "row", alignItems: "center", gap: AppSpacing.sm },
-  submodelText: { color: AppColors.text.muted, fontSize: 12 },
+  submodelText: { color: colors.text.muted, fontSize: 12 },
   metricsRow: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 16,
-    backgroundColor: AppColors.background,
+    backgroundColor: colors.background,
     borderRadius: AppRadius.sm,
     padding: 14,
   },
   metricBox: { flex: 1, alignItems: "center" },
-  metricValue: { color: AppColors.primary, fontSize: 22, fontWeight: "800" },
+  metricValue: { color: colors.primary, fontSize: 22, fontWeight: "800" },
   metricLabel: {
-    color: AppColors.text.tertiary,
+    color: colors.text.tertiary,
     fontSize: 11,
     fontWeight: "600",
     textTransform: "uppercase",
@@ -123,7 +124,7 @@ export const modelsStyles = StyleSheet.create({
   },
   activeBadgeText: { color: "#4caf50", fontSize: 12, fontWeight: "600" },
   activateBtn: {
-    backgroundColor: AppColors.primary,
+    backgroundColor: colors.primary,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -136,10 +137,13 @@ export const modelsStyles = StyleSheet.create({
   activateBtnActive: {
     backgroundColor: "rgba(0, 229, 255, 0.1)",
     borderWidth: 1,
-    borderColor: AppColors.border.cyan,
+    borderColor: colors.border.cyan,
     shadowOpacity: 0,
     elevation: 0,
   },
   activateBtnText: { color: "#000", fontWeight: "bold", fontSize: 14 },
-  activateBtnTextActive: { color: AppColors.primary },
+  activateBtnTextActive: { color: colors.primary },
 });
+}
+
+export const modelsStyles = makeModelsStyles;

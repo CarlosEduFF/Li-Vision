@@ -1,10 +1,11 @@
 import { StyleSheet } from "react-native";
-import { AppColors, AppRadius, AppShadow, AppSpacing } from "@/constants/theme";
+import { AppColorTokens, AppRadius, AppShadow, AppSpacing } from "@/constants/theme";
 
-export const aboutStyles = StyleSheet.create({
+export function makeAboutStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppColors.backgroundAlt,
+    backgroundColor: colors.backgroundAlt,
     padding: AppSpacing.xl,
     paddingTop: 50,
   },
@@ -18,22 +19,22 @@ export const aboutStyles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "800",
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 14,
-    color: AppColors.text.secondary,
+    color: colors.text.secondary,
     marginBottom: 32,
     lineHeight: 20,
   },
   card: {
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     borderRadius: AppRadius.xxl,
     padding: AppSpacing.xl,
     marginBottom: AppSpacing.xxl,
     borderWidth: 1,
-    borderColor: AppColors.border.cyan,
+    borderColor: colors.border.cyan,
     ...AppShadow.cyanSubtle,
     elevation: 5,
   },
@@ -49,12 +50,12 @@ export const aboutStyles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     letterSpacing: 0.5,
   },
   infoText: {
     fontSize: 14,
-    color: AppColors.text.alt,
+    color: colors.text.alt,
     lineHeight: 22,
     marginBottom: 16,
   },
@@ -70,7 +71,7 @@ export const aboutStyles = StyleSheet.create({
   },
   tipText: {
     fontSize: 13,
-    color: AppColors.text.muted,
+    color: colors.text.muted,
     flex: 1,
     lineHeight: 18,
   },
@@ -89,8 +90,8 @@ export const aboutStyles = StyleSheet.create({
     gap: 12,
     flex: 1,
   },
-  actionLabel: { fontSize: 15, fontWeight: "700", color: AppColors.text.primary },
-  actionDesc: { fontSize: 11, color: AppColors.text.tertiary, marginTop: 2 },
+  actionLabel: { fontSize: 15, fontWeight: "700", color: colors.text.primary },
+  actionDesc: { fontSize: 11, color: colors.text.tertiary, marginTop: 2 },
   versionRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -99,6 +100,9 @@ export const aboutStyles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "rgba(255,255,255,0.04)",
   },
-  versionLabel: { fontSize: 14, color: AppColors.text.secondary },
-  versionValue: { fontSize: 14, color: AppColors.primary, fontWeight: "600" },
+  versionLabel: { fontSize: 14, color: colors.text.secondary },
+  versionValue: { fontSize: 14, color: colors.primary, fontWeight: "600" },
 });
+}
+
+export const aboutStyles = makeAboutStyles;

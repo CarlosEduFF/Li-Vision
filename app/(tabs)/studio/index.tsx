@@ -1,12 +1,15 @@
 ﻿import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
-import { studioStyles as styles } from "@/styles/studio.styles";
+import { makeStudioStyles as makeStyles } from "@/styles/studio.styles";
+import { useAppTheme } from "@/context/ThemeContext";
 
 export default function StudioScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [isAdmin, setIsAdmin] = useState(false);
   const { t } = useTranslation();
 

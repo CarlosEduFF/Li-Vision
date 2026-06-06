@@ -2,15 +2,18 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { Alert, Dimensions, ScrollView, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { Camera, useCameraDevice, useFrameProcessor } from "react-native-vision-camera";
 import { Worklets } from "react-native-worklets-core";
 import { trainingService } from "@/services/trainingService";
 import { useTranslation } from "react-i18next";
-import { collectStaticStyles as styles } from "@/styles/collect-static.styles";
+import { makeCollectStaticStyles as makeStyles } from "@/styles/collect-static.styles";
+import { useAppTheme } from "@/context/ThemeContext";
 
 export default function CollectStaticScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [label, setLabel] = useState("");
   const [datasetName, setDatasetName] = useState("");
   const [sampleCount, setSampleCount] = useState(0);

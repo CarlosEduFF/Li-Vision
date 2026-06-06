@@ -1,4 +1,4 @@
-﻿import React, { useState, useCallback } from "react";
+﻿import React, { useMemo, useState, useCallback } from "react";
 import { View, TouchableOpacity, ActivityIndicator, Image } from "react-native";
 import Text from "@/components/TranslatableText";
 import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
@@ -7,12 +7,14 @@ import { router } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { trainingService } from "@/services/trainingService";
 import { useTranslation } from "react-i18next";
-import { profileStyles as styles } from "@/styles/profile.styles";
+import { makeProfileStyles as makeStyles } from "@/styles/profile.styles";
 import { changeLanguage } from "@/services/i18n";
 import { Modal, ScrollView as RNScrollView } from "react-native";
 import { useAppTheme } from "@/context/ThemeContext";
 
 function ProfileScreen() {
+  const { colors, scheme, setScheme, isSystemControlled } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [userName, setUserName] = useState("UsuÃ¡rio");
   const [userRole, setUserRole] = useState("member");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -20,7 +22,6 @@ function ProfileScreen() {
   const [myRank, setMyRank] = useState<any>(null);
   const [langModalVisible, setLangModalVisible] = useState(false);
   const { t, i18n } = useTranslation();
-  const { scheme, setScheme, isSystemControlled } = useAppTheme();
 
   const languages = [
     { code: 'pt', name: 'PortuguÃªs', flag: 'ðŸ‡§ðŸ‡·' },

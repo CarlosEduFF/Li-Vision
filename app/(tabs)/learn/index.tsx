@@ -12,13 +12,16 @@ import { TouchableOpacity, ScrollView, View } from "react-native";
 import Text from "@/components/TranslatableText";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { learnStyles as styles } from "@/styles/learn.styles";
+import { makeLearnStyles as makeStyles } from "@/styles/learn.styles";
+import { useAppTheme } from "@/context/ThemeContext";
 
 type LevelProgress = { total: number; learned: number; percent: number };
 
 const LEVELS: LearningLevel[] = ["iniciante", "intermediario", "avancado"];
 
 export default function LearnTabScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const router = useRouter();
   const [progress, setProgress] = useState<Record<LearningLevel, LevelProgress>>({
     iniciante: { total: 0, learned: 0, percent: 0 },

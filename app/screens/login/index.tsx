@@ -1,13 +1,16 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useMemo, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, Image, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
-import { loginStyles as styles } from "@/styles/login.styles";
+import { makeLoginStyles as makeStyles } from "@/styles/login.styles";
+import { useAppTheme } from "@/context/ThemeContext";
 
 export default function LoginScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { handleLogin, loading } = useAuth();

@@ -1,19 +1,20 @@
 import { StyleSheet } from "react-native";
-import { AppColors, AppRadius, AppSpacing } from "@/constants/theme";
+import { AppColorTokens, AppRadius, AppSpacing } from "@/constants/theme";
 
-export const adminConfigStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: AppColors.backgroundAlt },
+export function makeAdminConfigStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.backgroundAlt },
   scrollContent: { padding: AppSpacing.xl, paddingTop: 60 },
   header: { marginBottom: 30 },
   title: {
     fontSize: 28,
     fontWeight: "800",
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     marginBottom: AppSpacing.sm,
   },
   subtitle: {
     fontSize: 14,
-    color: AppColors.text.secondary,
+    color: colors.text.secondary,
     lineHeight: 20,
   },
   section: { marginBottom: 30 },
@@ -30,7 +31,7 @@ export const adminConfigStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     padding: AppSpacing.xl,
     borderRadius: AppRadius.xxl,
     borderWidth: 1,
@@ -50,7 +51,7 @@ export const adminConfigStyles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     marginBottom: 4,
   },
   cardDesc: { fontSize: 12, color: "#697688" },
@@ -67,7 +68,7 @@ export const adminConfigStyles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: AppColors.text.primary,
+    backgroundColor: colors.text.primary,
   },
   toggleInnerActive: { transform: [{ translateX: 20 }] },
   infoBox: {
@@ -84,3 +85,6 @@ export const adminConfigStyles = StyleSheet.create({
   footer: { marginTop: AppSpacing.xl, alignItems: "center", paddingBottom: 40 },
   footerText: { fontSize: 12, color: "#2d3748" },
 });
+}
+
+export const adminConfigStyles = makeAdminConfigStyles;

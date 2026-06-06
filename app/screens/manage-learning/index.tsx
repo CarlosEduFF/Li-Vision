@@ -8,9 +8,9 @@
 import { LearningLevel } from "@/services/learningService";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter, useFocusEffect } from "expo-router";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useMemo, useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { manageLearningStyles as styles } from "@/styles/manage-learning.styles";
+import { makeManageLearningStyles as makeStyles } from "@/styles/manage-learning.styles";
 import {
   Alert,
   Modal,
@@ -27,6 +27,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { uploadLearningImage } from "@/services/api";
+import { useAppTheme } from "@/context/ThemeContext";
 
 type FormState = {
   id?: string;
@@ -52,6 +53,8 @@ const initialForm: FormState = {
 };
 
 export default function ManageLearningScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const router = useRouter();
   const [crudItems, setCrudItems] = useState<LearningGestureApi[]>([]);
   const [loadingCrud, setLoadingCrud] = useState(false);

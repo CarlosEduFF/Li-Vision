@@ -1,12 +1,15 @@
 ﻿import { MaterialIcons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { router } from "expo-router";
 import AboutModal from "@/components/AboutModal";
 import { useTranslation } from "react-i18next";
-import { aboutStyles as styles } from "@/styles/about.styles";
+import { makeAboutStyles as makeStyles } from "@/styles/about.styles";
+import { useAppTheme } from "@/context/ThemeContext";
 
 export default function AboutScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [modalVisible, setModalVisible] = useState(false);
   const [activeSlide, setActiveSlide] = useState(1);
   const { t } = useTranslation();

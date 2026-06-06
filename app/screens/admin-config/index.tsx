@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+﻿import React, { useMemo, useState, useEffect } from "react";
 import { View, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Platform } from "react-native";
 import Text from "@/components/TranslatableText";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
@@ -8,9 +8,12 @@ import { useTranslation } from "react-i18next";
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
-import { adminConfigStyles as styles } from "@/styles/admin-config.styles";
+import { makeAdminConfigStyles as makeStyles } from "@/styles/admin-config.styles";
+import { useAppTheme } from "@/context/ThemeContext";
 
 export default function AdminConfigScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [isRulesEnabled, setIsRulesEnabled] = useState(true);
   const [loadingBackup, setLoadingBackup] = useState(false);
   const [loadingImport, setLoadingImport] = useState(false);

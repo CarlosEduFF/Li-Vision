@@ -1,7 +1,7 @@
 ﻿import { MaterialIcons } from "@expo/vector-icons";
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { transcriptionStyles as styles } from "@/styles/transcription.styles";
+import { makeTranscriptionStyles as makeStyles } from "@/styles/transcription.styles";
 import {
     ActivityIndicator,
     KeyboardAvoidingView,
@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
+import { useAppTheme } from "@/context/ThemeContext";
 
 // VLibras renderiza internamente em tamanho fixo.
 // NÃ£o tentamos redimensionar â€” o WebView preenche o espaÃ§o e o VLibras renderiza dentro.
@@ -163,6 +164,8 @@ const VLIBRAS_HTML = `
 `;
 
 export default function TranscriptionTabScreen() {
+    const { colors } = useAppTheme();
+    const styles = useMemo(() => makeStyles(colors), [colors]);
     const webViewRef = useRef<WebView>(null);
     const [text, setText] = useState("");
     const [isReady, setIsReady] = useState(false);

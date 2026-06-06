@@ -1,13 +1,16 @@
-﻿import React, { useEffect, useState } from "react";
+﻿import React, { useMemo, useEffect, useState } from "react";
 import { View, Text, FlatList, ActivityIndicator, TouchableOpacity } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { trainingService } from "@/services/trainingService";
 import { useTranslation } from "react-i18next";
-import { rankingStyles as styles } from "@/styles/ranking.styles";
+import { makeRankingStyles as makeStyles } from "@/styles/ranking.styles";
+import { useAppTheme } from "@/context/ThemeContext";
 
 export default function RankingScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const router = useRouter();
   const [ranking, setRanking] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

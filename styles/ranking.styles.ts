@@ -1,10 +1,11 @@
 import { StyleSheet } from "react-native";
-import { AppColors, AppRadius, AppSpacing } from "@/constants/theme";
+import { AppColorTokens, AppRadius, AppSpacing } from "@/constants/theme";
 
-export const rankingStyles = StyleSheet.create({
+export function makeRankingStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppColors.background,
+    backgroundColor: colors.background,
     padding: AppSpacing.xl,
     paddingTop: 50,
   },
@@ -18,14 +19,14 @@ export const rankingStyles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     justifyContent: "center",
     alignItems: "center",
   },
-  title: { fontSize: 22, fontWeight: "800", color: AppColors.text.primary },
+  title: { fontSize: 22, fontWeight: "800", color: colors.text.primary },
   subtitle: {
     fontSize: 13,
-    color: AppColors.text.secondary,
+    color: colors.text.secondary,
     textAlign: "center",
     marginBottom: 30,
     paddingHorizontal: AppSpacing.xl,
@@ -40,14 +41,14 @@ export const rankingStyles = StyleSheet.create({
   },
   podiumCol: { alignItems: "center", width: "30%" },
   podiumName: {
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     fontSize: 13,
     fontWeight: "700",
     marginBottom: 4,
     textAlign: "center",
   },
   podiumSamples: {
-    color: AppColors.primary,
+    color: colors.primary,
     fontSize: 12,
     fontWeight: "800",
     marginBottom: 10,
@@ -66,7 +67,7 @@ export const rankingStyles = StyleSheet.create({
   podiumRank: {
     fontSize: 24,
     fontWeight: "900",
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     textShadowColor: "rgba(0,0,0,0.5)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
@@ -77,7 +78,7 @@ export const rankingStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     padding: 16,
     borderRadius: AppRadius.xl,
     marginBottom: 12,
@@ -86,7 +87,7 @@ export const rankingStyles = StyleSheet.create({
   },
   rankLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
   rankNum: {
-    color: AppColors.text.tertiary,
+    color: colors.text.tertiary,
     fontSize: 16,
     fontWeight: "800",
     width: 20,
@@ -99,10 +100,10 @@ export const rankingStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: AppColors.border.cyan,
+    borderColor: colors.border.cyan,
   },
   rankRowName: {
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     fontSize: 15,
     fontWeight: "600",
   },
@@ -111,11 +112,14 @@ export const rankingStyles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: AppColors.border.cyan,
+    borderColor: colors.border.cyan,
   },
   rankRowPoints: {
-    color: AppColors.primary,
+    color: colors.primary,
     fontSize: 13,
     fontWeight: "700",
   },
 });
+}
+
+export const rankingStyles = makeRankingStyles;

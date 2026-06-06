@@ -1,8 +1,9 @@
 import { StyleSheet } from "react-native";
-import { AppColors, AppRadius, AppSpacing } from "@/constants/theme";
+import { AppColorTokens, AppRadius, AppSpacing } from "@/constants/theme";
 
-export const levelsInfoStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: AppColors.backgroundAlt },
+export function makeLevelsInfoStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.backgroundAlt },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -14,18 +15,18 @@ export const levelsInfoStyles = StyleSheet.create({
   backBtn: {
     padding: AppSpacing.sm,
     borderRadius: AppRadius.sm,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
   },
-  title: { fontSize: 22, fontWeight: "800", color: AppColors.text.primary },
+  title: { fontSize: 22, fontWeight: "800", color: colors.text.primary },
   scrollContent: { padding: AppSpacing.xl, paddingBottom: 40 },
   subtitle: {
     fontSize: 15,
-    color: AppColors.text.secondary,
+    color: colors.text.secondary,
     lineHeight: 22,
     marginBottom: 30,
   },
   levelCard: {
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     borderRadius: AppRadius.xxl,
     padding: AppSpacing.xl,
     marginBottom: AppSpacing.xl,
@@ -55,7 +56,7 @@ export const levelsInfoStyles = StyleSheet.create({
   },
   levelDesc: {
     fontSize: 14,
-    color: AppColors.text.alt,
+    color: colors.text.alt,
     lineHeight: AppSpacing.xl,
   },
   footerInfo: {
@@ -73,3 +74,6 @@ export const levelsInfoStyles = StyleSheet.create({
     flex: 1,
   },
 });
+}
+
+export const levelsInfoStyles = makeLevelsInfoStyles;

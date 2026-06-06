@@ -1,13 +1,16 @@
-﻿import { useState, useEffect } from "react";
+﻿import { useMemo, useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Alert, Modal, TextInput } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { trainingService } from "@/services/trainingService";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
-import { manageDatasetsStyles as styles } from "@/styles/manage-datasets.styles";
+import { makeManageDatasetsStyles as makeStyles } from "@/styles/manage-datasets.styles";
+import { useAppTheme } from "@/context/ThemeContext";
 
 export default function ManageDatasetsScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [datasets, setDatasets] = useState<any[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [datasetStats, setDatasetStats] = useState<any>(null);

@@ -1,4 +1,4 @@
-﻿import { useState, useCallback, useEffect, useRef } from "react";
+﻿import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { View, Text, TouchableOpacity, TextInput, Dimensions, Alert, ScrollView, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { trainingService } from "@/services/trainingService";
@@ -9,9 +9,12 @@ import { Worklets } from "react-native-worklets-core";
 import { detectHandLandmarks, LandmarkPoint } from "@/services/handLandmarkerPlugin";
 import { gestureWS } from "@/services/gestureWebSocket";
 import { useTranslation } from "react-i18next";
-import { collectDynamicStyles as styles } from "@/styles/collect-dynamic.styles";
+import { makeCollectDynamicStyles as makeStyles } from "@/styles/collect-dynamic.styles";
+import { useAppTheme } from "@/context/ThemeContext";
 
 export default function CollectDynamicScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [label, setLabel] = useState("");
   const [datasetName, setDatasetName] = useState("");
   const [isRecording, setIsRecording] = useState(false);

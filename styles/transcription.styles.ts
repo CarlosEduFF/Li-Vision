@@ -1,8 +1,9 @@
 import { StyleSheet } from "react-native";
-import { AppColors, AppRadius, AppSpacing } from "@/constants/theme";
+import { AppColorTokens, AppRadius, AppSpacing } from "@/constants/theme";
 
-export const transcriptionStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: AppColors.backgroundAlt },
+export function makeTranscriptionStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.backgroundAlt },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -11,7 +12,7 @@ export const transcriptionStyles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 12,
   },
-  title: { color: AppColors.text.primary, fontSize: 22, fontWeight: "800" },
+  title: { color: colors.text.primary, fontSize: 22, fontWeight: "800" },
   inputArea: { paddingHorizontal: AppSpacing.xl },
   inputContainer: {
     backgroundColor: "#1a2230",
@@ -21,7 +22,7 @@ export const transcriptionStyles = StyleSheet.create({
     overflow: "hidden",
   },
   input: {
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     fontSize: 15,
     paddingHorizontal: 14,
     paddingTop: 12,
@@ -42,7 +43,7 @@ export const transcriptionStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: AppColors.primary,
+    backgroundColor: colors.primary,
     paddingHorizontal: AppSpacing.xl,
     paddingVertical: AppSpacing.sm,
     borderRadius: 10,
@@ -55,9 +56,9 @@ export const transcriptionStyles = StyleSheet.create({
     marginTop: 12,
     borderRadius: AppRadius.xl,
     overflow: "hidden",
-    backgroundColor: AppColors.backgroundAlt,
+    backgroundColor: colors.backgroundAlt,
   },
-  webview: { flex: 1, backgroundColor: AppColors.backgroundAlt },
+  webview: { flex: 1, backgroundColor: colors.backgroundAlt },
   loadingOverlay: {
     position: "absolute",
     top: 0,
@@ -65,7 +66,7 @@ export const transcriptionStyles = StyleSheet.create({
     right: 0,
     bottom: 0,
     zIndex: 10,
-    backgroundColor: AppColors.backgroundAlt,
+    backgroundColor: colors.backgroundAlt,
     justifyContent: "center",
     alignItems: "center",
     gap: 12,
@@ -94,3 +95,6 @@ export const transcriptionStyles = StyleSheet.create({
   },
   footerText: { color: "#697688", fontSize: 11 },
 });
+}
+
+export const transcriptionStyles = makeTranscriptionStyles;

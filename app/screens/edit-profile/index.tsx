@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+﻿import React, { useMemo, useState, useEffect } from "react";
 import {
   View, Text, TouchableOpacity, TextInput,
   Image, ActivityIndicator, Alert, KeyboardAvoidingView,
@@ -10,9 +10,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { trainingService } from "@/services/trainingService";
 import { useTranslation } from "react-i18next";
-import { editProfileStyles as styles } from "@/styles/edit-profile.styles";
+import { makeEditProfileStyles as makeStyles } from "@/styles/edit-profile.styles";
+import { useAppTheme } from "@/context/ThemeContext";
 
 export default function EditProfileScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [fullName, setFullName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [localImageUri, setLocalImageUri] = useState<string | null>(null);

@@ -1,10 +1,11 @@
 import { StyleSheet } from "react-native";
-import { AppColors, AppRadius, AppShadow, AppSpacing } from "@/constants/theme";
+import { AppColorTokens, AppRadius, AppShadow, AppSpacing } from "@/constants/theme";
 
-export const studioStyles = StyleSheet.create({
+export function makeStudioStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppColors.backgroundAlt,
+    backgroundColor: colors.backgroundAlt,
     padding: AppSpacing.xl,
     paddingTop: 50,
   },
@@ -17,12 +18,12 @@ export const studioStyles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "800",
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 14,
-    color: AppColors.text.secondary,
+    color: colors.text.secondary,
     marginBottom: 32,
     lineHeight: AppSpacing.xl,
   },
@@ -33,12 +34,12 @@ export const studioStyles = StyleSheet.create({
     lineHeight: 19,
   },
   card: {
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     borderRadius: AppRadius.xxl,
     padding: AppSpacing.xl,
     marginBottom: AppSpacing.xxl,
     borderWidth: 1,
-    borderColor: AppColors.border.cyan,
+    borderColor: colors.border.cyan,
     ...AppShadow.cyanSubtle,
     elevation: 5,
   },
@@ -54,7 +55,7 @@ export const studioStyles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     letterSpacing: 0.5,
   },
   optionsGrid: { gap: 12 },
@@ -73,5 +74,8 @@ export const studioStyles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
   },
-  optionText: { color: AppColors.text.secondary, fontSize: 15, fontWeight: "600" },
+  optionText: { color: colors.text.secondary, fontSize: 15, fontWeight: "600" },
 });
+}
+
+export const studioStyles = makeStudioStyles;

@@ -1,13 +1,16 @@
 ﻿import { View, Text, TouchableOpacity, TextInput, ScrollView, ActivityIndicator, Alert } from "react-native";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { trainingService } from "@/services/trainingService";
 import { router } from "expo-router";
 import TrainingProgressModal from "@/components/TrainingProgressModal";
 import { useTranslation } from "react-i18next";
-import { trainStyles as styles } from "@/styles/train.styles";
+import { makeTrainStyles as makeStyles } from "@/styles/train.styles";
+import { useAppTheme } from "@/context/ThemeContext";
 
 export default function TrainScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [datasets, setDatasets] = useState<any[]>([]);
   const [existingModels, setExistingModels] = useState<any[]>([]);
   

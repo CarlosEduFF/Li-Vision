@@ -1,13 +1,16 @@
 ﻿import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from "react-native";
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { trainingService } from "@/services/trainingService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { selectModelStyles as styles } from "@/styles/select-model.styles";
+import { makeSelectModelStyles as makeStyles } from "@/styles/select-model.styles";
+import { useAppTheme } from "@/context/ThemeContext";
 
 export default function SelectModelScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [models, setModels] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activatingId, setActivatingId] = useState<string | null>(null);

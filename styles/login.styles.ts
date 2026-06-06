@@ -1,10 +1,11 @@
 import { StyleSheet } from "react-native";
-import { AppColors, AppRadius, AppShadow, AppSpacing } from "@/constants/theme";
+import { AppColorTokens, AppRadius, AppShadow, AppSpacing } from "@/constants/theme";
 
-export const loginStyles = StyleSheet.create({
+export function makeLoginStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppColors.backgroundAlt,
+    backgroundColor: colors.backgroundAlt,
     justifyContent: "center",
     alignItems: "center",
     padding: AppSpacing.xl,
@@ -12,11 +13,11 @@ export const loginStyles = StyleSheet.create({
   card: {
     width: "100%",
     maxWidth: 400,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     borderRadius: AppRadius.xxxl,
     padding: AppSpacing.xxxl,
     borderWidth: 1,
-    borderColor: AppColors.border.cyanMedium,
+    borderColor: colors.border.cyanMedium,
     ...AppShadow.cyanLarge,
   },
   iconCircle: {
@@ -29,41 +30,41 @@ export const loginStyles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: AppSpacing.xl,
     borderWidth: 1,
-    borderColor: AppColors.primary,
+    borderColor: colors.primary,
   },
   title: {
     fontSize: 24,
     fontWeight: "800",
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     textAlign: "center",
     marginBottom: AppSpacing.md,
   },
   subtitle: {
     fontSize: 13,
-    color: AppColors.text.secondary,
+    color: colors.text.secondary,
     textAlign: "center",
     marginBottom: AppSpacing.xxxl,
   },
   inputBox: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: AppColors.backgroundAlt,
+    backgroundColor: colors.backgroundAlt,
     borderRadius: AppRadius.md,
     borderWidth: 1,
-    borderColor: AppColors.border.subtle,
+    borderColor: colors.border.subtle,
     marginBottom: 15,
     overflow: "hidden",
   },
   icon: { padding: 15 },
   input: {
     flex: 1,
-    color: AppColors.primary,
+    color: colors.primary,
     fontSize: 16,
     paddingVertical: 15,
     fontWeight: "600",
   },
   mainBtn: {
-    backgroundColor: AppColors.primary,
+    backgroundColor: colors.primary,
     borderRadius: AppRadius.md,
     paddingVertical: 16,
     alignItems: "center",
@@ -73,9 +74,12 @@ export const loginStyles = StyleSheet.create({
   mainBtnText: { color: "#000", fontSize: 16, fontWeight: "bold" },
   toggleBtn: { marginTop: 25, alignSelf: "center", padding: AppSpacing.md },
   toggleText: {
-    color: AppColors.text.secondary,
+    color: colors.text.secondary,
     fontSize: 14,
     fontWeight: "600",
     textDecorationLine: "underline",
   },
 });
+}
+
+export const loginStyles = makeLoginStyles;

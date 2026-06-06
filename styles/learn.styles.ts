@@ -1,8 +1,9 @@
 import { StyleSheet } from "react-native";
-import { AppColors, AppRadius, AppSpacing } from "@/constants/theme";
+import { AppColorTokens, AppRadius, AppSpacing } from "@/constants/theme";
 
-export const learnStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: AppColors.backgroundAlt },
+export function makeLearnStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.backgroundAlt },
   content: { padding: AppSpacing.xl, paddingBottom: 28 },
   header: { marginBottom: AppSpacing.xl, marginTop: AppSpacing.sm },
   titleRow: {
@@ -10,7 +11,7 @@ export const learnStyles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
   },
-  title: { color: AppColors.text.primary, fontSize: 30, fontWeight: "700" },
+  title: { color: colors.text.primary, fontSize: 30, fontWeight: "700" },
   subtitle: { color: "#b8c0cc", marginTop: AppSpacing.sm, lineHeight: AppSpacing.xl },
   moduleSelectorContainer: { marginBottom: AppSpacing.xl },
   moduleScroll: { gap: 10, paddingRight: AppSpacing.xl },
@@ -18,22 +19,22 @@ export const learnStyles = StyleSheet.create({
     paddingHorizontal: AppSpacing.xl,
     paddingVertical: AppSpacing.sm,
     borderRadius: AppRadius.xxl,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: "#2a3548",
   },
   moduleBtnActive: {
     backgroundColor: "rgba(0, 229, 255, 0.15)",
-    borderColor: AppColors.primary,
+    borderColor: colors.primary,
   },
   moduleBtnText: { color: "#8a92a3", fontSize: 14, fontWeight: "700" },
-  moduleBtnTextActive: { color: AppColors.primary },
+  moduleBtnTextActive: { color: colors.primary },
   adminBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    backgroundColor: AppColors.primary,
+    backgroundColor: colors.primary,
     paddingVertical: 12,
     paddingHorizontal: AppSpacing.xl,
     borderRadius: AppRadius.sm,
@@ -75,7 +76,7 @@ export const learnStyles = StyleSheet.create({
     marginBottom: 4,
     marginTop: AppSpacing.sm,
   },
-  progressText: { color: AppColors.text.primary, fontSize: 22, fontWeight: "900" },
+  progressText: { color: colors.text.primary, fontSize: 22, fontWeight: "900" },
   progressDetail: { color: "#8a92a3", fontSize: 12, fontWeight: "600", marginBottom: 2 },
   iconCircle: {
     width: 36,
@@ -85,7 +86,7 @@ export const learnStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  levelTitle: { color: AppColors.text.primary, fontSize: 18, fontWeight: "800" },
+  levelTitle: { color: colors.text.primary, fontSize: 18, fontWeight: "800" },
   levelSubtitle: { color: "#9cadc3", fontSize: 13, marginTop: 2 },
   barBg: {
     height: 6,
@@ -144,3 +145,6 @@ export const learnStyles = StyleSheet.create({
     lineHeight: 18,
   },
 });
+}
+
+export const learnStyles = makeLearnStyles;

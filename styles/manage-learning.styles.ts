@@ -1,25 +1,26 @@
 import { StyleSheet } from "react-native";
-import { AppColors, AppRadius, AppSpacing } from "@/constants/theme";
+import { AppColorTokens, AppRadius, AppSpacing } from "@/constants/theme";
 
-export const manageLearningStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: AppColors.backgroundAlt },
+export function makeManageLearningStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.backgroundAlt },
   header: {
     flexDirection: "row",
     alignItems: "center",
     padding: AppSpacing.xl,
     borderBottomWidth: 1,
-    borderBottomColor: AppColors.surface,
+    borderBottomColor: colors.surface,
     backgroundColor: "#151a22",
   },
   backBtn: {
     padding: AppSpacing.sm,
     marginRight: AppSpacing.sm,
     borderRadius: AppSpacing.sm,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
   },
   titleContainer: { flex: 1 },
-  title: { color: AppColors.text.primary, fontSize: AppSpacing.xl, fontWeight: "700" },
-  subtitle: { color: AppColors.text.secondary, fontSize: 12, marginTop: 2 },
+  title: { color: colors.text.primary, fontSize: AppSpacing.xl, fontWeight: "700" },
+  subtitle: { color: colors.text.secondary, fontSize: 12, marginTop: 2 },
   addBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -27,19 +28,19 @@ export const manageLearningStyles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: AppSpacing.sm,
     borderRadius: AppSpacing.sm,
-    backgroundColor: AppColors.primary,
+    backgroundColor: colors.primary,
   },
   addBtnText: { color: "#081018", fontWeight: "700", fontSize: 13 },
   content: { padding: AppSpacing.xl, paddingBottom: 40, gap: 12 },
   emptyText: {
-    color: AppColors.text.secondary,
+    color: colors.text.secondary,
     textAlign: "center",
     marginTop: 40,
     fontSize: 15,
   },
   card: {
     flexDirection: "row",
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
     borderRadius: AppRadius.sm,
     padding: AppSpacing.xl,
     alignItems: "center",
@@ -47,7 +48,7 @@ export const manageLearningStyles = StyleSheet.create({
     borderColor: "#283345",
   },
   cardLeft: { flex: 1 },
-  cardTitle: { color: AppColors.text.primary, fontSize: 16, fontWeight: "700" },
+  cardTitle: { color: colors.text.primary, fontSize: 16, fontWeight: "700" },
   cardSubtitle: { color: "#9cadc3", fontSize: 13, marginTop: 4 },
   cardActions: { flexDirection: "row", gap: AppSpacing.sm },
   iconBtn: {
@@ -74,7 +75,7 @@ export const manageLearningStyles = StyleSheet.create({
     maxHeight: "85%",
   },
   modalTitle: {
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     fontSize: 22,
     fontWeight: "800",
     marginBottom: AppSpacing.xl,
@@ -93,7 +94,7 @@ export const manageLearningStyles = StyleSheet.create({
     borderRadius: AppRadius.sm,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: AppColors.text.primary,
+    color: colors.text.primary,
     fontSize: 15,
   },
   levelPicker: {
@@ -125,7 +126,7 @@ export const manageLearningStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#3a475c",
   },
-  saveBtn: { backgroundColor: AppColors.primary },
+  saveBtn: { backgroundColor: colors.primary },
   cancelText: { color: "#d4ddeb", fontWeight: "700", fontSize: 15 },
   saveText: { color: "#081018", fontWeight: "800", fontSize: 15 },
   imagesRow: { flexDirection: "row", gap: AppSpacing.sm, marginTop: 4 },
@@ -156,3 +157,6 @@ export const manageLearningStyles = StyleSheet.create({
     borderRadius: 4,
   },
 });
+}
+
+export const manageLearningStyles = makeManageLearningStyles;

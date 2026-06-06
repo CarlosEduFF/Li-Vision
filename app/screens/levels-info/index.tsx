@@ -1,12 +1,15 @@
-﻿import React from "react";
+﻿import React, { useMemo } from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { APP_LEVELS } from "@/constants/levels";
 import { useTranslation } from "react-i18next";
-import { levelsInfoStyles as styles } from "@/styles/levels-info.styles";
+import { makeLevelsInfoStyles as makeStyles } from "@/styles/levels-info.styles";
+import { useAppTheme } from "@/context/ThemeContext";
 
 export default function LevelsInfoScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { t } = useTranslation();
 
   return (
