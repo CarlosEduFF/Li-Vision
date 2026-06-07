@@ -25,18 +25,9 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from src.api.app_state import state
 from src.api.user_session import UserSession
+from src.api.holistic import MockLandmark, HolisticFrame, parse_input
 
 router = APIRouter(tags=["WebSocket"])
-
-
-class MockLandmark:
-    """Wrapper leve que imita o objeto landmark do MediaPipe."""
-    __slots__ = ("x", "y", "z")
-
-    def __init__(self, x: float, y: float, z: float):
-        self.x = x
-        self.y = y
-        self.z = z
 
 
 async def handle_action(websocket: WebSocket, session: UserSession, payload: dict):
@@ -151,7 +142,8 @@ async def websocket_detect(websocket: WebSocket):
                         })
                          continue
                     
-                    label, score = manager.detect(hands)
+                    # Pipeline server-side só extrai mãos; envolve em HolisticFrame
+                    label, score = manager.detect(HolisticFrame(hands=hands))
 
                     await websocket.send_json({
                         "gesture": label,
@@ -181,46 +173,31 @@ async def websocket_detect(websocket: WebSocket):
                         await handle_action(websocket, session, parsed)
                         continue
 
-                    # ----- Mensagem de LANDMARKS (array de mãos) -----
-                    hands_data = parsed
-
-                    if not isinstance(hands_data, list) or len(hands_data) == 0:
+                    # ----- Mensagem de LANDMARKS (legado: array de mãos | v2: objeto holístico) -----
+                    try:
+                        frame = parse_input(parsed)
+                    except ValueError as ve:
                         await websocket.send_json({
                             "gesture": None,
                             "confidence": 0.0,
                             "landmarks": [],
-                            "error": "Formato inválido: esperado array de mãos não vazio.",
+                            "error": str(ve),
                         })
                         continue
 
-                    hands = []
-                    for hand_points in hands_data:
-                        if not isinstance(hand_points, list) or len(hand_points) < 21:
-                            await websocket.send_json({
-                                "gesture": None,
-                                "confidence": 0.0,
-                                "landmarks": [],
-                                "error": f"Mão com {len(hand_points)} pontos (mínimo 21).",
-                            })
-                            break
-                        hand = [
-                            MockLandmark(
-                                float(lm.get("x", 0.0)),
-                                float(lm.get("y", 0.0)),
-                                float(lm.get("z", 0.0)),
-                            )
-                            for lm in hand_points
-                        ]
-                        hands.append(hand)
-                    else:
-                        pass # loop sem break
-
-                    if not hands:
+                    if not frame.hands:
+                        # Sem mãos não há o que detectar (pose/face sozinhos não inferem sinal)
                         continue
+
+                    # Echo dos landmarks de mão (mantém o contrato de resposta atual)
+                    hands_echo = [
+                        [{"x": lm.x, "y": lm.y, "z": lm.z} for lm in hand]
+                        for hand in frame.hands
+                    ]
 
                     # ----- COLETA DINÂMICA (se a sessão está coletando) -----
                     if session.collecting and session.collection_service.dynamic_session:
-                        res = session.collection_service.collect_dynamic_frame(hands)
+                        res = session.collection_service.collect_dynamic_frame(frame)
                         await websocket.send_json(res)
                         continue
 
@@ -231,7 +208,7 @@ async def websocket_detect(websocket: WebSocket):
                         await websocket.send_json({
                             "gesture": None,
                             "confidence": 0.0,
-                            "landmarks": hands_data,
+                            "landmarks": hands_echo,
                             "error": "Detectores não inicializados.",
                         })
                         continue
@@ -241,17 +218,17 @@ async def websocket_detect(websocket: WebSocket):
                             "gesture": None,
                             "confidence": 0.0,
                             "mode": session.detection_mode,
-                            "landmarks": hands_data,
+                            "landmarks": hands_echo,
                             "error": f"Nenhum detector carregado para o modo '{session.detection_mode}'."
                         })
                         continue
 
-                    label, score = manager.detect(hands)
+                    label, score = manager.detect(frame)
                     await websocket.send_json({
                         "gesture": label,
                         "confidence": round(float(score), 4) if score else 0.0,
                         "mode": session.detection_mode,
-                        "landmarks": hands_data,
+                        "landmarks": hands_echo,
                     })
 
                 except json.JSONDecodeError:

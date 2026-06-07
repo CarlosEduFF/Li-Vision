@@ -55,3 +55,22 @@ dynamic_ml:
   confidence_threshold: 0.70
 
   window_size: 15
+
+
+# ---------------------------------------------------
+# ENTRADA HOLÍSTICA v2 (mãos + corpo + rosto)
+# ---------------------------------------------------
+# Canais opcionais usados pelos sinais completos de Libras. As mãos sempre
+# são processadas; pose (corpo) e face (rosto) entram no vetor quando o
+# cliente os envia. O subconjunto de pontos é fixado em
+# src/data_collection/holistic_features.py (POSE_INDICES / FACE_INDICES) para
+# manter a dimensionalidade controlada.
+holistic:
+  # Schema padrão para NOVAS coletas. O servidor ainda detecta automaticamente
+  # holistic_v1 quando pose/face chegam no payload; este é apenas o rótulo base.
+  default_feature_schema: "hands_v1"   # hands_v1 | holistic_v1
+
+  pose:
+    enabled: true                      # aceitar canal de corpo, se enviado
+  face:
+    enabled: true                      # aceitar canal de rosto, se enviado

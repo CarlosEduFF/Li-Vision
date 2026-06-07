@@ -3,6 +3,9 @@ import torch.nn as nn
 import numpy as np
 from collections import deque
 
+from src.api.holistic import HolisticFrame
+from src.data_collection import holistic_features as hf
+
 
 class GestureLSTM(nn.Module):
     """
@@ -93,6 +96,14 @@ class LSTMGestureDetector:
         self.classes = checkpoint["classes"]          # lista de labels
         self.input_size = checkpoint.get("input_size", input_size)
 
+        # Schema de features: vem do checkpoint (modelos holísticos) ou é
+        # inferido pelo tamanho do frame (modelos hands_v1 antigos).
+        self.feature_schema = checkpoint.get("feature_schema") or (
+            hf.SCHEMA_HOLISTIC_V1
+            if self.input_size == hf.frame_size(hf.SCHEMA_HOLISTIC_V1)
+            else hf.SCHEMA_HANDS_V1
+        )
+
         # Reconstroi o modelo
         self.model = GestureLSTM(
             input_size=self.input_size,
@@ -105,15 +116,25 @@ class LSTMGestureDetector:
         self.model.load_state_dict(checkpoint["model_state_dict"])
         self.model.eval()  # modo inferencia (desativa dropout/batchnorm training)
 
-    def landmarks_to_vector(self, hands):
+    def landmarks_to_vector(self, frame):
         """
         Converte landmarks para o mesmo tamanho por frame usado no treinamento.
         """
-        if len(hands) > 0 and hasattr(hands[0], "__len__") and not hasattr(hands[0], "x"):
-            hands_list = hands
+        # Normaliza para HolisticFrame
+        if isinstance(frame, HolisticFrame):
+            hands_list = frame.hands
+        elif len(frame) > 0 and hasattr(frame[0], "__len__") and not hasattr(frame[0], "x"):
+            hands_list = frame
+            frame = HolisticFrame(hands=hands_list)
         else:
-            hands_list = [hands]
+            hands_list = [frame]
+            frame = HolisticFrame(hands=hands_list)
 
+        # Caminho unificado para os schemas atuais (hands_v1 / holistic_v1)
+        if self.input_size == hf.frame_size(self.feature_schema):
+            return hf.build_frame_vector(frame, self.feature_schema)
+
+        # ----- Caminho legado (modelos antigos 42/63/126/etc.) -----
         if self.input_size in (42, 63, 65):
             max_hands = 1
             hand_size = self.input_size
@@ -169,16 +190,17 @@ class LSTMGestureDetector:
             vec.extend([0.0] * (hand_size - len(vec)))
         return vec[:hand_size]
 
-    def detect(self, hands):
+    def detect(self, frame):
         """
         Processa um frame e retorna (label, score) se a janela estiver cheia.
         Interface compativel com DetectorManager.
         """
+        hands = getattr(frame, "hands", frame)
         if not hands:
             self.buffer.clear()
             return None, 0.0
 
-        vec = self.landmarks_to_vector(hands)
+        vec = self.landmarks_to_vector(frame)
         self.buffer.append(vec)
 
         if len(self.buffer) < self.window_size:

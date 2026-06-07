@@ -2,15 +2,19 @@ import numpy as np
 import joblib
 from collections import deque
 
+from src.api.holistic import HolisticFrame
+from src.data_collection import holistic_features as hf
+
 
 class SequenceGestureDetector:
 
-    def __init__(self, model_path, window_size, threshold):
+    def __init__(self, model_path, window_size, threshold, feature_schema=None):
 
         self.model = joblib.load(model_path)
         # Modelos antigos foram treinados com formatos diferentes por frame:
         # 63/126 = xyz relativo sem posicao absoluta; 42/84 = xy normalizado;
-        # 65/130 = formato atual com pulso absoluto + xyz relativo.
+        # 65/130 = formato atual com pulso absoluto + xyz relativo (hands_v1);
+        # holistic_v1 = 130 (maos) + pose + face.
         self.expected_features = getattr(self.model, "n_features_in_", 130 * window_size)
         self.features_per_frame = (
             self.expected_features // window_size
@@ -21,7 +25,17 @@ class SequenceGestureDetector:
         self.threshold = threshold
         self.buffer = deque(maxlen=self.window_size)
 
+        # Schema: usa o declarado (do registro do modelo) ou infere pelo tamanho.
+        self.feature_schema = feature_schema or self._infer_schema()
+
+    def _infer_schema(self) -> str:
+        """Infere o schema de features pelo tamanho do frame do modelo."""
+        if self.features_per_frame == hf.frame_size(hf.SCHEMA_HOLISTIC_V1):
+            return hf.SCHEMA_HOLISTIC_V1
+        return hf.SCHEMA_HANDS_V1
+
     def _hand_to_vector(self, hand, hand_size):
+        """Formato legado para modelos antigos (42/63/65 por mão)."""
         if hand_size == 42:
             xs = [lm.x for lm in hand]
             ys = [lm.y for lm in hand]
@@ -53,13 +67,29 @@ class SequenceGestureDetector:
             vec.extend([0.0] * (hand_size - len(vec)))
         return vec[:hand_size]
 
-    def landmarks_to_vector(self, hands):
+    def landmarks_to_vector(self, frame):
+        """
+        Monta o vetor de features de um frame.
 
-        if len(hands) > 0 and hasattr(hands[0], "__len__") and not hasattr(hands[0], "x"):
-            hands_list = hands
+        - holistic_v1 e hands_v1 (130): delega ao módulo unificado
+          `holistic_features.build_frame_vector`, garantindo paridade com a coleta.
+        - schemas legados (42/63/126/...): mantém a lógica histórica por compat.
+        """
+        # Normaliza para HolisticFrame
+        if isinstance(frame, HolisticFrame):
+            hands = frame.hands
+        elif len(frame) > 0 and hasattr(frame[0], "__len__") and not hasattr(frame[0], "x"):
+            hands = frame  # lista de mãos
+            frame = HolisticFrame(hands=hands)
         else:
-            hands_list = [hands]
+            hands = [frame]  # mão única
+            frame = HolisticFrame(hands=hands)
 
+        # Caminho unificado para os schemas atuais
+        if self.features_per_frame == hf.frame_size(self.feature_schema):
+            return hf.build_frame_vector(frame, self.feature_schema)
+
+        # ----- Caminho legado (modelos antigos com 42/63/126/etc.) -----
         if self.features_per_frame in (42, 63, 65):
             max_hands = 1
             hand_size = self.features_per_frame
@@ -72,8 +102,8 @@ class SequenceGestureDetector:
 
         vec = []
         for i in range(max_hands):
-            if i < len(hands_list):
-                vec.extend(self._hand_to_vector(hands_list[i], hand_size))
+            if i < len(hands):
+                vec.extend(self._hand_to_vector(hands[i], hand_size))
             else:
                 vec.extend([0.0] * hand_size)
 
@@ -82,13 +112,14 @@ class SequenceGestureDetector:
 
         return vec[:self.features_per_frame]
 
-    def detect(self, hands):
+    def detect(self, frame):
 
+        hands = getattr(frame, "hands", frame)
         if not hands:
             self.buffer.clear()
             return None, 0.0
 
-        vec = self.landmarks_to_vector(hands)
+        vec = self.landmarks_to_vector(frame)
         self.buffer.append(vec)
 
         if len(self.buffer) < self.window_size:
@@ -108,4 +139,4 @@ class SequenceGestureDetector:
 
         label = self.model.classes_[idx]
 
-        return label, score 
+        return label, score

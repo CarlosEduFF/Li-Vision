@@ -7,6 +7,7 @@ from typing import Optional, Dict
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score, classification_report
 from src.core.supabase_client import supabase
+from src.data_collection import holistic_features as hf
 
 logger = logging.getLogger(__name__)
 
@@ -222,9 +223,12 @@ class TrainingService:
 
             # Detecta features_per_frame e window_size.
             # Formatos historicos:
-            # 130/65 = atual, com pulso absoluto + xyz relativo;
+            # 130/65 = atual hands_v1, com pulso absoluto + xyz relativo;
             # 126/63 = xyz relativo antigo; 84/42 = xy antigo.
-            supported_frame_sizes = (130, 126, 65, 63, 84, 42)
+            # holistic_v1 = 130 (maos) + pose + face.
+            holistic_size = hf.frame_size(hf.SCHEMA_HOLISTIC_V1)
+            # holistic_size primeiro (e o maior) para nao casar com submultiplos.
+            supported_frame_sizes = (holistic_size, 130, 126, 65, 63, 84, 42)
             features_per_frame = None
             window_size = None
 
@@ -241,7 +245,15 @@ class TrainingService:
                     f"Esperado multiplo de um destes tamanhos por frame: {supported_frame_sizes}."
                 )
 
-            if features_per_frame != 130:
+            # Schema de features deste modelo (casa inferência ↔ vetor montado)
+            if features_per_frame == holistic_size:
+                feature_schema = hf.SCHEMA_HOLISTIC_V1
+            elif features_per_frame == 130:
+                feature_schema = hf.SCHEMA_HANDS_V1
+            else:
+                feature_schema = None  # formato legado sem schema nomeado
+
+            if features_per_frame not in (130, holistic_size):
                 logger.warning("[Dynamic] Dataset no formato legado (%d features/frame). "
                                "Recomendado regravar com formato novo.", features_per_frame)
 
@@ -377,6 +389,7 @@ class TrainingService:
                 "num_layers": num_layers,
                 "bidirectional": bidirectional,
                 "window_size": window_size,
+                "feature_schema": feature_schema,
             }
             torch.save(checkpoint, local_path)
 
@@ -399,13 +412,22 @@ class TrainingService:
                     file_options={"content-type": "application/octet-stream"}
                 )
 
-            supabase.table("models").update({
+            model_update = {
                 "storage_path": storage_path,
                 "accuracy": acc,
                 "classification_report": report,
                 "total_samples_trained": len(df),
                 "updated_at": "now()"
-            }).eq("id", model_id).execute()
+            }
+            if feature_schema:
+                model_update["feature_schema"] = feature_schema
+            try:
+                supabase.table("models").update(model_update).eq("id", model_id).execute()
+            except Exception as col_err:
+                # Coluna feature_schema pode não existir ainda (migração pendente)
+                logger.warning("[Dynamic] update de modelo sem feature_schema (migração pendente?): %s", col_err)
+                model_update.pop("feature_schema", None)
+                supabase.table("models").update(model_update).eq("id", model_id).execute()
 
             self._update_job(job_id, {
                 "status": "completed",

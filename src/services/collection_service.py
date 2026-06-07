@@ -2,6 +2,8 @@ import logging
 from typing import Optional, Dict, Any, List
 from src.core.supabase_client import supabase, supabase_admin
 from src.data_collection.static_collector import StaticCollector
+from src.data_collection import holistic_features as hf
+from src.api.holistic import HolisticFrame
 
 logger = logging.getLogger(__name__)
 
@@ -11,15 +13,17 @@ class CollectionService:
         self.dynamic_buffer = []
         self.dynamic_session: Optional[Dict[str, Any]] = None
 
-    def _get_or_create_dataset(self, name: str, ds_type: str) -> str:
+    def _get_or_create_dataset(self, name: str, ds_type: str,
+                               feature_schema: str = hf.DEFAULT_SCHEMA) -> str:
         name = name.upper()
         res = supabase.table("datasets").select("id").eq("name", name).execute()
         if len(res.data) > 0:
             return res.data[0]["id"]
-        
+
         ins_res = supabase.table("datasets").insert({
             "name": name,
-            "type": ds_type
+            "type": ds_type,
+            "feature_schema": feature_schema,
         }).execute()
         return ins_res.data[0]["id"]
 
@@ -49,73 +53,53 @@ class CollectionService:
             return {"ok": False, "error": f"Backend Error: {str(e)}"}
 
     def collect_dynamic_start(self, label: str, dataset_name: str, user_id: str = None) -> dict:
-        dataset_name = dataset_name.upper()
-        label = label.upper()
-        dataset_id = self._get_or_create_dataset(dataset_name, "dynamic")
-        
+        # O dataset é criado de forma preguiçosa no primeiro frame, quando o
+        # feature_schema (hands_v1 vs holistic_v1) já pode ser detectado.
         self.dynamic_session = {
-            "label": label,
-            "dataset_id": dataset_id,
-            "dataset_name": dataset_name,
-            "user_id": user_id
+            "label": label.upper(),
+            "dataset_name": dataset_name.upper(),
+            "user_id": user_id,
+            "dataset_id": None,
+            "feature_schema": None,
         }
         self.dynamic_buffer = []
         return {"ok": True, "status": "started"}
 
-    def collect_dynamic_frame(self, hands) -> dict:
+    def collect_dynamic_frame(self, frame) -> dict:
         """
-        Recebe a lista completa de maos (hands) e extrai features no mesmo
-        formato do SequenceGestureDetector.landmarks_to_vector().
-        130 features por frame: 2 maos x (2 absolutas + 21x3 relativas) = 65 cada.
+        Recebe um HolisticFrame (ou lista de mãos legada) e extrai features no
+        mesmo formato consumido pelo SequenceGestureDetector, via módulo unificado.
+
+        O feature_schema é decidido no primeiro frame: holistic_v1 se houver
+        pose/face, caso contrário hands_v1 (130 features/frame). O dataset é
+        criado com esse schema.
         """
         if not self.dynamic_session:
             return {"ok": False, "error": "No dynamic session active"}
-        
-        features = self._dynamic_landmarks_to_vector(hands)
+
+        frame = frame if isinstance(frame, HolisticFrame) else HolisticFrame(hands=frame)
+
+        # Decide o schema e cria o dataset no primeiro frame
+        if self.dynamic_session["dataset_id"] is None:
+            schema = hf.SCHEMA_HOLISTIC_V1 if frame.is_holistic else hf.SCHEMA_HANDS_V1
+            self.dynamic_session["feature_schema"] = schema
+            self.dynamic_session["dataset_id"] = self._get_or_create_dataset(
+                self.dynamic_session["dataset_name"], "dynamic", schema
+            )
+
+        schema = self.dynamic_session["feature_schema"]
+        features = hf.build_frame_vector(frame, schema)
         self.dynamic_buffer.append(features)
-        
+
         if len(self.dynamic_buffer) >= 15:
             return self.collect_dynamic_save()
-            
+
         return {
-            "ok": True, 
-            "collecting": True, 
-            "buffer": len(self.dynamic_buffer)
+            "ok": True,
+            "collecting": True,
+            "buffer": len(self.dynamic_buffer),
+            "feature_schema": schema,
         }
-
-    def _dynamic_landmarks_to_vector(self, hands) -> list:
-        """
-        Converte landmarks para vetor identico ao SequenceGestureDetector.
-        Suporta ate 2 maos, com padding de zeros para mao ausente.
-        Gera 130 features por frame (65 por mao).
-        """
-        vec = []
-
-        # Normaliza entrada para lista de maos
-        if len(hands) > 0 and hasattr(hands[0], "__len__") and not hasattr(hands[0], "x"):
-            hands_list = hands
-        else:
-            hands_list = [hands]
-
-        for i in range(2):
-            if i < len(hands_list):
-                hand = hands_list[i]
-                base_x = hand[0].x
-                base_y = hand[0].y
-
-                # Posicao absoluta do pulso (para capturar direcao do movimento)
-                vec.append(base_x)
-                vec.append(base_y)
-
-                for lm in hand:
-                    vec.append(lm.x - base_x)
-                    vec.append(lm.y - base_y)
-                    vec.append(getattr(lm, "z", 0.0))
-            else:
-                # 2 absolutas + 63 relativas = 65 posicoes por mao ausente
-                vec.extend([0.0] * 65)
-
-        return vec
 
     def collect_dynamic_save(self) -> dict:
         try:

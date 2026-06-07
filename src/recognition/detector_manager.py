@@ -47,20 +47,24 @@ class DetectorManager:
         """
         return hasattr(det, "buffer") and hasattr(det, "window_size")
 
-    def detect(self, hands):
+    def detect(self, frame):
         """
         Executa detectores e retorna gesto estabilizado.
 
         Parameters
         ----------
-        hands : list[list[MockLandmark]]
-            Lista de mãos, cada mão é uma lista de 21 landmarks.
+        frame : HolisticFrame | list[list[MockLandmark]]
+            Frame holístico (mãos + pose/face opcionais). Por compatibilidade,
+            também aceita a lista de mãos crua (tratada como frame só-mãos).
 
         Returns
         -------
         tuple[str|None, float]
             (label, score) — label pode ser None se nada detectado.
         """
+        # Detectores de sequência recebem o frame inteiro (mãos + pose + face);
+        # detectores estáticos/regras recebem apenas as mãos.
+        hands = getattr(frame, "hands", frame)
 
         # -------------------------------------------
         # Cooldown ativo — retorna último gesto estável
@@ -82,8 +86,10 @@ class DetectorManager:
         for det in self.detectors:
             try:
                 if self._is_sequence_detector(det):
-                    # Detectores de sequência processam todas as mãos de uma vez
-                    label, score = det.detect(hands)
+                    # Detectores de sequência processam o frame holístico inteiro
+                    # (mãos + pose + face). Detectores que só entendem mãos
+                    # ignoram os canais extras.
+                    label, score = det.detect(frame)
                 else:
                     # Detectores estáticos: roda para cada mão, pega o melhor
                     label, score = None, 0.0
