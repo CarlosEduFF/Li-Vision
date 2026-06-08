@@ -1,5 +1,6 @@
 import 'react-native-gesture-handler/jestSetup'; // Para RN mocks
 import { detectGesture, getState, setRunMode } from '../api';
+import { apiUrl } from '@/config/api';
 
 // Mock global fetch
 global.fetch = jest.fn();
@@ -20,7 +21,7 @@ describe('API Service', () => {
     const result = await detectGesture(uri);
 
     expect(global.fetch).toHaveBeenCalledWith(
-      'https://li-visionv2.onrender.com/detect/',
+      apiUrl('/detect/'),
       expect.objectContaining({
         method: 'POST',
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -51,7 +52,7 @@ describe('API Service', () => {
     const result = await getState();
 
     expect(global.fetch).toHaveBeenCalledWith(
-      'https://li-visionv2.onrender.com/admin/state'
+      apiUrl('/admin/state')
     );
     expect(result).toEqual(mockState);
   });

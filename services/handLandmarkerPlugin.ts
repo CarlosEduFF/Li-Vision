@@ -16,10 +16,16 @@ import { VisionCameraProxy, Frame } from "react-native-vision-camera";
 export type {
   HandLandmark as LandmarkPoint,
   HandDetectionResult as HandLandmarkResult,
+  // Resultado holístico (mãos + corpo + rosto). Mesmo shape de
+  // HandDetectionResult, com pose/face populados quando enablePose/enableFace
+  // estão ligados no app.json.
+  HolisticDetectionResult,
   HandednessCategory,
+  PoseLandmark,
+  FaceLandmark,
 } from "expo-vision-camera-v4-mediapipe";
 
-export { HandLandmarkIndex } from "expo-vision-camera-v4-mediapipe";
+export { HandLandmarkIndex, PoseLandmarkIndex } from "expo-vision-camera-v4-mediapipe";
 
 // ── Estado do plugin ──────────────────────────────────
 let plugin: ReturnType<typeof VisionCameraProxy.initFrameProcessorPlugin> | null = null;
@@ -54,7 +60,7 @@ export function getPluginStatus(): { ready: boolean; error: string | null } {
  * @param frame - Frame da câmera do VisionCamera
  * @returns Resultado com os landmarks, handedness, ou null se o plugin não carregou
  */
-export function detectHandLandmarks(frame: Frame): import("expo-vision-camera-v4-mediapipe").HandDetectionResult | null {
+export function detectHandLandmarks(frame: Frame): import("expo-vision-camera-v4-mediapipe").HolisticDetectionResult | null {
   "worklet";
 
   if (plugin == null) {
@@ -63,6 +69,8 @@ export function detectHandLandmarks(frame: Frame): import("expo-vision-camera-v4
     return null;
   }
 
-  const result = plugin.call(frame) as unknown as import("expo-vision-camera-v4-mediapipe").HandDetectionResult | null;
+  // O plugin já devolve pose/face quando enablePose/enableFace estão ativos
+  // no app.json; o tipo holístico expõe esses campos sem mudar a chamada.
+  const result = plugin.call(frame) as unknown as import("expo-vision-camera-v4-mediapipe").HolisticDetectionResult | null;
   return result;
 }

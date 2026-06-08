@@ -14,7 +14,10 @@
  * - Limpeza de recursos ao desconectar
  */
 
-const WS_BASE_URL = "wss://li-visionv2.onrender.com/ws/detect";
+import type { HolisticPayload } from "@/services/holisticFeatures";
+import { wsUrl } from "@/config/api";
+
+const WS_DETECT_URL = wsUrl("/ws/detect");
 
 // Render plano gratuito fecha conexoes idle com codigo 1000.
 // Usamos tentativas ilimitadas com cap de 30s para manter conexao.
@@ -86,12 +89,12 @@ class GestureWebSocket {
     this._setStatus(this.reconnectAttempts > 0 ? "reconnecting" : "connecting");
 
     // Envia o modo de detecção e o modelo ativo como query parameter
-    let wsUrl = `${WS_BASE_URL}?mode=${this.currentMode}&use_rules=${this.useRules}`;
+    let url = `${WS_DETECT_URL}?mode=${this.currentMode}&use_rules=${this.useRules}`;
     if (this.activeModelName) {
-      wsUrl += `&model=${encodeURIComponent(this.activeModelName)}`;
+      url += `&model=${encodeURIComponent(this.activeModelName)}`;
     }
-    
-    const ws = new WebSocket(wsUrl);
+
+    const ws = new WebSocket(url);
 
     ws.onopen = () => {
       console.log(`[WS] Conectado (modo: ${this.currentMode})`);
@@ -175,10 +178,29 @@ class GestureWebSocket {
    * Envia landmarks JSON para a API classificar o gesto.
    * Formato esperado pela API: [[{x, y, z}, ...21 pontos], ...mãos]
    * Trafego: ~1KB vs 196KB do sendFrame (redução de 99.5%)
+   *
+   * Este é o caminho legado (schema hands_v1). Para enviar mãos + corpo + rosto
+   * use sendHolistic().
    */
   sendLandmarks(hands: Array<Array<{ x: number; y: number; z: number }>>): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(hands));
+    }
+  }
+
+  /**
+   * Envia o payload holístico (mãos + corpo + rosto) para a API.
+   *
+   * Aceita tanto o array legado de mãos (schema hands_v1) quanto o objeto
+   * `{ hands, pose?, face? }` (schema holistic_v1). O backend detecta o schema
+   * pela *forma* do payload — array = hands_v1, objeto = holistic_v1 —, então
+   * este método cobre os dois casos sem mudança de protocolo.
+   *
+   * @see services/holisticFeatures.ts (buildPayload)
+   */
+  sendHolistic(payload: HolisticPayload): void {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(payload));
     }
   }
 

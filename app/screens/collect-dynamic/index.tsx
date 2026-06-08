@@ -6,8 +6,9 @@ import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Camera, useCameraDevice, useFrameProcessor } from "react-native-vision-camera";
 import { Worklets } from "react-native-worklets-core";
-import { detectHandLandmarks, LandmarkPoint } from "@/services/handLandmarkerPlugin";
+import { detectHandLandmarks, LandmarkPoint, HolisticDetectionResult } from "@/services/handLandmarkerPlugin";
 import { gestureWS } from "@/services/gestureWebSocket";
+import { buildPayload, transformPoint } from "@/services/holisticFeatures";
 import { useTranslation } from "react-i18next";
 import { makeCollectDynamicStyles as makeStyles } from "@/styles/collect-dynamic.styles";
 import { useAppTheme } from "@/context/ThemeContext";
@@ -26,15 +27,21 @@ export default function CollectDynamicScreen() {
   const [gestureLabels, setGestureLabels] = useState<string[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [labelHint, setLabelHint] = useState<string | null>(null);
+  // Holístico: coleta mãos + corpo + rosto. Compartilha a preferência com a cam.
+  const [holisticEnabled, setHolisticEnabled] = useState(false);
+  const holisticEnabledRef = useRef(holisticEnabled);
   const { t } = useTranslation();
 
   useEffect(() => {
     isRecordingRef.current = isRecording;
   }, [isRecording]);
 
+  useEffect(() => { holisticEnabledRef.current = holisticEnabled; }, [holisticEnabled]);
+
   useEffect(() => {
     loadDatasets();
     AsyncStorage.getItem("userRole").then(r => setIsAdmin(r === "admin"));
+    AsyncStorage.getItem("config_holistic_enabled").then(v => setHolisticEnabled(v === "true"));
   }, []);
 
   useEffect(() => {
@@ -71,15 +78,15 @@ export default function CollectDynamicScreen() {
   const device = useCameraDevice("front");
   const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
-  const transformPoint = (lm: any) => ({ x: 1.0 - lm.y, y: 1.0 - lm.x, z: lm.z });
-
-  const onLandmarksDetected = Worklets.createRunOnJS((hands: LandmarkPoint[][]) => {
+  const onLandmarksDetected = Worklets.createRunOnJS((result: HolisticDetectionResult) => {
+    const hands = result?.hands ?? [];
     if (hands.length > 0) {
-      const transformedHands = hands.map(handLms => handLms.map(transformPoint));
-      setLandmarks(transformedHands[0]);
+      setLandmarks(hands[0].map(transformPoint));
 
       if (isRecordingRef.current && gestureWS.isConnected()) {
-        gestureWS.sendLandmarks(transformedHands);
+        const schema = holisticEnabledRef.current ? "holistic_v1" : "hands_v1";
+        const payload = buildPayload(result, schema);
+        if (payload) gestureWS.sendHolistic(payload);
       }
     } else {
       setLandmarks([]);
@@ -97,12 +104,12 @@ export default function CollectDynamicScreen() {
     try {
       const result = detectHandLandmarks(frame);
       if (result && result.hands && result.hands.length > 0) {
-        onLandmarksDetected(result.hands);
+        onLandmarksDetected(result);
       } else {
-        onLandmarksDetected([]);
+        onLandmarksDetected({ hands: [] } as any);
       }
     } catch (e) {
-      onLandmarksDetected([]);
+      onLandmarksDetected({ hands: [] } as any);
     }
   }, [lastSync, isRecording]);
 
@@ -187,6 +194,23 @@ export default function CollectDynamicScreen() {
           <MaterialIcons name="arrow-back" size={28} color="#00e5ff" />
         </TouchableOpacity>
         <Text style={styles.title}>{t('collect_dynamic.title')}</Text>
+        <TouchableOpacity
+          onPress={() => {
+            if (isRecording) return; // não troca de schema no meio de uma gravação
+            setHolisticEnabled((v) => {
+              const next = !v;
+              AsyncStorage.setItem("config_holistic_enabled", String(next));
+              return next;
+            });
+          }}
+          style={{ marginLeft: "auto", flexDirection: "row", alignItems: "center", gap: 4, opacity: isRecording ? 0.4 : 1 }}
+          accessibilityLabel="Alternar holístico (mãos + corpo + rosto)"
+        >
+          <MaterialIcons name="accessibility-new" size={20} color={holisticEnabled ? "#00e5ff" : "#888"} />
+          <Text style={{ color: holisticEnabled ? "#00e5ff" : "#888", fontSize: 12, fontWeight: "600" }}>
+            {holisticEnabled ? "Holístico" : "Só mãos"}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={[styles.cameraContainer, { width: CAM_WIDTH, height: CAM_HEIGHT }]}>

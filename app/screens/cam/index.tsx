@@ -28,7 +28,9 @@ import {
 import {
   detectHandLandmarks,
   LandmarkPoint,
+  HolisticDetectionResult,
 } from "@/services/handLandmarkerPlugin";
+import { buildPayload, transformPoint } from "@/services/holisticFeatures";
 import { useModelStatus } from "@/hooks/useModelStatus";
 import { trainingService } from "@/services/trainingService";
 import speechService, { getSpeechLanguageConfig, SpeechPreferences } from "@/services/speechService";
@@ -65,6 +67,10 @@ export default function CameraScreen() {
   const [showModeModal, setShowModeModal] = useState<boolean>(false);
   const [activeModelName, setActiveModelName] = useState<string | null>(null);
   const [availableModes, setAvailableModes] = useState(DETECTION_MODES);
+  // Holístico: quando ON, envia mãos + corpo + rosto (schema holistic_v1).
+  // Quando OFF, envia só mãos (hands_v1) — compat com modelos antigos.
+  const [holisticEnabled, setHolisticEnabled] = useState<boolean>(false);
+  const holisticEnabledRef = useRef(holisticEnabled);
   const { t } = useTranslation();
 
   // Voz / Soletração
@@ -96,9 +102,14 @@ export default function CameraScreen() {
     onWordComplete: handleWordComplete,
   });
 
+  useEffect(() => { holisticEnabledRef.current = holisticEnabled; }, [holisticEnabled]);
+
   useEffect(() => {
     let mounted = true;
     speechService.init().then((prefs) => { if (mounted) setSpeechPrefs(prefs); });
+    AsyncStorage.getItem("config_holistic_enabled").then((v) => {
+      if (mounted && v === "true") setHolisticEnabled(true);
+    });
 
     const checkRulesConfig = async () => {
       let rulesEnabled = true;
@@ -144,7 +155,6 @@ export default function CameraScreen() {
   }, []);
 
   const { status: modelStatus, errorMessage: modelError } = useModelStatus();
-  const transformPoint = (lm: any) => ({ x: 1.0 - lm.y, y: 1.0 - lm.x, z: lm.z });
   const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
   const device = useCameraDevice("front");
   const { hasPermission, requestPermission } = useCameraPermission();
@@ -291,11 +301,17 @@ export default function CameraScreen() {
     gestureWS.sendAction({ action: "set_mode", mode });
   };
 
-  const onLandmarksDetected = Worklets.createRunOnJS((hands: LandmarkPoint[][]) => {
+  const onLandmarksDetected = Worklets.createRunOnJS((result: HolisticDetectionResult) => {
+    const hands = result?.hands ?? [];
     if (hands.length > 0) {
-      const transformedHands = hands.map(handLms => handLms.map(transformPoint));
-      setLandmarks(transformedHands);
-      if (gestureWS.isConnected()) gestureWS.sendLandmarks(transformedHands);
+      // Overlay continua desenhando só as mãos (esqueleto), transformadas.
+      setLandmarks(hands.map((handLms: LandmarkPoint[]) => handLms.map(transformPoint)));
+
+      if (gestureWS.isConnected()) {
+        const schema = holisticEnabledRef.current ? "holistic_v1" : "hands_v1";
+        const payload = buildPayload(result, schema);
+        if (payload) gestureWS.sendHolistic(payload);
+      }
     } else {
       setLandmarks([]);
     }
@@ -329,11 +345,11 @@ export default function CameraScreen() {
           sendLogToJS(`Frame #${frameCount.value}: plugin retornou null`);
         }
       }
-      if (result && result.hands && result.hands.length > 0) onLandmarksDetected(result.hands);
-      else onLandmarksDetected([]);
+      if (result && result.hands && result.hands.length > 0) onLandmarksDetected(result);
+      else onLandmarksDetected({ hands: [] } as any);
     } catch (e: any) {
       if (shouldLog) onPluginError(`Frame: ${e?.message || String(e)}`);
-      onLandmarksDetected([]);
+      onLandmarksDetected({ hands: [] } as any);
     }
   }, [lastSync, frameCount]);
 
@@ -399,6 +415,20 @@ export default function CameraScreen() {
           accessibilityLabel="Alternar landmarks"
         >
           <MaterialIcons name="grain" size={20} color={showLandmarks ? "#00e5ff" : "#888"} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            setHolisticEnabled((v) => {
+              const next = !v;
+              AsyncStorage.setItem("config_holistic_enabled", String(next));
+              return next;
+            });
+          }}
+          style={[styles.iconBtn, holisticEnabled && styles.iconBtnActive]}
+          accessibilityLabel="Alternar holístico (mãos + corpo + rosto)"
+        >
+          <MaterialIcons name="accessibility-new" size={20} color={holisticEnabled ? "#00e5ff" : "#888"} />
         </TouchableOpacity>
 
         <TouchableOpacity

@@ -47,7 +47,9 @@
         "numHands": 2,
         "minDetectionConfidence": 0.4,
         "minPresenceConfidence": 0.4,
-        "minTrackingConfidence": 0.4
+        "minTrackingConfidence": 0.4,
+        "enablePose": true,
+        "enableFace": true
       }],
       "expo-localization"
     ],

@@ -1,3 +1,5 @@
+import { apiUrl } from "@/config/api";
+
 export async function detectGesture(uri: string): Promise<string> {
   const form = new FormData();
 
@@ -7,7 +9,7 @@ export async function detectGesture(uri: string): Promise<string> {
     type: "image/jpeg",
   } as any);
 
-  const response = await fetch("https://li-visionv2.onrender.com/detect/", {
+  const response = await fetch(apiUrl("/detect/"), {
     method: "POST",
     body: form,
   });
