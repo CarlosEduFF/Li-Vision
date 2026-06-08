@@ -19,7 +19,7 @@ import { useAppTheme } from "@/context/ThemeContext";
 // VLibras renderiza internamente em tamanho fixo.
 // NÃ£o tentamos redimensionar â€” o WebView preenche o espaÃ§o e o VLibras renderiza dentro.
 
-const VLIBRAS_HTML = `
+const buildVlibrasHtml = (bgColor: string) => `
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -27,9 +27,9 @@ const VLIBRAS_HTML = `
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body, html { 
-  width: 100%; height: 100%; 
-  background: #10141a; 
+    body, html {
+  width: 100%; height: 100%;
+  background: ${bgColor};
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -166,6 +166,7 @@ const VLIBRAS_HTML = `
 export default function TranscriptionTabScreen() {
     const { colors } = useAppTheme();
     const styles = useMemo(() => makeStyles(colors), [colors]);
+    const vlibrasHtml = useMemo(() => buildVlibrasHtml(colors.backgroundAlt), [colors.backgroundAlt]);
     const webViewRef = useRef<WebView>(null);
     const [text, setText] = useState("");
     const [isReady, setIsReady] = useState(false);
@@ -202,7 +203,7 @@ export default function TranscriptionTabScreen() {
         <SafeAreaView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <MaterialIcons name="translate" size={24} color="#00e5ff" />
+                <MaterialIcons name="translate" size={24} color={colors.primary} />
                 <Text style={styles.title}>{t('transcription.title')}</Text>
             </View>
 
@@ -217,7 +218,7 @@ export default function TranscriptionTabScreen() {
                         value={text}
                         onChangeText={setText}
                         placeholder={t('transcription.placeholder')}
-                        placeholderTextColor="#697688"
+                        placeholderTextColor={colors.text.secondary}
                         multiline
                         maxLength={500}
                     />
@@ -249,13 +250,13 @@ export default function TranscriptionTabScreen() {
             <View style={styles.webviewContainer}>
                 {!isReady && (
                     <View style={styles.loadingOverlay}>
-                        <ActivityIndicator size="large" color="#00e5ff" />
+                        <ActivityIndicator size="large" color={colors.primary} />
                         <Text style={styles.loadingText}>{t('transcription.loading')}</Text>
                     </View>
                 )}
                 <WebView
                     ref={webViewRef}
-                    source={{ html: VLIBRAS_HTML }}
+                    source={{ html: vlibrasHtml }}
                     style={styles.webview}
                     javaScriptEnabled={true}
                     domStorageEnabled={true}
@@ -270,7 +271,7 @@ export default function TranscriptionTabScreen() {
 
                 {lastTranslated && isReady && (
                     <View style={styles.subtitleBar}>
-                        <MaterialIcons name="closed-caption" size={16} color="#00e5ff" />
+                        <MaterialIcons name="closed-caption" size={16} color={colors.primary} />
                         <Text style={styles.subtitleText} numberOfLines={2}>
                             {lastTranslated}
                         </Text>
@@ -280,7 +281,7 @@ export default function TranscriptionTabScreen() {
 
             {/* Info Footer */}
             <View style={styles.footer}>
-                <MaterialIcons name="info-outline" size={14} color="#697688" />
+                <MaterialIcons name="info-outline" size={14} color={colors.text.secondary} />
                 <Text style={styles.footerText}>
                     {t('transcription.footer')}
                 </Text>

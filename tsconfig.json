@@ -17,4 +17,8 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
   ]
+  ,
+  "exclude": [
+    ".expo"
+  ]
 }

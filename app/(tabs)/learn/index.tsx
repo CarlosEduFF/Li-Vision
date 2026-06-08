@@ -112,7 +112,7 @@ export default function LearnTabScreen() {
   }, [gestures, selectedModule]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#10141a" }}>
+    <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <View style={styles.titleRow}>
@@ -208,7 +208,7 @@ export default function LearnTabScreen() {
                         </Text>
                       </View>
                       <View style={styles.playBtn}>
-                        <MaterialIcons name="play-arrow" size={20} color="#fff" />
+                        <MaterialIcons name="play-arrow" size={20} color={colors.text.primary} />
                       </View>
                     </TouchableOpacity>
                   ))}
@@ -219,7 +219,7 @@ export default function LearnTabScreen() {
         })}
 
         <View style={styles.note}>
-          <MaterialIcons name="info-outline" size={18} color="#8a92a3" />
+          <MaterialIcons name="info-outline" size={18} color={colors.text.secondary} />
           <Text style={styles.noteText}>
             {t('learn.note')}
           </Text>

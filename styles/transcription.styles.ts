@@ -15,10 +15,10 @@ export function makeTranscriptionStyles(colors: AppColorTokens) {
   title: { color: colors.text.primary, fontSize: 22, fontWeight: "800" },
   inputArea: { paddingHorizontal: AppSpacing.xl },
   inputContainer: {
-    backgroundColor: "#1a2230",
+    backgroundColor: colors.surface,
     borderRadius: AppRadius.xl,
     borderWidth: 1,
-    borderColor: "#2a3548",
+    borderColor: colors.border.subtle,
     overflow: "hidden",
   },
   input: {
@@ -38,7 +38,7 @@ export function makeTranscriptionStyles(colors: AppColorTokens) {
     paddingHorizontal: 14,
     paddingBottom: 10,
   },
-  charCount: { color: "#697688", fontSize: 12 },
+  charCount: { color: colors.text.secondary, fontSize: 12 },
   translateBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -48,7 +48,7 @@ export function makeTranscriptionStyles(colors: AppColorTokens) {
     paddingVertical: AppSpacing.sm,
     borderRadius: 10,
   },
-  translateBtnDisabled: { backgroundColor: "#2a3548", opacity: 0.5 },
+  translateBtnDisabled: { backgroundColor: colors.surfaceAlt, opacity: 0.5 },
   translateBtnText: { color: "#081018", fontWeight: "700", fontSize: 14 },
   webviewContainer: {
     flex: 1,
@@ -71,7 +71,7 @@ export function makeTranscriptionStyles(colors: AppColorTokens) {
     alignItems: "center",
     gap: 12,
   },
-  loadingText: { color: "#8a92a3", fontSize: 14 },
+  loadingText: { color: colors.text.secondary, fontSize: 14 },
   subtitleBar: {
     position: "absolute",
     bottom: 0,
@@ -80,11 +80,11 @@ export function makeTranscriptionStyles(colors: AppColorTokens) {
     flexDirection: "row",
     alignItems: "center",
     gap: AppSpacing.sm,
-    backgroundColor: "rgba(16, 20, 26, 0.85)",
+    backgroundColor: colors.surface,
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
-  subtitleText: { color: "#dfe2eb", fontSize: 13, flex: 1 },
+  subtitleText: { color: colors.text.alt, fontSize: 13, flex: 1 },
   footer: {
     flexDirection: "row",
     alignItems: "center",
@@ -93,7 +93,7 @@ export function makeTranscriptionStyles(colors: AppColorTokens) {
     paddingVertical: AppSpacing.sm,
     paddingHorizontal: AppSpacing.xl,
   },
-  footerText: { color: "#697688", fontSize: 11 },
+  footerText: { color: colors.text.secondary, fontSize: 11 },
 });
 }
 
