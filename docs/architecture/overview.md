@@ -1,197 +1,87 @@
-# 🧠 Arquitetura do Sistema — Visão Geral
+# Arquitetura geral
 
-O **Li-Vision** é um sistema de visão computacional projetado para reconhecimento de letras da Língua Brasileira de Sinais (LIBRAS) utilizando processamento em tempo real da câmera.
+O Li-Vision é composto por um aplicativo mobile, um backend Python e uma documentação MkDocs. A arquitetura foi desenhada para traduzir sinais de Libras para texto em tempo real, mas também inclui coleta de dados, treinamento de modelos, módulo de aprendizado e administração.
 
-A arquitetura foi construída de forma modular para separar captura, detecção, processamento e reconhecimento.
+## Visão em camadas
 
----
+```mermaid
+flowchart TB
+    subgraph Mobile["Li-Vision_App"]
+        Câmera[Câmera]
+        LocalMP[MediaPipe local]
+        UI[Interface e transcrição]
+        AdminUI[Telas de coleta, treino e admin]
+    end
 
-## 🔄 Fluxo Geral do Sistema
+    subgraph API["Li-Vision_API"]
+        FastAPI[FastAPI]
+        WS[WebSocket /ws/detect]
+        Session[UserSession]
+        Manager[DetectorManager]
+        Services[Serviços de coleta e treino]
+    end
 
-O processamento segue o seguinte pipeline:
+    subgraph AI["Reconhecimento"]
+        Rules[Regras geométricas]
+        StaticML[ML estático .joblib]
+        DynamicML[GRU dinâmico .pt]
+    end
 
-```
-Câmera
-   ↓
-MediaPipe
-   ↓
-Landmarks da mão
-   ↓
-DetectorManager
-   ↓
-Reconhecimento da letra (LIBRAS)
-```
+    subgraph Data["Persistência"]
+        Supabase[Supabase]
+        Storage[Supabase Storage]
+        LocalModels[Modelos locais]
+    end
 
----
-
-## 📷 1. Captura da Câmera
-
-A aplicação inicia a captura de vídeo em tempo real utilizando **OpenCV**.
-
-Responsabilidades:
-
-* acessar webcam do dispositivo
-* capturar frames continuamente
-* enviar imagens para o pipeline de processamento
-
-Arquivo principal relacionado:
-
-```
-src/app.py
-```
-
----
-
-## ✋ 2. Detecção de Mãos (MediaPipe)
-
-Cada frame capturado é processado pelo **MediaPipe Hands**, responsável por localizar a mão na imagem.
-
-Funções principais:
-
-* detectar presença da mão
-* rastrear movimento em tempo real
-* extrair pontos anatômicos da mão
-
-Saída do módulo:
-
-```
-21 pontos (landmarks) da mão
+    Câmera --> LocalMP --> UI
+    UI --> WS
+    AdminUI --> FastAPI
+    WS --> Session --> Manager
+    Manager --> Rules
+    Manager --> StaticML
+    Manager --> DynamicML
+    Services --> Supabase
+    Services --> Storage
+    Storage --> LocalModels
 ```
 
-Arquivo relacionado:
+## Componentes
 
-```
-src/hand_detect.py
-```
+| Componente | Responsabilidade |
+| --- | --- |
+| App mobile | Capturar sinais, extrair landmarks, mostrar transcrição, coletar datasets e operar telas administrativas. |
+| MediaPipe local | Converter frames da câmera em pontos anatômicos normalizados. |
+| API FastAPI | Expor REST/WebSocket, autenticar usuários, classificar gestos e gerenciar dados. |
+| AppState | Manter recursos compartilhados do backend, como configuração, pipeline e cache de modelos. |
+| UserSession | Isolar estado de cada conexão WebSocket. |
+| DetectorManager | Executar detectores e estabilizar resultados no tempo. |
+| CollectionService | Salvar amostras estaticas e dinamicas. |
+| TrainingService | Treinar, registrar e ativar modelos. |
+| Supabase | Persistir usuários, datasets, amostras, modelos, jobs e gestos educacionais. |
 
----
+## Princípios arquiteturais
 
-## 📍 3. Extração de Landmarks
+| Principio | Aplicação no projeto |
+| --- | --- |
+| Separação de responsabilidades | App cuida da experiência e extração local; API cuida de classificação, dados e modelos. |
+| Estado por sessão | Cada WebSocket tem detectores e buffers próprios. |
+| Pipeline extensível | Novos detectores podem ser adicionados sem reescrever a captura. |
+| Modos configuráveis | `rules`, `ml`, `dynamic_ml` e `hybrid` permitem evolução gradual. |
+| Coleta integrada | O mesmo app usado para tradução também alimenta datasets. |
 
-Os landmarks representam coordenadas tridimensionais:
+## Referências do repositório
 
-* posição dos dedos
-* articulações
-* orientação da mão
+Os nomes com `_` são usados como referências para variações do mesmo repositório:
 
-Exemplo conceitual:
+| Referência | Descrição |
+| --- | --- |
+| `Li-Vision_API` | Variação da API consumida pelo aplicativo. |
+| `Li-Vision_App` | Variação da aplicação mobile Expo/React Native. |
+| `Li-Vision_Docs` | Variação da documentação MkDocs. |
+| `Li-Vision_Principal` | Variação principal/base Python relacionada ao backend. |
 
-```
-Polegar → (x, y, z)
-Indicador → (x, y, z)
-...
-```
+## Risco de divergência
 
-Esses dados são transformados em vetores numéricos para análise posterior.
+`Li-Vision_API` e `Li-Vision_Principal` possuem muitos arquivos equivalentes. Isso é útil como referência, mas exige cuidado: uma correção aplicada apenas em uma variação pode não chegar à outra.
 
----
-
-## 🧩 4. DetectorManager
-
-O `DetectorManager` atua como o **orquestrador do reconhecimento**.
-
-Responsabilidades:
-
-* receber landmarks normalizados
-* selecionar detectores ativos
-* aplicar regras ou modelos treinados
-* consolidar resultados
-
-Diretório relacionado:
-
-```
-src/detectors/
-```
-
-Ele permite adicionar novos detectores sem alterar o restante do sistema.
-
----
-
-## 🔤 5. Reconhecimento da Letra (LIBRAS)
-
-Após o processamento, o sistema classifica o gesto detectado em uma letra da LIBRAS.
-
-O reconhecimento pode ocorrer via:
-
-* regras geométricas (rule-based)
-* modelos de Machine Learning treinados
-* classificação baseada em features
-
-Diretório principal:
-
-```
-src/recognition/
-```
-
-Resultado final:
-
-```
-Letra reconhecida → exibida em tempo real
-```
-
----
-
-## 🏗️ Organização dos Módulos
-
-```
-src/
-│
-├── core/           → lógica central do sistema
-├── data/           → datasets e modelos treinados
-├── detectors/      → detectores de gestos
-├── models/         → estruturas de ML
-├── recognition/    → classificação das letras
-│
-├── app.py          → ponto de entrada da aplicação
-├── pipeline.py     → fluxo de processamento
-├── trainer.py      → treinamento de modelos
-└── utils.py        → funções auxiliares
-```
-
----
-
-## ⚙️ Pipeline Interno
-
-O pipeline executa continuamente:
-
-1. Captura frame da câmera
-2. Detecta mão
-3. Extrai landmarks
-4. Normaliza dados
-5. Executa detectores
-6. Classifica gesto
-7. Exibe resultado
-
-Esse ciclo ocorre várias vezes por segundo, permitindo reconhecimento em tempo real.
-
----
-
-## 🎯 Objetivos da Arquitetura
-
-* ✅ Modularidade
-* ✅ Facilidade de expansão
-* ✅ Separação de responsabilidades
-* ✅ Suporte a múltiplos métodos de reconhecimento
-* ✅ Processamento em tempo real
-
----
-
-## 🚀 Extensibilidade
-
-Novos gestos podem ser adicionados criando:
-
-* novos detectores em `detectors/`
-* novos modelos em `models/`
-* novas estratégias em `recognition/`
-
-Sem modificar o pipeline principal.
-
----
-
-## 📌 Resumo
-
-O Li-Vision transforma imagens capturadas pela câmera em informação semântica (letras da LIBRAS) através de um pipeline de visão computacional estruturado e extensível.
-
-```
-Imagem → Pontos → Features → Classificação → Letra
-```
+Para mudanças futuras, documente explicitamente qual base é fonte de verdade para deploy, testes locais e desenvolvimento.

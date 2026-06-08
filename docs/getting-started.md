@@ -1,152 +1,140 @@
-# 🚀 Getting Started
+# Começando
 
-Este guia apresenta os passos necessários para configurar e executar o projeto **Li-Vision** localmente.
+Este guia orienta a execução local dos três blocos principais: documentação, backend e aplicativo mobile.
 
----
+## Pre-requisitos
 
-## 📋 Requisitos
+| Área | Requisito |
+| --- | --- |
+| Documentação | Python 3.10+ e MkDocs Material. |
+| Backend | Python 3.10+, ambiente virtual e dependências de `requirements.txt`. |
+| App mobile | Node.js 18+, npm, Expo e ambiente Android/iOS para development build. |
+| Câmera/MediaPipe | Permissões de câmera e dispositivo/emulador compatível. |
 
-Antes de iniciar, certifique-se de possuir os seguintes softwares instalados:
+## Documentação
 
-* **Python 3.10 ou superior**
-* **pip** (gerenciador de pacotes do Python)
-* Sistema operacional:
-
-  * Windows 10+
-  * Linux
-  * macOS
-
-Recomenda-se também:
-
-* Ambiente virtual (`venv`)
-* Editor de código (VS Code recomendado)
-
----
-
-## 📦 Dependências do Projeto
-
-O projeto utiliza bibliotecas voltadas para visão computacional, processamento de dados e machine learning:
-
-* `opencv-python` — captura e processamento de imagens e vídeo
-* `mediapipe` — detecção e rastreamento de mãos
-* `numpy` — operações matemáticas e arrays
-* `pandas` — manipulação de dados
-* `scikit-learn` — treinamento de modelos de ML
-* `joblib` — serialização e carregamento de modelos
-
----
-
-## ⚙️ Instalação
-
-### 1️⃣ Clonar o repositório
+Entre em `Li-Vision_Docs`:
 
 ```bash
-git clone https://github.com/seu-usuario/li-vision.git
-cd li-vision
+cd Li-Vision_Docs
 ```
 
----
+Instale o MkDocs se ainda não estiver disponível:
 
-### 2️⃣ Criar ambiente virtual (recomendado)
+```bash
+pip install mkdocs mkdocs-material
+```
 
-#### Windows
+Rode o site local:
+
+```bash
+mkdocs serve
+```
+
+Build estático:
+
+```bash
+mkdocs build
+```
+
+## Backend API
+
+Entre em `Li-Vision_API`:
+
+```bash
+cd Li-Vision_API
+```
+
+Crie e ative um ambiente virtual:
 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
 ```
 
-#### Linux / macOS
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
----
-
-### 3️⃣ Instalar dependências
-
-Execute:
+Instale dependências:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Isso instalará automaticamente todas as bibliotecas necessárias.
-
----
-
-## ▶️ Execução
-
-Após a instalação, execute a aplicação com:
+Execute a API com Uvicorn:
 
 ```bash
-python src/app.py
+uvicorn src.api.server:app --reload
 ```
 
-Se tudo estiver configurado corretamente:
-
-* a câmera será iniciada
-* o sistema começará a detectar gestos da mão
-* o reconhecimento da língua de sinais será ativado
-
----
-
-## ✅ Verificação rápida
-
-Caso ocorra algum erro, valide:
+Verifique:
 
 ```bash
-python --version
-pip list
+curl http://localhost:8000/healthz
 ```
 
-Verifique se as seguintes bibliotecas aparecem na lista:
+Resposta esperada:
 
-* opencv-python
-* mediapipe
-* numpy
-* pandas
-* scikit-learn
-* joblib
-
----
-
-## 🧩 Estrutura esperada do projeto
-
-```
-li-vision/
-│
-├── src/
-│   └── app.py
-├── requirements.txt
-└── docs/
+```json
+{ "status": "ok" }
 ```
 
----
+## Aplicativo mobile
 
-## 🛠️ Problemas comuns
-
-### Câmera não inicia
-
-* Verifique permissões do sistema operacional.
-* Feche outros aplicativos que utilizem a webcam.
-
-### Erro ao instalar MediaPipe (Windows)
-
-Atualize o pip:
+Entre em `Li-Vision_App`:
 
 ```bash
-python -m pip install --upgrade pip
+cd Li-Vision_App
 ```
 
----
+Instale dependências:
 
-## 🚀 Próximos passos
+```bash
+npm install
+```
 
-Após executar o projeto com sucesso:
+Inicie o Expo:
 
-* Consulte a seção **Arquitetura** para entender o funcionamento interno.
-* Veja a documentação da **API de reconhecimento**.
-* Explore exemplos de uso e treinamento do modelo.
+```bash
+npx expo start
+```
+
+Para recursos nativos de câmera/MediaPipe, use development build:
+
+```bash
+npx expo run:android
+```
+
+ou:
+
+```bash
+npx expo run:ios
+```
+
+## Configurar API local no app
+
+O app usa `EXPO_PUBLIC_API_URL` quando definida. Para apontar para uma API local, configure a variável antes de iniciar o Expo.
+
+Exemplo:
+
+```bash
+set EXPO_PUBLIC_API_URL=http://localhost:8000
+npx expo start
+```
+
+Observação: o WebSocket atual do app possui URL própria em `services/gestureWebSocket.ts`. Se o ambiente mudar, mantenha REST e WebSocket alinhados.
+
+## Validação rápida
+
+| Componente | Comando |
+| --- | --- |
+| Docs | `mkdocs build` |
+| API | `uvicorn src.api.server:app --reload` e `GET /healthz` |
+| App | `npm test` e `npx expo start` |
+
+## Problemas comuns
+
+| Sintoma | Possível causa |
+| --- | --- |
+| Câmera não abre | Permissão negada ou outro app usando a câmera. |
+| MediaPipe falha no Expo Go | Recursos nativos exigem development build. |
+| API não responde | Servidor não iniciado, porta incorreta ou URL errada no app. |
+| WebSocket desconecta | Render free tier pode encerrar conexões ociosas; o app tenta reconectar. |
+| Modelo não carrega | Arquivo ausente em `models/static`, `models/dynamic` ou `models/mediapipe`. |

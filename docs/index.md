@@ -1,179 +1,68 @@
 # Li-Vision
 
-Bem-vindo ao **Li-Vision**, um sistema de **reconhecimento e interpretação de letras em Libras (Língua Brasileira de Sinais)** utilizando **visão computacional em tempo real**.
+O **Li-Vision** é uma plataforma para tradução de sinais de Libras para texto em tempo real. O projeto combina aplicativo mobile, API Python, visão computacional, coleta de datasets, treinamento de modelos e documentação técnica em MkDocs.
 
-O projeto tem como objetivo explorar como técnicas modernas de **Computer Vision** e **Machine Learning** podem transformar movimentos das mãos capturados por uma webcam em interpretações digitais compreensíveis, servindo como base para sistemas de acessibilidade, pesquisa acadêmica e aprendizado em Inteligência Artificial.
+O objetivo central é permitir que uma pessoa sinalize diante da câmera de um celular e receba uma interpretação textual do gesto, reduzindo dependência de hardware especial e mantendo o processamento visual mais pesado no próprio dispositivo sempre que possível.
 
----
+## Visão geral
 
-## 🎯 Objetivo do Projeto
+Na organização atual, os nomes com `_` identificam referências diferentes do mesmo repositório, usadas como variações de trabalho para separar responsabilidades do projeto:
 
-O Li-Vision foi desenvolvido para demonstrar, de forma prática e modular:
+| Referência | Papel no projeto |
+| --- | --- |
+| `Li-Vision_App` | Aplicativo Expo/React Native usado pelo usuário final e por administradores. |
+| `Li-Vision_API` | Backend FastAPI responsável por autenticação, inferência, coleta, treinamento e gestão de modelos. |
+| `Li-Vision_Principal` | Versão Python principal/espelhada do backend, com a mesma base de arquitetura para execução, testes locais e referência. |
+| `Li-Vision_Docs` | Documentação oficial em MkDocs. Esta foi a única referência alterada nesta tarefa. |
 
-* Detecção de mãos em tempo real
-* Extração de pontos anatômicos (landmarks)
-* Interpretação geométrica de gestos
-* Reconhecimento de letras da Libras
-* Arquitetura extensível para IA e aprendizado de máquina
-
-O sistema foi projetado também como **plataforma educacional**, permitindo compreender cada etapa do pipeline de visão computacional.
-
----
-
-## 🧰 Tecnologias Utilizadas
-
-Atualmente o projeto utiliza:
-
-* **Python** — linguagem principal e camada backend do sistema
-* **OpenCV** — captura da webcam e renderização visual dos frames
-* **MediaPipe** — detecção da mão e geração dos landmarks 3D
-* **Machine Learning** — classificação opcional baseada em modelos treinados
-* **YAML Configuration** — controle dinâmico do modo de reconhecimento
-
----
-
-## ⚙️ Como o Sistema Funciona
-
-Quando a aplicação é iniciada, o seguinte fluxo acontece:
-
-1. A webcam é ativada.
-2. Cada frame do vídeo é capturado em tempo real.
-3. O modelo de detecção identifica a mão presente na imagem.
-4. São extraídos **21 pontos anatômicos (landmarks)** da mão.
-5. Detectores analisam relações geométricas entre os pontos.
-6. Uma letra da Libras é identificada e exibida na tela.
-
----
-
-## 🔄 Pipeline de Reconhecimento
+## Como o Li-Vision funciona
 
 ```mermaid
-graph LR
-A[Webcam] --> B[Captura de Frame]
-B --> C[Hand Landmarker]
-C --> D[Landmarks da Mão]
-D --> E[Detectores]
-E --> F[Letra Reconhecida]
-F --> G[Renderização na Tela]
+flowchart LR
+    U[Usuário sinaliza em Libras] --> A[App mobile]
+    A --> M[MediaPipe no dispositivo]
+    M --> L[Landmarks de mãos, corpo e rosto]
+    L --> W[WebSocket da API]
+    W --> D[DetectorManager]
+    D --> R[Regras, ML estático ou ML dinâmico]
+    R --> T[Texto reconhecido]
+    T --> A
 ```
 
-### Fluxo simplificado
+1. O usuário abre a tela de câmera no aplicativo.
+2. O app usa MediaPipe para extrair landmarks no próprio dispositivo.
+3. Os landmarks sao enviados para a API por WebSocket.
+4. A API cria uma sessão isolada para a conexão.
+5. O `DetectorManager` executa detectores baseados em regras, modelos estáticos, modelos dinâmicos ou modo híbrido.
+6. O resultado volta para o app como gesto e confiança.
+7. O app exibe a transcrição e pode usar recursos como soletramento e síntese de voz.
 
-```
-Webcam → Landmarks → Detectores → Letra
-```
+## Capacidades principais
 
----
+| Área | Recursos |
+| --- | --- |
+| Tradução em tempo real | Câmera, landmarks on-device, WebSocket e resposta contínua. |
+| Detecção | Modos `rules`, `ml`, `dynamic_ml` e `hybrid`. |
+| Coleta | Amostras estaticas e sequências dinamicas para datasets. |
+| Treinamento | MLP para sinais estáticos e GRU bidirecional para sinais dinâmicos. |
+| Aprendizado | Cadastro e exibição de gestos por nível, categoria e módulo. |
+| Administração | Modelos, datasets, configuração de regras e acompanhamento de treino. |
+| Acessibilidade | Tradução visual, transcrição e text-to-speech. |
 
-## ✋ O que são Landmarks?
+## Onde continuar
 
-Landmarks são coordenadas espaciais que representam pontos específicos da mão, como:
+| Se você quer entender... | Leia |
+| --- | --- |
+| A estrutura geral do projeto | [Arquitetura geral](architecture/overview.md) |
+| O fluxo de landmarks até a resposta | [Fluxo de dados](architecture/data-flow.md) |
+| O backend e seus módulos | [Backend API](modules/backend-api.md) |
+| O aplicativo mobile | [Aplicativo mobile](modules/mobile-app.md) |
+| Os endpoints disponíveis | [Referência da API](api-reference.md) |
+| Como rodar localmente | [Começando](getting-started.md) |
+| Como configurar modos e modelos | [Configuração](configuration.md) |
 
-* pulso
-* articulações
-* pontas dos dedos
+## Estado documentado
 
-Cada frame gera um conjunto de **21 pontos tridimensionais**, permitindo que o sistema entenda a posição e a curvatura dos dedos sem precisar analisar pixels diretamente.
+Esta documentação foi escrita a partir das referências existentes do projeto, incluindo arquivos de configuração, rotas FastAPI, serviços Python, telas Expo e documentação já presente nas variações do repositório.
 
-Isso torna o reconhecimento:
-
-✅ mais rápido
-✅ independente de iluminação parcial
-✅ robusto para tempo real
-
----
-
-## 🧠 Modos de Reconhecimento
-
-O Li-Vision suporta dois estilos de detecção:
-
-### 🔹 Rule-Based (Heurístico)
-
-Reconhecimento baseado em regras geométricas:
-
-* distância entre dedos
-* ângulo das articulações
-* dedos abertos ou fechados
-
-Ideal para aprendizado e prototipagem.
-
----
-
-### 🔹 Machine Learning
-
-Utiliza modelos treinados para classificar gestos automaticamente a partir dos landmarks.
-
-Vantagens:
-
-* maior escalabilidade
-* reconhecimento mais flexível
-* adaptação a variações de usuários
-
----
-
-## 🏗️ Arquitetura do Projeto
-
-O sistema foi dividido em módulos independentes:
-
-```
-src/
- ├── app.py              → ponto de entrada
- ├── pipeline/           → processamento de frames
- ├── detectors/          → reconhecimento das letras
- ├── recognition/        → gerenciamento dos detectores
- └── utils/              → funções auxiliares
-```
-
-Essa separação permite adicionar novas letras sem alterar o núcleo do sistema.
-
----
-
-## 🚀 Principais Características
-
-* Reconhecimento em tempo real
-* Arquitetura modular
-* Alternância entre IA e regras heurísticas
-* Fácil expansão para novas letras
-* Base para projetos de acessibilidade
-
----
-
-## 📚 Para Onde Ir Agora
-
-Se você está começando:
-
-👉 Veja **Getting Started** para executar o projeto.
-
-Se deseja entender o funcionamento interno:
-
-👉 Consulte a seção **Arquitetura**.
-
-Se quer criar novas letras:
-
-👉 Acesse **Desenvolvimento de Detectores**.
-
----
-
-## 💡 Visão Futuro
-
-O Li-Vision pode evoluir para:
-
-* reconhecimento de palavras completas
-* tradução contínua de Libras
-* integração com aplicações web/mobile
-* assistentes de acessibilidade em tempo real
-
----
-
-## 👨‍💻 Propósito Educacional
-
-Este projeto foi construído com foco em aprendizado prático de:
-
-* Visão Computacional
-* Engenharia de Software
-* Arquitetura modular
-* Inteligência Artificial aplicada
-
----
-
-> Li-Vision demonstra como movimentos humanos podem ser transformados em informação digital através da combinação entre matemática, visão computacional e inteligência artificial.
+Quando houver divergência entre esta documentação e o código, o código deve ser tratado como fonte primária até que a documentação seja atualizada.
