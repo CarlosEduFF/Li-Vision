@@ -39,7 +39,7 @@
     "expo-status-bar": "~3.0.9",
     "expo-symbols": "~1.0.8",
     "expo-system-ui": "~6.0.9",
-    "expo-vision-camera-v4-mediapipe": "file:../expo-vision-camera-v4-mediapipe/expo-vision-camera-v4-mediapipe-1.2.1.tgz",
+    "expo-vision-camera-v4-mediapipe": "^1.2.1",
     "expo-web-browser": "~15.0.10",
     "i18next": "^26.2.0",
     "react": "19.1.0",
