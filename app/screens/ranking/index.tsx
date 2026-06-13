@@ -76,7 +76,7 @@ export default function RankingScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <MaterialIcons name="arrow-back" size={24} color="#fff" />
+          <MaterialIcons name="arrow-back" size={24} color="#00e5ff" />
         </TouchableOpacity>
         <Text style={styles.title}>{t('ranking.title')}</Text>
         <View style={{ width: 40 }} />

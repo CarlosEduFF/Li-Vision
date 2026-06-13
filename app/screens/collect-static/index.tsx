@@ -65,7 +65,8 @@ export default function CollectStaticScreen() {
   const { width: screenWidth } = Dimensions.get("window");
 
   // same transformation mode as cam.tsx
-  const transformPoint = (lm: any) => ({ x: 1.0 - lm.y, y: 1.0 - lm.x, z: lm.z });
+  // O plugin nativo já entrega coordenadas em pé (retrato); resta espelhar X (câmera frontal).
+  const transformPoint = (lm: any) => ({ x: 1.0 - lm.x, y: lm.y, z: lm.z });
 
   const onLandmarksDetected = Worklets.createRunOnJS((hands: LandmarkPoint[][]) => {
     if (hands.length > 0) {

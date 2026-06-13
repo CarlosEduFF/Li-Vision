@@ -44,7 +44,7 @@ export default function HomeScreen() {
 
         <View style={styles.topActions}>
           <TouchableOpacity>
-            <MaterialIcons name="notifications" size={24} color="#dfe2eb" />
+            <MaterialIcons name="notifications" size={24} color={colors.text.alt} />
           </TouchableOpacity>
 
           {avatarUrl ? (
@@ -53,7 +53,7 @@ export default function HomeScreen() {
               style={styles.avatarImage}
             />
           ) : (
-            <FontAwesome5 name="user-astronaut" size={40} color="#00e5ff" />
+            <FontAwesome5 name="user-astronaut" size={40} color={colors.primary} />
           )}
         </View>
       </View>
@@ -78,15 +78,15 @@ export default function HomeScreen() {
           
           {/* Selecionar Modelo / Idioma */}
           <TouchableOpacity style={styles.cardWide} activeOpacity={0.8} onPress={() => router.push("/screens/select-model")}>
-            <MaterialIcons name="language" size={34} color="#b388ff" />
+            <MaterialIcons name="language" size={34} color={colors.accent.purple} />
             <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
               <View>
-                <Text style={[styles.cardTitle, { color: "#b388ff" }]}>{t('home.base_language')}</Text>
+                <Text style={[styles.cardTitle, { color: colors.accent.purple }]}>{t('home.base_language')}</Text>
                 <Text style={styles.cardTextSmall}>
                   {t('home.selected')}{activeModelName || t('home.default')}
                 </Text>
               </View>
-              <MaterialIcons name="chevron-right" size={24} color="#b388ff" />
+              <MaterialIcons name="chevron-right" size={24} color={colors.accent.purple} />
             </View>
           </TouchableOpacity>
 
@@ -109,7 +109,7 @@ export default function HomeScreen() {
                   <View style={styles.rankLeft}>
                     <Text style={styles.rankNum}>{index + 4}</Text>
                     <View style={styles.avatarMini}>
-                      <MaterialIcons name="person" size={14} color="#00e5ff" />
+                      <MaterialIcons name="person" size={14} color={colors.primary} />
                     </View>
                     <Text style={styles.rankName} numberOfLines={1}>{item.name}</Text>
                   </View>

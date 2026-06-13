@@ -35,7 +35,8 @@ import speechService, { getSpeechLanguageConfig, SpeechPreferences } from "@/ser
 import { useSpellingDetector } from "@/hooks/useSpellingDetector";
 import SpellingPanel from "@/components/voice/SpellingPanel";
 import VoiceSettingsModal from "@/components/voice/VoiceSettingsModal";
-import { camStyles as styles } from "@/styles/cam.styles";
+import { makeCamStyles } from "@/styles/cam.styles";
+import { useAppTheme } from "@/context/ThemeContext";
 import { useTranslation } from "react-i18next";
 
 const DETECTION_MODES: { key: DetectionMode; label: string; desc: string; icon: string }[] = [
@@ -55,6 +56,8 @@ const SKELETON_CONNECTIONS: [number, number][] = [
 ];
 
 export default function CameraScreen() {
+  const { colors: themeColors } = useAppTheme();
+  const styles = useMemo(() => makeCamStyles(themeColors), [themeColors]);
   const [gesture, setGesture] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number>(0);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("disconnected");
@@ -144,7 +147,10 @@ export default function CameraScreen() {
   }, []);
 
   const { status: modelStatus, errorMessage: modelError } = useModelStatus();
-  const transformPoint = (lm: any) => ({ x: 1.0 - lm.y, y: 1.0 - lm.x, z: lm.z });
+  // O plugin nativo já entrega as coordenadas em pé (retrato), pois agora informa
+  // a rotação do frame ao MediaPipe. Resta apenas espelhar o eixo X para a câmera
+  // frontal (selfie); o eixo Y vai direto.
+  const transformPoint = (lm: any) => ({ x: 1.0 - lm.x, y: lm.y, z: lm.z });
   const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
   const device = useCameraDevice("front");
   const { hasPermission, requestPermission } = useCameraPermission();
@@ -315,6 +321,11 @@ export default function CameraScreen() {
     frameCount.value += 1;
     const shouldLog = frameCount.value % 30 === 1;
 
+    // Captura dimensões enquanto o frame ainda é válido — após detectHandLandmarks
+    // o frame pode já ter sido reciclado/fechado pela câmera.
+    const frameWidth = frame.width;
+    const frameHeight = frame.height;
+
     try {
       const result = detectHandLandmarks(frame);
       if (shouldLog) {
@@ -322,7 +333,7 @@ export default function CameraScreen() {
           const handsLen = result.hands ? result.hands.length : 0;
           const errorMsg = (result as any).error;
           sendLogToJS(
-            `Frame #${frameCount.value}: ${frame.width}x${frame.height} → ${handsLen} mão(s)` +
+            `Frame #${frameCount.value}: ${frameWidth}x${frameHeight} → ${handsLen} mão(s)` +
             (errorMsg ? ` | ERRO: ${errorMsg}` : "")
           );
         } else {
@@ -379,7 +390,7 @@ export default function CameraScreen() {
       {/* HEADER */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityLabel="Voltar">
-          <MaterialIcons name="arrow-back" size={24} color="#fff" />
+          <MaterialIcons name="arrow-back" size={24} color={themeColors.text.primary} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -387,7 +398,7 @@ export default function CameraScreen() {
           style={[styles.iconBtn, styles.modeBtnActive]}
           accessibilityLabel={t('cam.mode_title')}
         >
-          <MaterialIcons name={(currentModeConfig?.icon as any) || "memory"} size={18} color="#00e5ff" />
+          <MaterialIcons name={(currentModeConfig?.icon as any) || "memory"} size={18} color={themeColors.primary} />
           <Text style={styles.modeBtnText} numberOfLines={1} ellipsizeMode="tail">
             {currentModeConfig ? t(`cam.mode_${currentModeConfig.key}`) : detectionMode}
           </Text>
@@ -398,7 +409,7 @@ export default function CameraScreen() {
           style={[styles.iconBtn, showLandmarks && styles.iconBtnActive]}
           accessibilityLabel="Alternar landmarks"
         >
-          <MaterialIcons name="grain" size={20} color={showLandmarks ? "#00e5ff" : "#888"} />
+          <MaterialIcons name="grain" size={20} color={showLandmarks ? themeColors.primary : themeColors.text.secondary} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -410,7 +421,7 @@ export default function CameraScreen() {
           <MaterialIcons
             name={speechPrefs.enabled ? "volume-up" : "volume-off"}
             size={20}
-            color={speechPrefs.enabled ? "#00e5ff" : "#888"}
+            color={speechPrefs.enabled ? themeColors.primary : themeColors.text.secondary}
           />
         </TouchableOpacity>
 
@@ -580,7 +591,7 @@ export default function CameraScreen() {
         <View style={styles.modalBg}>
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
-              <MaterialIcons name="memory" size={28} color="#00e5ff" />
+              <MaterialIcons name="memory" size={28} color={themeColors.primary} />
               <Text style={styles.modalTitle}>{t('cam.mode_title')}</Text>
             </View>
             <Text style={styles.modalSubtitle}>
@@ -600,7 +611,7 @@ export default function CameraScreen() {
                     <MaterialIcons
                       name={mode.icon as any}
                       size={22}
-                      color={isActive ? "#00e5ff" : "#888"}
+                      color={isActive ? themeColors.primary : themeColors.text.secondary}
                     />
                     <View>
                       <Text style={[styles.modeLabel, isActive && styles.modeLabelActive]}>

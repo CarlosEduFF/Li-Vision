@@ -1,9 +1,11 @@
 import { StyleSheet } from "react-native";
+import { AppColorTokens } from "@/constants/theme";
 
-export const camStyles = StyleSheet.create({
+export function makeCamStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#10141a",
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: "row",
@@ -13,30 +15,30 @@ export const camStyles = StyleSheet.create({
     paddingHorizontal: 16,
     gap: 8,
   },
-  backBtn: { padding: 8, borderRadius: 12, backgroundColor: "#1c2026" },
-  iconBtn: { padding: 8, borderRadius: 12, backgroundColor: "#1c2026" },
+  backBtn: { padding: 8, borderRadius: 12, backgroundColor: colors.surface },
+  iconBtn: { padding: 8, borderRadius: 12, backgroundColor: colors.surface },
   iconBtnActive: {
-    backgroundColor: "rgba(0, 229, 255, 0.15)",
+    backgroundColor: colors.border.cyanMedium,
     borderWidth: 1,
-    borderColor: "#00e5ff",
+    borderColor: colors.primary,
   },
   modeBtnActive: {
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
     paddingHorizontal: 10,
-    backgroundColor: "rgba(0, 229, 255, 0.12)",
+    backgroundColor: colors.border.cyanMedium,
     borderWidth: 1,
-    borderColor: "rgba(0, 229, 255, 0.4)",
+    borderColor: colors.border.cyanStrong,
     maxWidth: 140,
   },
-  modeBtnText: { fontSize: 11, fontWeight: "bold", color: "#00e5ff" },
-  headerTitle: { flex: 1, fontSize: 18, fontWeight: "bold", color: "#fff" },
+  modeBtnText: { fontSize: 11, fontWeight: "bold", color: colors.primary },
+  headerTitle: { flex: 1, fontSize: 18, fontWeight: "bold", color: colors.text.primary },
   statusBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#1c2026",
+    backgroundColor: colors.surface,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -171,12 +173,12 @@ export const camStyles = StyleSheet.create({
   modalCard: {
     width: "100%",
     maxWidth: 380,
-    backgroundColor: "#14171d",
+    backgroundColor: colors.surface,
     borderRadius: 24,
     padding: 24,
     borderWidth: 1,
-    borderColor: "#00e5ff",
-    shadowColor: "#00e5ff",
+    borderColor: colors.primary,
+    shadowColor: colors.primary,
     shadowOpacity: 0.3,
     shadowRadius: 30,
     shadowOffset: { width: 0, height: 10 },
@@ -187,10 +189,10 @@ export const camStyles = StyleSheet.create({
     gap: 10,
     marginBottom: 8,
   },
-  modalTitle: { fontSize: 22, fontWeight: "800", color: "#fff" },
+  modalTitle: { fontSize: 22, fontWeight: "800", color: colors.text.primary },
   modalSubtitle: {
     fontSize: 13,
-    color: "#888",
+    color: colors.text.secondary,
     marginBottom: 20,
     lineHeight: 18,
   },
@@ -198,7 +200,7 @@ export const camStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#1c2026",
+    backgroundColor: colors.surfaceAlt,
     padding: 14,
     borderRadius: 14,
     borderWidth: 1,
@@ -206,9 +208,9 @@ export const camStyles = StyleSheet.create({
     marginBottom: 10,
   },
   modeOptionActive: {
-    backgroundColor: "rgba(0, 229, 255, 0.12)",
-    borderColor: "#00e5ff",
-    shadowColor: "#00e5ff",
+    backgroundColor: colors.border.cyanMedium,
+    borderColor: colors.primary,
+    shadowColor: colors.primary,
     shadowOpacity: 0.3,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 0 },
@@ -219,14 +221,14 @@ export const camStyles = StyleSheet.create({
     gap: 12,
     flex: 1,
   },
-  modeLabel: { fontSize: 15, fontWeight: "700", color: "#aaa" },
-  modeLabelActive: { color: "#00e5ff" },
-  modeDesc: { fontSize: 11, color: "#666", marginTop: 2 },
+  modeLabel: { fontSize: 15, fontWeight: "700", color: colors.text.tertiary },
+  modeLabelActive: { color: colors.primary },
+  modeDesc: { fontSize: 11, color: colors.text.secondary, marginTop: 2 },
   activeDotOuter: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "rgba(0, 229, 255, 0.2)",
+    backgroundColor: colors.border.cyanMedium,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -234,16 +236,19 @@ export const camStyles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#00e5ff",
+    backgroundColor: colors.primary,
   },
   modalCloseBtn: {
     marginTop: 10,
     alignItems: "center",
     paddingVertical: 14,
     borderRadius: 12,
-    backgroundColor: "#1c2026",
+    backgroundColor: colors.surfaceAlt,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: colors.border.subtle,
   },
-  modalCloseBtnText: { color: "#888", fontSize: 15, fontWeight: "600" },
-});
+  modalCloseBtnText: { color: colors.text.secondary, fontSize: 15, fontWeight: "600" },
+  });
+}
+
+export const camStyles = makeCamStyles;

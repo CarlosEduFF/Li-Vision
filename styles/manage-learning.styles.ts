@@ -10,7 +10,7 @@ export function makeManageLearningStyles(colors: AppColorTokens) {
     padding: AppSpacing.xl,
     borderBottomWidth: 1,
     borderBottomColor: colors.surface,
-    backgroundColor: "#151a22",
+    backgroundColor: colors.surface,
   },
   backBtn: {
     padding: AppSpacing.sm,

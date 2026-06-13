@@ -25,7 +25,7 @@ export default function AboutScreen() {
         {/* HEADER */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <MaterialIcons name="arrow-back" size={24} color="#fff" />
+            <MaterialIcons name="arrow-back" size={24} color="#00e5ff" />
           </TouchableOpacity>
           <MaterialIcons name="tune" size={28} color="#00e5ff" />
           <Text style={styles.title}>{t('about.title')}</Text>
@@ -52,7 +52,7 @@ export default function AboutScreen() {
           </View>
         </View>
 
-        {/* CARD AÃ‡Ã•ES RÃPIDAS - 4 BOTÃ•ES COM MODAIS */}
+        {/* CARD AÇÕES RÁPIDAS - 4 BOTÕES COM MODAIS */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <MaterialIcons name="flash-on" size={20} color="#fff" />

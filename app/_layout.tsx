@@ -31,8 +31,11 @@ function RootLayoutInner() {
     <ThemeProvider value={scheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="screens/login" options={{ animation: 'fade' }} />
-        <Stack.Screen name="screens/register" options={{ animation: 'fade' }} />
+        <Stack.Screen name="screens/login/index" options={{ animation: 'fade' }} />
+        <Stack.Screen name="screens/register/index" options={{ animation: 'fade' }} />
+        <Stack.Screen name="screens/cam/index" options={{ animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="screens/select-model/index" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="screens/ranking/index" options={{ animation: 'slide_from_right' }} />
       </Stack>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <GlobalVLibras />

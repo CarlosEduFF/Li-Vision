@@ -24,7 +24,7 @@ export default function StudioScreen() {
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
       {/* HEADER */}
       <View style={styles.header}>
-        <MaterialIcons name="dashboard" size={28} color="#00e5ff" />
+        <MaterialIcons name="dashboard" size={28} color={colors.primary} />
         <Text style={styles.title}>{t('studio.title')}</Text>
       </View>
 
@@ -35,7 +35,7 @@ export default function StudioScreen() {
       {/* CARD â€” Coleta de Dados */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <MaterialIcons name="backup" size={20} color="#fff" />
+          <MaterialIcons name="backup" size={20} color={colors.text.primary} />
           <Text style={styles.sectionTitle}>
             {isAdmin ? t('studio.section_data') : t('studio.section_data_user')}
           </Text>
@@ -51,7 +51,7 @@ export default function StudioScreen() {
             onPress={() => router.push("/screens/collect-static")}
           >
             <View style={styles.optionContent}>
-              <MaterialIcons name="camera" size={22} color="#888" />
+              <MaterialIcons name="camera" size={22} color={colors.text.secondary} />
               <Text style={styles.optionText}>{t('studio.static_collection')}</Text>
             </View>
           </TouchableOpacity>
@@ -60,7 +60,7 @@ export default function StudioScreen() {
             onPress={() => router.push("/screens/collect-dynamic")}
           >
             <View style={styles.optionContent}>
-              <MaterialIcons name="videocam" size={22} color="#888" />
+              <MaterialIcons name="videocam" size={22} color={colors.text.secondary} />
               <Text style={styles.optionText}>{t('studio.dynamic_collection')}</Text>
             </View>
           </TouchableOpacity>
@@ -69,8 +69,8 @@ export default function StudioScreen() {
             onPress={() => router.push("/screens/manage-datasets")}
           >
             <View style={styles.optionContent}>
-              <MaterialIcons name="folder-open" size={22} color={isAdmin ? "#00e5ff" : "#888"} />
-              <Text style={[styles.optionText, isAdmin && { color: "#00e5ff" }]}>
+              <MaterialIcons name="folder-open" size={22} color={isAdmin ? colors.text.secondary : colors.text.secondary} />
+              <Text style={[styles.optionText, isAdmin && { color: colors.text.secondary }]}>
                 {isAdmin ? t('studio.manage_datasets') : t('studio.view_datasets')}
               </Text>
             </View>
@@ -82,7 +82,7 @@ export default function StudioScreen() {
       {isAdmin && (
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <MaterialIcons name="model-training" size={20} color="#fff" />
+          <MaterialIcons name="model-training" size={20} color={colors.text.primary} />
           <Text style={styles.sectionTitle}>{t('studio.section_models')}</Text>
         </View>
         <View style={styles.optionsGrid}>
@@ -91,7 +91,7 @@ export default function StudioScreen() {
             onPress={() => router.push("/screens/train")}
           >
             <View style={styles.optionContent}>
-              <MaterialIcons name="bolt" size={22} color="#888" />
+              <MaterialIcons name="bolt" size={22} color={colors.text.secondary} />
               <Text style={styles.optionText}>{t('studio.start_training')}</Text>
             </View>
           </TouchableOpacity>
@@ -100,7 +100,7 @@ export default function StudioScreen() {
             onPress={() => router.push("/screens/models")}
           >
             <View style={styles.optionContent}>
-              <MaterialIcons name="list" size={22} color="#888" />
+              <MaterialIcons name="list" size={22} color={colors.text.secondary} />
               <Text style={styles.optionText}>{t('studio.manage_models')}</Text>
             </View>
           </TouchableOpacity>

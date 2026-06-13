@@ -29,7 +29,7 @@ export function makeStudioStyles(colors: AppColorTokens) {
   },
   collaboratorHint: {
     fontSize: 13,
-    color: "#9cadc3",
+    color: colors.text.muted,
     marginBottom: 14,
     lineHeight: 19,
   },
@@ -50,7 +50,7 @@ export function makeStudioStyles(colors: AppColorTokens) {
     marginBottom: AppSpacing.xl,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
+    borderBottomColor: colors.border.subtle,
   },
   sectionTitle: {
     fontSize: 16,
@@ -63,7 +63,7 @@ export function makeStudioStyles(colors: AppColorTokens) {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#262a31",
+    backgroundColor: colors.surfaceAlt,
     padding: AppSpacing.xl,
     borderRadius: AppRadius.md,
     borderWidth: 1,

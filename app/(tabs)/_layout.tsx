@@ -1,25 +1,23 @@
+import { MaterialIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from "react-native";
 
 import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useAppTheme } from '@/context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { colors } = useAppTheme();
   const { t } = useTranslation();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#00e5ff",
-        tabBarInactiveTintColor: "#697688",
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.text.secondary,
         tabBarStyle: {
-          backgroundColor: "#10141a",
-          borderTopColor: "rgba(255,255,255,0.05)",
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border.subtle,
           elevation: 0,
         },
         tabBarHideOnKeyboard: true,
@@ -27,47 +25,47 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
       }}>
       <Tabs.Screen
-        name="index"
+        name="index/index"
         options={{
           title: t('tabs.home'),
-          tabBarIcon: ({ color }) => <IconSymbol size={24} name="house.fill" color={color} />,
+          tabBarIcon: ({ color }) => <MaterialIcons size={24} name="home" color={color} />,
         }}
       />
 
       <Tabs.Screen
-        name="transcription"
+        name="transcription/index"
         options={{
           title: t('tabs.translate'),
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={24} name="arrow.triangle.2.circlepath" color={color} />
+            <MaterialIcons size={24} name="autorenew" color={color} />
           ),
         }}
       />
 
       <Tabs.Screen
-        name="learn"
+        name="learn/index"
         options={{
           title: t('tabs.learn'),
-          tabBarIcon: ({ color }) => <IconSymbol size={24} name="book.fill" color={color} />,
+          tabBarIcon: ({ color }) => <MaterialIcons size={24} name="menu-book" color={color} />,
         }}
       />
 
       <Tabs.Screen
-        name="studio"
+        name="studio/index"
         options={{
           title: t('tabs.studio'),
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={24} name="play.rectangle.fill" color={color} />
+            <MaterialIcons size={24} name="smart-display" color={color} />
           ),
         }}
       />
 
       <Tabs.Screen
-        name="profile"
+        name="profile/index"
         options={{
           title: t('tabs.profile'),
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={24} name="person.circle.fill" color={color} />
+            <MaterialIcons size={24} name="person" color={color} />
           ),
         }}
       />
