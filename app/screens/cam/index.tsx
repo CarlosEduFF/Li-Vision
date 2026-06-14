@@ -446,6 +446,7 @@ export default function CameraScreen() {
             style={StyleSheet.absoluteFill}
             device={device}
             isActive={true}
+            pixelFormat="rgb"
             frameProcessor={modelStatus === "ready" ? frameProcessor : undefined}
           />
         ) : (

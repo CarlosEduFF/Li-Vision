@@ -196,6 +196,7 @@ export default function CollectDynamicScreen() {
             style={StyleSheet.absoluteFill}
             device={device}
             isActive={true}
+            pixelFormat="rgb"
             frameProcessor={frameProcessor}
           />
         ) : (
