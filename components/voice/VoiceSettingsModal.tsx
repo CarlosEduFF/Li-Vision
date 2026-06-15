@@ -12,16 +12,17 @@ import {
     speechService,
 } from "@/services/speechService";
 import { MaterialIcons } from "@expo/vector-icons";
-import React from "react";
+import React, { useMemo } from "react";
 import {
     Modal,
     ScrollView,
-    StyleSheet,
     Switch,
     Text,
     TouchableOpacity,
     View,
 } from "react-native";
+import { useAppTheme } from "@/context/ThemeContext";
+import { makeVoiceSettingStyles } from "./styles";
 
 type Props = {
   visible: boolean;
@@ -50,6 +51,9 @@ export default function VoiceSettingsModal({
   onSetLanguage,
   onTestVoice,
 }: Props) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeVoiceSettingStyles(colors), [colors]);
+
   // Mapa idioma → voz instalada no dispositivo. Recalculado ao abrir o modal.
   const [voiceAvailability, setVoiceAvailability] = React.useState<Record<string, boolean>>({});
 
@@ -74,7 +78,7 @@ export default function VoiceSettingsModal({
       <View style={styles.bg}>
         <View style={styles.card}>
           <View style={styles.header}>
-            <MaterialIcons name="record-voice-over" size={26} color="#b388ff" />
+            <MaterialIcons name="record-voice-over" size={26} color={colors.accent.purple} />
             <Text style={styles.title}>Voz & Soletração</Text>
           </View>
           <Text style={styles.subtitle}>
@@ -91,8 +95,8 @@ export default function VoiceSettingsModal({
               <Switch
                 value={prefs.enabled}
                 onValueChange={onToggleEnabled}
-                trackColor={{ true: "#00e5ff", false: "#444" }}
-                thumbColor={prefs.enabled ? "#fff" : "#888"}
+                trackColor={{ true: colors.primary, false: colors.surfaceAlt }}
+                thumbColor={prefs.enabled ? colors.text.primary : colors.text.secondary}
               />
             </View>
 
@@ -107,8 +111,8 @@ export default function VoiceSettingsModal({
                 value={prefs.speakGestures}
                 onValueChange={onToggleSpeakGestures}
                 disabled={!prefs.enabled}
-                trackColor={{ true: "#00e5ff", false: "#444" }}
-                thumbColor={prefs.speakGestures ? "#fff" : "#888"}
+                trackColor={{ true: colors.primary, false: colors.surfaceAlt }}
+                thumbColor={prefs.speakGestures ? colors.text.primary : colors.text.secondary}
               />
             </View>
 
@@ -123,8 +127,8 @@ export default function VoiceSettingsModal({
                 value={prefs.spellingEnabled}
                 onValueChange={onToggleSpelling}
                 disabled={!prefs.enabled}
-                trackColor={{ true: "#ffb74d", false: "#444" }}
-                thumbColor={prefs.spellingEnabled ? "#fff" : "#888"}
+                trackColor={{ true: colors.accent.warning, false: colors.surfaceAlt }}
+                thumbColor={prefs.spellingEnabled ? colors.text.primary : colors.text.secondary}
               />
             </View>
 
@@ -157,7 +161,7 @@ export default function VoiceSettingsModal({
                         {language.label}
                       </Text>
                       {!installed && (
-                        <MaterialIcons name="file-download" size={14} color="#ffb74d" />
+                        <MaterialIcons name="file-download" size={14} color={colors.accent.warning} />
                       )}
                     </TouchableOpacity>
                   );
@@ -204,7 +208,7 @@ export default function VoiceSettingsModal({
                 onPress={onTestVoice}
                 disabled={!prefs.enabled}
               >
-                <MaterialIcons name="play-arrow" size={18} color="#00e5ff" />
+                <MaterialIcons name="play-arrow" size={18} color={colors.primary} />
                 <Text style={styles.testBtnText}>Testar voz</Text>
               </TouchableOpacity>
             )}
@@ -234,6 +238,9 @@ function Stepper({
   hint?: string;
   disabled?: boolean;
 }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeVoiceSettingStyles(colors), [colors]);
+
   return (
     <View style={[styles.stepperRow, disabled && { opacity: 0.4 }]}>
       <View style={{ flex: 1 }}>
@@ -246,7 +253,7 @@ function Stepper({
           disabled={disabled}
           style={styles.stepBtn}
         >
-          <MaterialIcons name="remove" size={18} color="#fff" />
+          <MaterialIcons name="remove" size={18} color={colors.text.primary} />
         </TouchableOpacity>
         <Text style={styles.stepperValue}>{value}</Text>
         <TouchableOpacity
@@ -254,192 +261,10 @@ function Stepper({
           disabled={disabled}
           style={styles.stepBtn}
         >
-          <MaterialIcons name="add" size={18} color="#fff" />
+          <MaterialIcons name="add" size={18} color={colors.text.primary} />
         </TouchableOpacity>
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  bg: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.85)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  card: {
-    width: "100%",
-    maxWidth: 420,
-    backgroundColor: "#14171d",
-    borderRadius: 24,
-    padding: 22,
-    borderWidth: 1,
-    borderColor: "rgba(179,136,255,0.4)",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 6,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#fff",
-  },
-  subtitle: {
-    fontSize: 12,
-    color: "#888",
-    marginBottom: 16,
-    lineHeight: 17,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#1c2026",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 10,
-  },
-  rowTextBlock: {
-    flex: 1,
-    paddingRight: 12,
-  },
-  rowTitle: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  rowDesc: {
-    color: "#888",
-    fontSize: 11,
-    marginTop: 2,
-  },
-  languageBlock: {
-    backgroundColor: "#1c2026",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 10,
-  },
-  languageTitle: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  languageDesc: {
-    color: "#888",
-    fontSize: 11,
-    marginTop: 2,
-    marginBottom: 10,
-  },
-  languageGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  languageChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    backgroundColor: "#272c34",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-  },
-  languageChipActive: {
-    backgroundColor: "rgba(0,229,255,0.14)",
-    borderColor: "rgba(0,229,255,0.5)",
-  },
-  languageChipMissing: {
-    borderColor: "rgba(255,183,77,0.5)",
-  },
-  languageMissingHint: {
-    color: "#ffb74d",
-    fontSize: 10,
-    marginTop: 10,
-    lineHeight: 14,
-  },
-  languageChipText: {
-    color: "#a0aab5",
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  languageChipTextActive: {
-    color: "#00e5ff",
-  },
-  stepperRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#1c2026",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 10,
-  },
-  stepperLabel: {
-    color: "#fff",
-    fontSize: 13,
-    fontWeight: "700",
-  },
-  stepperHint: {
-    color: "#777",
-    fontSize: 10,
-    marginTop: 2,
-  },
-  stepperControls: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  stepBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#272c34",
-  },
-  stepperValue: {
-    color: "#00e5ff",
-    fontSize: 13,
-    fontWeight: "700",
-    minWidth: 60,
-    textAlign: "center",
-  },
-  testBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: "rgba(0,229,255,0.12)",
-    borderWidth: 1,
-    borderColor: "rgba(0,229,255,0.3)",
-    marginTop: 4,
-    marginBottom: 10,
-  },
-  testBtnText: {
-    color: "#00e5ff",
-    fontWeight: "700",
-    fontSize: 13,
-  },
-  closeBtn: {
-    marginTop: 8,
-    alignItems: "center",
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: "#1c2026",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-  },
-  closeBtnText: {
-    color: "#888",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-});
