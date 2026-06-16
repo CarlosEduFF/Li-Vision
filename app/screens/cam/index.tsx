@@ -325,6 +325,7 @@ export default function CameraScreen() {
     // o frame pode já ter sido reciclado/fechado pela câmera.
     const frameWidth = frame.width;
     const frameHeight = frame.height;
+    const frameOrientation = frame.orientation;
 
     try {
       const result = detectHandLandmarks(frame);
@@ -333,7 +334,7 @@ export default function CameraScreen() {
           const handsLen = result.hands ? result.hands.length : 0;
           const errorMsg = (result as any).error;
           sendLogToJS(
-            `Frame #${frameCount.value}: ${frameWidth}x${frameHeight} → ${handsLen} mão(s)` +
+            `Frame #${frameCount.value}: ${frameWidth}x${frameHeight} orient=${frameOrientation} → ${handsLen} mão(s)` +
             (errorMsg ? ` | ERRO: ${errorMsg}` : "")
           );
         } else {
