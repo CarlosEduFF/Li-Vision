@@ -7,6 +7,7 @@ import {
   Alert,
   Dimensions,
   Modal,
+  Switch,
 } from "react-native";
 import {
   Camera,
@@ -28,7 +29,10 @@ import {
 import {
   detectHandLandmarks,
   LandmarkPoint,
+  PoseLandmark,
+  FaceLandmark,
   HolisticDetectionResult,
+  PoseLandmarkIndex,
 } from "@/services/handLandmarkerPlugin";
 import { buildPayload, transformPoint } from "@/services/holisticFeatures";
 import { useModelStatus } from "@/hooks/useModelStatus";
@@ -57,6 +61,30 @@ const SKELETON_CONNECTIONS: [number, number][] = [
   [5, 9], [9, 13], [13, 17],
 ];
 
+// Esqueleto de pose (MediaPipe Pose, 33 pontos) — só a parte superior do
+// corpo relevante para Libras: ombros, cotovelos, pulsos e quadris.
+const POSE_CONNECTIONS: [number, number][] = [
+  [PoseLandmarkIndex.LEFT_SHOULDER, PoseLandmarkIndex.RIGHT_SHOULDER],
+  [PoseLandmarkIndex.LEFT_SHOULDER, PoseLandmarkIndex.LEFT_ELBOW],
+  [PoseLandmarkIndex.LEFT_ELBOW, PoseLandmarkIndex.LEFT_WRIST],
+  [PoseLandmarkIndex.RIGHT_SHOULDER, PoseLandmarkIndex.RIGHT_ELBOW],
+  [PoseLandmarkIndex.RIGHT_ELBOW, PoseLandmarkIndex.RIGHT_WRIST],
+  [PoseLandmarkIndex.LEFT_SHOULDER, PoseLandmarkIndex.LEFT_HIP],
+  [PoseLandmarkIndex.RIGHT_SHOULDER, PoseLandmarkIndex.RIGHT_HIP],
+  [PoseLandmarkIndex.LEFT_HIP, PoseLandmarkIndex.RIGHT_HIP],
+];
+
+// Subconjunto leve de pontos do rosto (contorno + olhos + boca) — desenhar
+// os 478 pontos completos do FaceLandmarker poluiria demais a tela.
+const FACE_POINT_INDICES: number[] = [
+  10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379,
+  378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127,
+  162, 21, 54, 103, 67, 109, // contorno do rosto
+  33, 133, 160, 159, 158, 157, 173, 246, // olho esquerdo
+  362, 263, 387, 386, 385, 384, 398, 466, // olho direito
+  61, 291, 39, 269, 0, 17, 84, 314, // boca
+];
+
 export default function CameraScreen() {
   const { colors } = useAppTheme();
   const styles = useMemo(() => makeCamStyles(colors), [colors]);
@@ -65,7 +93,10 @@ export default function CameraScreen() {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("disconnected");
   const [apiError, setApiError] = useState<string | null>(null);
   const [landmarks, setLandmarks] = useState<LandmarkPoint[][]>([]);
+  const [poseLandmarks, setPoseLandmarks] = useState<PoseLandmark[]>([]);
+  const [faceLandmarks, setFaceLandmarks] = useState<FaceLandmark[]>([]);
   const [showLandmarks, setShowLandmarks] = useState<boolean>(true);
+  const [showLandmarksModal, setShowLandmarksModal] = useState<boolean>(false);
   const [detectionMode, setDetectionMode] = useState<DetectionMode>("hybrid");
   const [showModeModal, setShowModeModal] = useState<boolean>(false);
   const [activeModelName, setActiveModelName] = useState<string | null>(null);
@@ -307,8 +338,17 @@ export default function CameraScreen() {
   const onLandmarksDetected = Worklets.createRunOnJS((result: HolisticDetectionResult) => {
     const hands = result?.hands ?? [];
     if (hands.length > 0) {
-      // Overlay continua desenhando só as mãos (esqueleto), transformadas.
+      // Overlay desenha mãos sempre; pose/rosto só quando o modo Holístico
+      // está ativo (são os únicos canais efetivamente usados nesse modo).
       setLandmarks(hands.map((handLms: LandmarkPoint[]) => handLms.map(transformPoint)));
+
+      if (holisticEnabledRef.current) {
+        setPoseLandmarks(result.pose && result.pose.length > 0 ? result.pose.map(transformPoint) as PoseLandmark[] : []);
+        setFaceLandmarks(result.face && result.face.length > 0 ? result.face.map(transformPoint) as FaceLandmark[] : []);
+      } else {
+        setPoseLandmarks([]);
+        setFaceLandmarks([]);
+      }
 
       if (gestureWS.isConnected()) {
         const schema = holisticEnabledRef.current ? "holistic_v1" : "hands_v1";
@@ -317,6 +357,8 @@ export default function CameraScreen() {
       }
     } else {
       setLandmarks([]);
+      setPoseLandmarks([]);
+      setFaceLandmarks([]);
     }
   });
 
@@ -413,25 +455,11 @@ export default function CameraScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => setShowLandmarks((v) => !v)}
+          onPress={() => setShowLandmarksModal(true)}
           style={[styles.iconBtn, showLandmarks && styles.iconBtnActive]}
-          accessibilityLabel="Alternar landmarks"
+          accessibilityLabel="Configurar landmarks exibidos"
         >
           <MaterialIcons name="grain" size={20} color={showLandmarks ? "#00e5ff" : "#888"} />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => {
-            setHolisticEnabled((v) => {
-              const next = !v;
-              AsyncStorage.setItem("config_holistic_enabled", String(next));
-              return next;
-            });
-          }}
-          style={[styles.iconBtn, holisticEnabled && styles.iconBtnActive]}
-          accessibilityLabel="Alternar holístico (mãos + corpo + rosto)"
-        >
-          <MaterialIcons name="accessibility-new" size={20} color={holisticEnabled ? "#00e5ff" : "#888"} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -542,6 +570,82 @@ export default function CameraScreen() {
                 </View>
               );
             })}
+
+            {/* Pose (corpo) — só no modo Holístico */}
+            {poseLandmarks.length > 0 &&
+              POSE_CONNECTIONS.map(([a, b], idx) => {
+                if (!poseLandmarks[a] || !poseLandmarks[b]) return null;
+                if ((poseLandmarks[a].visibility ?? 0) < 0.3 || (poseLandmarks[b].visibility ?? 0) < 0.3) return null;
+                const ax = poseLandmarks[a].x * CAM_WIDTH;
+                const ay = poseLandmarks[a].y * CAM_HEIGHT;
+                const bx = poseLandmarks[b].x * CAM_WIDTH;
+                const by = poseLandmarks[b].y * CAM_HEIGHT;
+                const length = Math.hypot(bx - ax, by - ay);
+                const angle = (Math.atan2(by - ay, bx - ax) * 180) / Math.PI;
+                return (
+                  <View
+                    key={`pose-bone-${idx}`}
+                    style={{
+                      position: "absolute",
+                      left: ax - length / 2,
+                      top: ay - 1,
+                      width: length,
+                      height: 2,
+                      backgroundColor: "rgba(76, 175, 80, 0.6)",
+                      transform: [
+                        { translateX: length / 2 },
+                        { rotate: `${angle}deg` },
+                        { translateX: -(length / 2) },
+                      ],
+                    }}
+                  />
+                );
+              })}
+            {poseLandmarks.length > 0 &&
+              [
+                PoseLandmarkIndex.LEFT_SHOULDER, PoseLandmarkIndex.RIGHT_SHOULDER,
+                PoseLandmarkIndex.LEFT_ELBOW, PoseLandmarkIndex.RIGHT_ELBOW,
+                PoseLandmarkIndex.LEFT_WRIST, PoseLandmarkIndex.RIGHT_WRIST,
+                PoseLandmarkIndex.LEFT_HIP, PoseLandmarkIndex.RIGHT_HIP,
+              ].map((idx) => {
+                const lm = poseLandmarks[idx];
+                if (!lm || (lm.visibility ?? 0) < 0.3) return null;
+                return (
+                  <View
+                    key={`pose-dot-${idx}`}
+                    style={{
+                      position: "absolute",
+                      left: lm.x * CAM_WIDTH - 4,
+                      top: lm.y * CAM_HEIGHT - 4,
+                      width: 8,
+                      height: 8,
+                      borderRadius: 4,
+                      backgroundColor: "#4caf50",
+                    }}
+                  />
+                );
+              })}
+
+            {/* Rosto — subconjunto leve de pontos, só no modo Holístico */}
+            {faceLandmarks.length > 0 &&
+              FACE_POINT_INDICES.map((idx) => {
+                const lm = faceLandmarks[idx];
+                if (!lm) return null;
+                return (
+                  <View
+                    key={`face-dot-${idx}`}
+                    style={{
+                      position: "absolute",
+                      left: lm.x * CAM_WIDTH - 1.5,
+                      top: lm.y * CAM_HEIGHT - 1.5,
+                      width: 3,
+                      height: 3,
+                      borderRadius: 1.5,
+                      backgroundColor: "rgba(255, 214, 0, 0.8)",
+                    }}
+                  />
+                );
+              })}
           </View>
         )}
 
@@ -652,6 +756,61 @@ export default function CameraScreen() {
             })}
 
             <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setShowModeModal(false)}>
+              <Text style={styles.modalCloseBtnText}>{t('cam.close')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* MODAL DE LANDMARKS EXIBIDOS */}
+      <Modal transparent visible={showLandmarksModal} animationType="fade" onRequestClose={() => setShowLandmarksModal(false)}>
+        <View style={styles.modalBg}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <MaterialIcons name="grain" size={28} color={colors.primary} />
+              <Text style={styles.modalTitle}>{t('cam.landmarks_title')}</Text>
+            </View>
+            <Text style={styles.modalSubtitle}>{t('cam.landmarks_subtitle')}</Text>
+
+            <View style={styles.landmarksRow}>
+              <View style={styles.landmarksRowText}>
+                <Text style={styles.landmarksRowTitle}>{t('cam.landmarks_show')}</Text>
+                <Text style={styles.landmarksRowDesc}>{t('cam.landmarks_show_desc')}</Text>
+              </View>
+              <Switch
+                value={showLandmarks}
+                onValueChange={setShowLandmarks}
+                trackColor={{ true: colors.primary, false: colors.border.subtle }}
+                thumbColor={showLandmarks ? colors.surface : colors.text.secondary}
+              />
+            </View>
+
+            <View style={[styles.landmarksRow, !showLandmarks && { opacity: 0.4 }]}>
+              <View style={styles.landmarksRowText}>
+                <Text style={styles.landmarksRowTitle}>{t('cam.landmarks_hands')}</Text>
+                <Text style={styles.landmarksRowDesc}>{t('cam.landmarks_hands_desc')}</Text>
+              </View>
+              <MaterialIcons name="check-circle" size={22} color={colors.primary} />
+            </View>
+
+            <View style={[styles.landmarksRow, !showLandmarks && { opacity: 0.4 }]}>
+              <View style={styles.landmarksRowText}>
+                <Text style={styles.landmarksRowTitle}>{t('cam.landmarks_holistic')}</Text>
+                <Text style={styles.landmarksRowDesc}>{t('cam.landmarks_holistic_desc')}</Text>
+              </View>
+              <Switch
+                value={holisticEnabled}
+                disabled={!showLandmarks}
+                onValueChange={(next) => {
+                  setHolisticEnabled(next);
+                  AsyncStorage.setItem("config_holistic_enabled", String(next));
+                }}
+                trackColor={{ true: colors.primary, false: colors.border.subtle }}
+                thumbColor={holisticEnabled ? colors.surface : colors.text.secondary}
+              />
+            </View>
+
+            <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setShowLandmarksModal(false)}>
               <Text style={styles.modalCloseBtnText}>{t('cam.close')}</Text>
             </TouchableOpacity>
           </View>

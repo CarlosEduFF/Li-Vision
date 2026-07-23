@@ -216,7 +216,15 @@
     "mode_ml": "Static ML",
     "mode_ml_desc": "Only models of gestures without movement",
     "mode_dynamic_ml": "Dynamic ML",
-    "mode_dynamic_ml_desc": "Only models of gestures with movement"
+    "mode_dynamic_ml_desc": "Only models of gestures with movement",
+    "landmarks_title": "Displayed Landmarks",
+    "landmarks_subtitle": "Choose what gets drawn over the camera.",
+    "landmarks_show": "Show landmarks",
+    "landmarks_show_desc": "Turns the whole point overlay on or off.",
+    "landmarks_hands": "Hands",
+    "landmarks_hands_desc": "Always shown when the overlay is on.",
+    "landmarks_holistic": "Body and face",
+    "landmarks_holistic_desc": "Enables Holistic mode: also sends and draws pose and face."
   },
   "train": {
     "warning": "Warning",

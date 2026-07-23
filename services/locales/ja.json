@@ -216,7 +216,15 @@
     "mode_ml": "静的ML",
     "mode_ml_desc": "動きのないジェスチャのモデルのみ",
     "mode_dynamic_ml": "動的ML",
-    "mode_dynamic_ml_desc": "動きのあるジェスチャのモデルのみ"
+    "mode_dynamic_ml_desc": "動きのあるジェスチャのモデルのみ",
+    "landmarks_title": "表示するランドマーク",
+    "landmarks_subtitle": "カメラに描画する内容を選択します。",
+    "landmarks_show": "ランドマークを表示",
+    "landmarks_show_desc": "ポイントのオーバーレイ全体をオン/オフします。",
+    "landmarks_hands": "手",
+    "landmarks_hands_desc": "オーバーレイが有効な間は常に表示されます。",
+    "landmarks_holistic": "体と顔",
+    "landmarks_holistic_desc": "ホリスティックモードを有効にし、姿勢と顔も送信・描画します。"
   },
   "train": {
     "warning": "警告",

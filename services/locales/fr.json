@@ -216,7 +216,15 @@
     "mode_ml": "ML Statique",
     "mode_ml_desc": "Uniquement les modèles de gestes sans mouvement",
     "mode_dynamic_ml": "ML Dynamique",
-    "mode_dynamic_ml_desc": "Uniquement les modèles de gestes avec mouvement"
+    "mode_dynamic_ml_desc": "Uniquement les modèles de gestes avec mouvement",
+    "landmarks_title": "Repères affichés",
+    "landmarks_subtitle": "Choisissez ce qui est dessiné sur la caméra.",
+    "landmarks_show": "Afficher les repères",
+    "landmarks_show_desc": "Active ou désactive tout l'overlay de points.",
+    "landmarks_hands": "Mains",
+    "landmarks_hands_desc": "Toujours affichées lorsque l'overlay est actif.",
+    "landmarks_holistic": "Corps et visage",
+    "landmarks_holistic_desc": "Active le mode Holistique : envoie et dessine aussi la posture et le visage."
   },
   "train": {
     "warning": "Avertissement",

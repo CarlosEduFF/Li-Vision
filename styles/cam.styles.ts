@@ -248,5 +248,18 @@ export function makeCamStyles(colors: AppColorTokens) {
     borderColor: colors.border.subtle,
   },
   modalCloseBtnText: { color: colors.text.secondary, fontSize: 15, fontWeight: "600" },
+  landmarksRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: colors.surfaceAlt,
+    padding: 14,
+    borderRadius: 14,
+    marginBottom: 10,
+    gap: 12,
+  },
+  landmarksRowText: { flex: 1 },
+  landmarksRowTitle: { fontSize: 15, fontWeight: "700", color: colors.text.primary },
+  landmarksRowDesc: { fontSize: 11, color: colors.text.secondary, marginTop: 2 },
   });
 }

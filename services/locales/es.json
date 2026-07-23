@@ -216,7 +216,15 @@
     "mode_ml": "ML Estático",
     "mode_ml_desc": "Solo modelos de gestos sin movimiento",
     "mode_dynamic_ml": "ML Dinámico",
-    "mode_dynamic_ml_desc": "Solo modelos de gestos con movimiento"
+    "mode_dynamic_ml_desc": "Solo modelos de gestos con movimiento",
+    "landmarks_title": "Landmarks mostrados",
+    "landmarks_subtitle": "Elige qué se dibuja sobre la cámara.",
+    "landmarks_show": "Mostrar landmarks",
+    "landmarks_show_desc": "Activa o desactiva toda la superposición de puntos.",
+    "landmarks_hands": "Manos",
+    "landmarks_hands_desc": "Siempre visibles cuando la superposición está activa.",
+    "landmarks_holistic": "Cuerpo y rostro",
+    "landmarks_holistic_desc": "Activa el modo Holístico: también envía y dibuja pose y rostro."
   },
   "train": {
     "warning": "Advertencia",
