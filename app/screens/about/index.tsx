@@ -25,9 +25,9 @@ export default function AboutScreen() {
         {/* HEADER */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <MaterialIcons name="arrow-back" size={24} color="#fff" />
+            <MaterialIcons name="arrow-back" size={24} color={colors.text.primary} />
           </TouchableOpacity>
-          <MaterialIcons name="tune" size={28} color="#00e5ff" />
+          <MaterialIcons name="tune" size={28} color={colors.primary} />
           <Text style={styles.title}>{t('about.title')}</Text>
         </View>
 
@@ -38,14 +38,14 @@ export default function AboutScreen() {
         {/* CARD INFO ARQUITETURA */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <MaterialIcons name="cloud-done" size={20} color="#4caf50" />
+            <MaterialIcons name="cloud-done" size={20} color={colors.accent.green} />
             <Text style={styles.sectionTitle}>{t('about.multi_session')}</Text>
           </View>
           <Text style={styles.infoText}>
             {t('about.multi_session_desc')}
           </Text>
           <View style={styles.tipBox}>
-            <MaterialIcons name="lightbulb-outline" size={18} color="#ffab00" />
+            <MaterialIcons name="lightbulb-outline" size={18} color={colors.accent.warning} />
             <Text style={styles.tipText}>
               {t('about.tip')}
             </Text>
@@ -55,7 +55,7 @@ export default function AboutScreen() {
         {/* CARD AÃ‡Ã•ES RÃPIDAS - 4 BOTÃ•ES COM MODAIS */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <MaterialIcons name="flash-on" size={20} color="#fff" />
+            <MaterialIcons name="flash-on" size={20} color={colors.text.primary} />
             <Text style={styles.sectionTitle}>{t('about.guide')}</Text>
           </View>
 
@@ -65,13 +65,13 @@ export default function AboutScreen() {
             activeOpacity={0.7}
           >
             <View style={styles.actionLeft}>
-              <MaterialIcons name="dashboard" size={22} color="#00e5ff" />
+              <MaterialIcons name="dashboard" size={22} color={colors.primary} />
               <View>
                 <Text style={styles.actionLabel}>{t('about.guide_presentation')}</Text>
                 <Text style={styles.actionDesc}>{t('about.guide_presentation_desc')}</Text>
               </View>
             </View>
-            <MaterialIcons name="chevron-right" size={22} color="#555" />
+            <MaterialIcons name="chevron-right" size={22} color={colors.text.tertiary} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -80,13 +80,13 @@ export default function AboutScreen() {
             activeOpacity={0.7}
           >
             <View style={styles.actionLeft}>
-              <MaterialIcons name="videocam" size={22} color="#00e5ff" />
+              <MaterialIcons name="videocam" size={22} color={colors.primary} />
               <View>
                 <Text style={styles.actionLabel}>{t('about.guide_inference')}</Text>
                 <Text style={styles.actionDesc}>{t('about.guide_inference_desc')}</Text>
               </View>
             </View>
-            <MaterialIcons name="chevron-right" size={22} color="#555" />
+            <MaterialIcons name="chevron-right" size={22} color={colors.text.tertiary} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -95,13 +95,13 @@ export default function AboutScreen() {
             activeOpacity={0.7}
           >
             <View style={styles.actionLeft}>
-              <MaterialIcons name="science" size={22} color="#00e5ff" />
+              <MaterialIcons name="science" size={22} color={colors.primary} />
               <View>
                 <Text style={styles.actionLabel}>{t('about.guide_train')}</Text>
                 <Text style={styles.actionDesc}>{t('about.guide_train_desc')}</Text>
               </View>
             </View>
-            <MaterialIcons name="chevron-right" size={22} color="#555" />
+            <MaterialIcons name="chevron-right" size={22} color={colors.text.tertiary} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -110,20 +110,20 @@ export default function AboutScreen() {
             activeOpacity={0.7}
           >
             <View style={styles.actionLeft}>
-              <MaterialIcons name="leaderboard" size={22} color="#00e5ff" />
+              <MaterialIcons name="leaderboard" size={22} color={colors.primary} />
               <View>
                 <Text style={styles.actionLabel}>{t('about.guide_ranking')}</Text>
                 <Text style={styles.actionDesc}>{t('about.guide_ranking_desc')}</Text>
               </View>
             </View>
-            <MaterialIcons name="chevron-right" size={22} color="#555" />
+            <MaterialIcons name="chevron-right" size={22} color={colors.text.tertiary} />
           </TouchableOpacity>
         </View>
 
         {/* CARD VERSÃƒO */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <MaterialIcons name="info-outline" size={20} color="#fff" />
+            <MaterialIcons name="info-outline" size={20} color={colors.text.primary} />
             <Text style={styles.sectionTitle}>{t('about.about_app')}</Text>
           </View>
           <View style={styles.versionRow}>

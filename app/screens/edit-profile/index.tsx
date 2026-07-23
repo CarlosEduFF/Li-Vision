@@ -140,7 +140,7 @@ export default function EditProfileScreen() {
   if (loading) {
     return (
       <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
-        <ActivityIndicator size="large" color="#00e5ff" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -158,7 +158,7 @@ export default function EditProfileScreen() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <MaterialIcons name="arrow-back" size={24} color="#fff" />
+            <MaterialIcons name="arrow-back" size={24} color={colors.text.primary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t('edit_profile.title')}</Text>
           <View style={{ width: 40 }} />
@@ -174,7 +174,7 @@ export default function EditProfileScreen() {
               />
             ) : (
               <View style={styles.avatarPlaceholder}>
-                <MaterialIcons name="person" size={60} color="#555" />
+                <MaterialIcons name="person" size={60} color={colors.text.tertiary} />
               </View>
             )}
 
@@ -202,13 +202,13 @@ export default function EditProfileScreen() {
         <View style={styles.formCard}>
           <Text style={styles.fieldLabel}>{t('edit_profile.full_name')}</Text>
           <View style={styles.inputRow}>
-            <MaterialIcons name="person" size={20} color="#555" />
+            <MaterialIcons name="person" size={20} color={colors.text.tertiary} />
             <TextInput
               style={styles.input}
               value={fullName}
               onChangeText={setFullName}
               placeholder={t('edit_profile.name_placeholder')}
-              placeholderTextColor="#444"
+              placeholderTextColor={colors.text.secondary}
               autoCapitalize="words"
             />
           </View>
@@ -231,7 +231,7 @@ export default function EditProfileScreen() {
 
         {/* Info card */}
         <View style={styles.infoCard}>
-          <MaterialIcons name="info-outline" size={18} color="#ffab00" />
+          <MaterialIcons name="info-outline" size={18} color={colors.accent.warning} />
           <Text style={styles.infoText}>
             {t('edit_profile.info')}
           </Text>

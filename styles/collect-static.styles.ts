@@ -67,7 +67,7 @@ export function makeCollectStaticStyles(colors: AppColorTokens) {
   stats: { color: colors.text.secondary, textAlign: "center", marginTop: 10 },
   chipScroll: { marginBottom: 10 },
   chip: {
-    backgroundColor: "#262a31",
+    backgroundColor: colors.surfaceAlt,
     paddingHorizontal: 15,
     paddingVertical: AppSpacing.sm,
     borderRadius: 20,

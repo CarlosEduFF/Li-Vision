@@ -154,7 +154,7 @@ export default function TrainScreen() {
 
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <MaterialIcons name="arrow-back" size={28} color="#00e5ff" />
+          <MaterialIcons name="arrow-back" size={28} color={colors.primary} />
         </TouchableOpacity>
         <Text style={styles.title}>{t('train.title')}</Text>
       </View>
@@ -207,7 +207,7 @@ export default function TrainScreen() {
             )}
 
             <Text style={styles.label}>{t('train.select_datasets')} ({selectedDatasetIds.length})</Text>
-            {datasets.length === 0 && <Text style={{ color: "#888" }}>{t('train.no_dataset')}</Text>}
+            {datasets.length === 0 && <Text style={{ color: colors.text.tertiary }}>{t('train.no_dataset')}</Text>}
             {datasets.map(ds => {
               const isSelected = selectedDatasetIds.includes(ds.id);
               return (
@@ -218,17 +218,17 @@ export default function TrainScreen() {
                 >
                   <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                     <View>
-                      <Text style={isSelected ? {color:"#00e5ff", fontWeight:"bold", fontSize: 16} : {color:"#ccc", fontSize: 16}}>
+                      <Text style={isSelected ? {color: colors.primary, fontWeight:"bold", fontSize: 16} : {color: colors.text.tertiary, fontSize: 16}}>
                         {ds.name}
                       </Text>
-                      <Text style={{ color: "#888", fontSize: 12, marginTop: 4 }}>
+                      <Text style={{ color: colors.text.tertiary, fontSize: 12, marginTop: 4 }}>
                         {ds.type === "static" ? t('train.format_static') : t('train.format_dynamic')}
                       </Text>
                     </View>
-                    <MaterialIcons 
-                      name={isSelected ? "check-box" : "check-box-outline-blank"} 
-                      size={24} 
-                      color={isSelected ? "#00e5ff" : "#555"} 
+                    <MaterialIcons
+                      name={isSelected ? "check-box" : "check-box-outline-blank"}
+                      size={24}
+                      color={isSelected ? colors.primary : colors.text.tertiary}
                     />
                   </View>
                 </TouchableOpacity>
@@ -242,24 +242,24 @@ export default function TrainScreen() {
 
             {status && status.status !== "running" && (
               <View style={styles.statusBox}>
-                <Text style={{color: status.status === "completed" ? "#4caf50" : "red", fontWeight:"bold", marginBottom:10}}>
+                <Text style={{color: status.status === "completed" ? colors.accent.green : colors.accent.error, fontWeight:"bold", marginBottom:10}}>
                   {t('train.status')} {status.status.toUpperCase()}
                 </Text>
-                
+
                 {status.details && status.details.map((d: any, idx: number) => (
-                   <View key={idx} style={{ marginBottom: 10, paddingBottom: 10, borderBottomWidth: 1, borderColor: "#333" }}>
-                     <Text style={{color:"#00e5ff", fontWeight:"bold"}}>[{d.type.toUpperCase()}] Model</Text>
+                   <View key={idx} style={{ marginBottom: 10, paddingBottom: 10, borderBottomWidth: 1, borderColor: colors.border.subtle }}>
+                     <Text style={{color: colors.primary, fontWeight:"bold"}}>[{d.type.toUpperCase()}] Model</Text>
                      {d.accuracy != null && d.accuracy !== undefined ? (
-                       <Text style={{color:"#ccc"}}>{t('train.accuracy')} {(d.accuracy * 100).toFixed(2)}%</Text>
+                       <Text style={{color: colors.text.tertiary}}>{t('train.accuracy')} {(d.accuracy * 100).toFixed(2)}%</Text>
                      ) : d.error ? (
-                       <Text style={{color:"red"}}>{d.error}</Text>
+                       <Text style={{color: colors.accent.error}}>{d.error}</Text>
                      ) : (
-                       <Text style={{color:"#888"}}>{t('train.no_data')}</Text>
+                       <Text style={{color: colors.text.tertiary}}>{t('train.no_data')}</Text>
                      )}
                    </View>
                 ))}
 
-                {status.error && <Text style={{color:"red", marginTop: 5}}>{status.error}</Text>}
+                {status.error && <Text style={{color: colors.accent.error, marginTop: 5}}>{status.error}</Text>}
               </View>
             )}
         </View>

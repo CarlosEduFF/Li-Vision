@@ -31,22 +31,22 @@ function RootLayoutInner() {
     <ThemeProvider value={scheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/cam" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/collect-static" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/collect-dynamic" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/train" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/models" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/login" options={{ headerShown: false, animation: 'fade' }} />
-        <Stack.Screen name="screens/register" options={{ headerShown: false, animation: 'fade' }} />
-        <Stack.Screen name="screens/manage-datasets" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/edit-profile" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/select-model" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/gesture-detail" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/manage-learning" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/ranking" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/about" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/levels-info" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/admin-config" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/cam/index" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/collect-static/index" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/collect-dynamic/index" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/train/index" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/models/index" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/login/index" options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="screens/register/index" options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="screens/manage-datasets/index" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/edit-profile/index" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/select-model/index" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/gesture-detail/index" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/manage-learning/index" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/ranking/index" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/about/index" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/levels-info/index" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/admin-config/index" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <GlobalVLibras />

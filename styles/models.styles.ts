@@ -48,7 +48,7 @@ export function makeModelsStyles(colors: AppColorTokens) {
   },
   cardActive: {
     borderColor: colors.border.cyan,
-    backgroundColor: "#1a2228",
+    backgroundColor: colors.surfaceAlt,
     ...AppShadow.cyanSubtle,
     elevation: 6,
   },
@@ -72,7 +72,7 @@ export function makeModelsStyles(colors: AppColorTokens) {
     paddingVertical: 5,
     borderRadius: AppSpacing.sm,
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: colors.border.subtle,
   },
   modelType: {
     color: colors.text.secondary,
@@ -122,7 +122,7 @@ export function makeModelsStyles(colors: AppColorTokens) {
     paddingHorizontal: 10,
     alignSelf: "flex-start",
   },
-  activeBadgeText: { color: "#4caf50", fontSize: 12, fontWeight: "600" },
+  activeBadgeText: { color: colors.accent.green, fontSize: 12, fontWeight: "600" },
   activateBtn: {
     backgroundColor: colors.primary,
     flexDirection: "row",

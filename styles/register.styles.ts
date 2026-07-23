@@ -89,7 +89,7 @@ export function makeRegisterStyles(colors: AppColorTokens) {
   modalCard: {
     width: "100%",
     maxWidth: 350,
-    backgroundColor: "#14171d",
+    backgroundColor: colors.surface,
     borderRadius: AppRadius.xxxl,
     padding: AppSpacing.xxxl,
     alignItems: "center",

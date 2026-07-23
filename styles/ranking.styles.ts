@@ -60,7 +60,7 @@ export function makeRankingStyles(colors: AppColorTokens) {
     justifyContent: "flex-start",
     alignItems: "center",
     paddingTop: 15,
-    shadowColor: "#ffdf00",
+    shadowColor: colors.podium.gold,
     shadowOpacity: 0.3,
     shadowRadius: 10,
   },

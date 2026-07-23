@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "@/context/ThemeContext";
+import { AppColorTokens } from "@/constants/theme";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const BAR_WIDTH = SCREEN_WIDTH - 100;
@@ -57,6 +59,8 @@ export default function TrainingProgressModal({
   onClose,
 }: TrainingProgressModalProps) {
   const { t } = useTranslation();
+  const { colors } = useAppTheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
   // ── Animated values ──────────────────────────────────────
   const barWidth = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -227,13 +231,13 @@ export default function TrainingProgressModal({
                 <MaterialIcons
                   name={isSuccess ? "check-circle" : "error"}
                   size={48}
-                  color={isSuccess ? "#4caf50" : "#ff5252"}
+                  color={isSuccess ? colors.accent.green : colors.accent.error}
                 />
               </View>
             ) : (
               <View style={styles.iconCircle}>
                 <Animated.View style={{ transform: [{ rotate: spinInterpolation }] }}>
-                  <MaterialIcons name="settings" size={48} color="#00e5ff" />
+                  <MaterialIcons name="settings" size={48} color={colors.primary} />
                 </Animated.View>
               </View>
             )}
@@ -249,7 +253,7 @@ export default function TrainingProgressModal({
           </Text>
 
           {/* ── Progress Percentage ───────────── */}
-          <Text style={[styles.percentage, isDone && { color: isSuccess ? "#4caf50" : "#ff5252" }]}>
+          <Text style={[styles.percentage, isDone && { color: isSuccess ? colors.accent.green : colors.accent.error }]}>
             {Math.min(progress, 100)}%
           </Text>
 
@@ -262,9 +266,9 @@ export default function TrainingProgressModal({
                   width: barWidthInterpolated,
                   backgroundColor: isDone
                     ? isSuccess
-                      ? "#4caf50"
-                      : "#ff5252"
-                    : "#00e5ff",
+                      ? colors.accent.green
+                      : colors.accent.error
+                    : colors.primary,
                 },
               ]}
             />
@@ -284,13 +288,13 @@ export default function TrainingProgressModal({
           {/* ── Time Info ────────────────────── */}
           <View style={styles.timeRow}>
             <View style={styles.timeBlock}>
-              <MaterialIcons name="timer" size={14} color="#555" />
+              <MaterialIcons name="timer" size={14} color={colors.text.secondary} />
               <Text style={styles.timeLabel}>{t('training_modal.elapsed')}</Text>
               <Text style={styles.timeValue}>{formatTime(elapsed)}</Text>
             </View>
             {!isDone && eta !== null && (
               <View style={styles.timeBlock}>
-                <MaterialIcons name="hourglass-bottom" size={14} color="#555" />
+                <MaterialIcons name="hourglass-bottom" size={14} color={colors.text.secondary} />
                 <Text style={styles.timeLabel}>{t('training_modal.remaining')}</Text>
                 <Text style={styles.timeValue}>~{formatTime(eta)}</Text>
               </View>
@@ -313,10 +317,10 @@ export default function TrainingProgressModal({
                     size={16}
                     color={
                       job.status === "completed"
-                        ? "#4caf50"
+                        ? colors.accent.green
                         : job.status === "failed"
-                        ? "#ff5252"
-                        : "#00e5ff"
+                        ? colors.accent.error
+                        : colors.primary
                     }
                   />
                   <Text style={styles.jobType}>
@@ -355,9 +359,9 @@ export default function TrainingProgressModal({
             <MaterialIcons
               name={isSuccess ? "done" : "close"}
               size={20}
-              color={isSuccess ? "#000" : "#fff"}
+              color={isSuccess ? colors.background : colors.text.primary}
             />
-            <Text style={[styles.closeBtnText, isSuccess && { color: "#000" }]}>
+            <Text style={[styles.closeBtnText, isSuccess && { color: colors.background }]}>
               {isSuccess ? t('training_modal.btn_completed') : isDone ? t('training_modal.btn_close') : t('training_modal.btn_hide')}
             </Text>
           </TouchableOpacity>
@@ -367,7 +371,8 @@ export default function TrainingProgressModal({
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.85)",
@@ -377,13 +382,13 @@ const styles = StyleSheet.create({
   },
   container: {
     width: "100%",
-    backgroundColor: "#1c2026",
+    backgroundColor: colors.surface,
     borderRadius: 24,
     padding: 30,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(0, 229, 255, 0.15)",
-    shadowColor: "#00e5ff",
+    borderColor: colors.border.cyan,
+    shadowColor: colors.primary,
     shadowOpacity: 0.1,
     shadowRadius: 30,
     shadowOffset: { width: 0, height: 10 },
@@ -396,23 +401,23 @@ const styles = StyleSheet.create({
     width: 88,
     height: 88,
     borderRadius: 44,
-    backgroundColor: "rgba(0, 229, 255, 0.08)",
+    backgroundColor: colors.border.cyan,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(0, 229, 255, 0.12)",
+    borderColor: colors.border.cyanMedium,
   },
   title: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#fff",
+    color: colors.text.primary,
     marginBottom: 8,
     textAlign: "center",
   },
   percentage: {
     fontSize: 48,
     fontWeight: "900",
-    color: "#00e5ff",
+    color: colors.primary,
     marginBottom: 16,
     fontVariant: ["tabular-nums"],
   },
@@ -421,7 +426,7 @@ const styles = StyleSheet.create({
   barTrack: {
     width: BAR_WIDTH,
     height: 10,
-    backgroundColor: "#10141a",
+    backgroundColor: colors.background,
     borderRadius: 5,
     overflow: "hidden",
     marginBottom: 16,
@@ -442,7 +447,7 @@ const styles = StyleSheet.create({
   // ── Stage ────────────────────────────
   stageText: {
     fontSize: 13,
-    color: "#888",
+    color: colors.text.secondary,
     textAlign: "center",
     marginBottom: 20,
     lineHeight: 18,
@@ -461,13 +466,13 @@ const styles = StyleSheet.create({
   },
   timeLabel: {
     fontSize: 10,
-    color: "#555",
+    color: colors.text.secondary,
     fontWeight: "600",
     textTransform: "uppercase",
   },
   timeValue: {
     fontSize: 16,
-    color: "#ccc",
+    color: colors.text.tertiary,
     fontWeight: "700",
     fontVariant: ["tabular-nums"],
   },
@@ -475,7 +480,7 @@ const styles = StyleSheet.create({
   // ── Sub Jobs ─────────────────────────
   jobsContainer: {
     width: "100%",
-    backgroundColor: "#10141a",
+    backgroundColor: colors.background,
     borderRadius: 12,
     padding: 14,
     gap: 10,
@@ -488,22 +493,22 @@ const styles = StyleSheet.create({
   },
   jobType: {
     fontSize: 13,
-    color: "#ccc",
+    color: colors.text.tertiary,
     fontWeight: "600",
   },
   jobAccuracy: {
     fontSize: 13,
-    color: "#4caf50",
+    color: colors.accent.green,
     fontWeight: "700",
   },
   jobError: {
     fontSize: 13,
-    color: "#ff5252",
+    color: colors.accent.error,
     fontWeight: "700",
   },
   jobProgress: {
     fontSize: 13,
-    color: "#00e5ff",
+    color: colors.primary,
     fontWeight: "700",
   },
 
@@ -519,7 +524,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 12,
-    color: "#ff8a80",
+    color: colors.accent.error,
     textAlign: "center",
     lineHeight: 17,
   },
@@ -533,15 +538,15 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 40,
     borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.06)",
+    backgroundColor: colors.surfaceAlt,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: colors.border.subtle,
     width: "100%",
   },
   closeBtnSuccess: {
-    backgroundColor: "#00e5ff",
+    backgroundColor: colors.primary,
     borderColor: "transparent",
-    shadowColor: "#00e5ff",
+    shadowColor: colors.primary,
     shadowOpacity: 0.3,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
@@ -550,6 +555,7 @@ const styles = StyleSheet.create({
   closeBtnText: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#ccc",
+    color: colors.text.tertiary,
   },
-});
+  });
+}

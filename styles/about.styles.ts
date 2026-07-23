@@ -79,7 +79,7 @@ export function makeAboutStyles(colors: AppColorTokens) {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#262a31",
+    backgroundColor: colors.surfaceAlt,
     padding: AppSpacing.xl,
     borderRadius: AppRadius.md,
     marginBottom: 10,

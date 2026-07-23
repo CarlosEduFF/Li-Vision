@@ -1,8 +1,10 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Dimensions, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import Carousel from "react-native-reanimated-carousel";
+import { useAppTheme } from "@/context/ThemeContext";
+import { AppColorTokens } from "@/constants/theme";
 
 const { width, height: screenHeight } = Dimensions.get("window");
 const CAROUSEL_WIDTH = width - 60;
@@ -53,6 +55,8 @@ type AboutModalProps = {
 };
 
 export default function AboutModal({ visible, slide, onClose }: AboutModalProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [activeIndex, setActiveIndex] = useState(0);
   const { t } = useTranslation();
   const modalId = modalsData[String(slide)] ? String(slide) : "1";
@@ -79,10 +83,10 @@ export default function AboutModal({ visible, slide, onClose }: AboutModalProps)
         <View style={styles.modalContent}>
           <View style={styles.header}>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <MaterialIcons name="close" size={28} color="#fff" />
+              <MaterialIcons name="close" size={28} color={colors.text.primary} />
             </TouchableOpacity>
             <View style={styles.titleRow}>
-              <MaterialIcons name={modalData.icon} size={32} color="#00e5ff" />
+              <MaterialIcons name={modalData.icon} size={32} color={colors.primary} />
               <Text style={styles.title}>{t(modalData.titleKey)}</Text>
             </View>
           </View>
@@ -106,7 +110,7 @@ export default function AboutModal({ visible, slide, onClose }: AboutModalProps)
                   <View style={styles.itemsContainer}>
                     {item.items.map((text, idx) => (
                       <View key={idx} style={styles.itemRow}>
-                        <MaterialIcons name="check-circle" size={18} color="#4caf50" />
+                        <MaterialIcons name="check-circle" size={18} color={colors.accent.green} />
                         <Text style={styles.itemText}>{text}</Text>
                       </View>
                     ))}
@@ -130,7 +134,8 @@ export default function AboutModal({ visible, slide, onClose }: AboutModalProps)
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.7)",
@@ -141,13 +146,13 @@ const styles = StyleSheet.create({
     width: "92%",
     maxHeight: "95%",
     minHeight: screenHeight * 0.88,
-    backgroundColor: "#10141a",
+    backgroundColor: colors.background,
     borderRadius: 24,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(0, 229, 255, 0.15)",
+    borderColor: colors.border.cyan,
     elevation: 10,
-    shadowColor: "#00e5ff",
+    shadowColor: colors.primary,
     shadowOpacity: 0.2,
     shadowRadius: 20,
     shadowOffset: { width: 0, height: 10 },
@@ -156,9 +161,9 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    backgroundColor: "#1c2026",
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0, 229, 255, 0.15)",
+    borderBottomColor: colors.border.cyan,
   },
   closeBtn: {
     position: "absolute",
@@ -177,7 +182,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "800",
-    color: "#ffffff",
+    color: colors.text.primary,
     flex: 1,
   },
   image: {
@@ -190,12 +195,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   slideCard: {
-    backgroundColor: "#1c2026",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 20,
     marginHorizontal: 10,
     borderWidth: 1,
-    borderColor: "rgba(0, 229, 255, 0.15)",
+    borderColor: colors.border.cyan,
     height: 360,
   },
   slideHeader: {
@@ -205,25 +210,25 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.05)",
+    borderBottomColor: colors.border.subtle,
   },
   slideNumber: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#00e5ff",
+    backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
   },
   slideNumberText: {
-    color: "#000",
+    color: colors.background,
     fontSize: 16,
     fontWeight: "bold",
   },
   slideTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#fff",
+    color: colors.text.primary,
     flex: 1,
   },
   itemsContainer: {
@@ -236,7 +241,7 @@ const styles = StyleSheet.create({
   },
   itemText: {
     fontSize: 14,
-    color: "#a0aab5",
+    color: colors.text.muted,
     flex: 1,
     lineHeight: 20,
   },
@@ -251,10 +256,11 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 999,
-    backgroundColor: "rgba(255,255,255,0.25)",
+    backgroundColor: colors.border.subtle,
   },
   dotActive: {
     width: 20,
-    backgroundColor: "#00e5ff",
+    backgroundColor: colors.primary,
   },
-});
+  });
+}

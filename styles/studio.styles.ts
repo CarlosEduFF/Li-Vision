@@ -29,7 +29,7 @@ export function makeStudioStyles(colors: AppColorTokens) {
   },
   collaboratorHint: {
     fontSize: 13,
-    color: "#9cadc3",
+    color: colors.text.muted,
     marginBottom: 14,
     lineHeight: 19,
   },
@@ -63,7 +63,7 @@ export function makeStudioStyles(colors: AppColorTokens) {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#262a31",
+    backgroundColor: colors.surfaceAlt,
     padding: AppSpacing.xl,
     borderRadius: AppRadius.md,
     borderWidth: 1,

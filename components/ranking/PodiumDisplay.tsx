@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import Text from "@/components/TranslatableText";
-import { AppColors } from "@/constants/theme";
+import { AppColorTokens } from "@/constants/theme";
+import { useAppTheme } from "@/context/ThemeContext";
 import type { RankingEntry } from "@/features/ranking/types";
 
 type Props = {
@@ -13,40 +14,44 @@ type Props = {
 type PodiumItemProps = {
   entry: RankingEntry;
   position: 1 | 2 | 3;
+  colors: AppColorTokens;
+  styles: ReturnType<typeof makeStyles>;
 };
 
-const PODIUM_CONFIG = {
-  1: {
-    color: AppColors.podium.gold,
-    gradientColors: [AppColors.podium.gold, AppColors.podium.goldDark] as [string, string],
-    height: 60,
-    size: 36,
-    borderRadius: 18,
-    icon: "emoji-events" as const,
-    iconSize: 20,
-  },
-  2: {
-    color: AppColors.podium.silver,
-    gradientColors: [AppColors.podium.silver, AppColors.podium.silverDark] as [string, string],
-    height: 40,
-    size: 28,
-    borderRadius: 14,
-    icon: "person" as const,
-    iconSize: 16,
-  },
-  3: {
-    color: AppColors.podium.bronze,
-    gradientColors: [AppColors.podium.bronze, AppColors.podium.bronzeDark] as [string, string],
-    height: 30,
-    size: 28,
-    borderRadius: 14,
-    icon: "person" as const,
-    iconSize: 16,
-  },
-} as const;
+function makePodiumConfig(colors: AppColorTokens) {
+  return {
+    1: {
+      color: colors.podium.gold,
+      gradientColors: [colors.podium.gold, colors.podium.goldDark] as [string, string],
+      height: 60,
+      size: 36,
+      borderRadius: 18,
+      icon: "emoji-events" as const,
+      iconSize: 20,
+    },
+    2: {
+      color: colors.podium.silver,
+      gradientColors: [colors.podium.silver, colors.podium.silverDark] as [string, string],
+      height: 40,
+      size: 28,
+      borderRadius: 14,
+      icon: "person" as const,
+      iconSize: 16,
+    },
+    3: {
+      color: colors.podium.bronze,
+      gradientColors: [colors.podium.bronze, colors.podium.bronzeDark] as [string, string],
+      height: 30,
+      size: 28,
+      borderRadius: 14,
+      icon: "person" as const,
+      iconSize: 16,
+    },
+  } as const;
+}
 
-function PodiumItem({ entry, position }: PodiumItemProps) {
-  const config = PODIUM_CONFIG[position];
+function PodiumItem({ entry, position, colors, styles }: PodiumItemProps) {
+  const config = makePodiumConfig(colors)[position];
   return (
     <View style={styles.podiumItem}>
       <View
@@ -83,18 +88,21 @@ function PodiumItem({ entry, position }: PodiumItemProps) {
 }
 
 export function PodiumDisplay({ ranking }: Props) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   if (ranking.length === 0) return null;
 
   return (
     <View style={styles.podiumRow}>
-      {ranking[1] && <PodiumItem entry={ranking[1]} position={2} />}
-      {ranking[0] && <PodiumItem entry={ranking[0]} position={1} />}
-      {ranking[2] && <PodiumItem entry={ranking[2]} position={3} />}
+      {ranking[1] && <PodiumItem entry={ranking[1]} position={2} colors={colors} styles={styles} />}
+      {ranking[0] && <PodiumItem entry={ranking[0]} position={1} colors={colors} styles={styles} />}
+      {ranking[2] && <PodiumItem entry={ranking[2]} position={3} colors={colors} styles={styles} />}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
   podiumRow: {
     flexDirection: "row",
     alignItems: "flex-end",
@@ -108,12 +116,12 @@ const styles = StyleSheet.create({
     width: "28%",
   },
   avatarMini: {
-    backgroundColor: "rgba(0, 229, 255, 0.1)",
+    backgroundColor: colors.border.cyan,
     justifyContent: "center",
     alignItems: "center",
   },
   podiumName: {
-    color: "#dfe2eb",
+    color: colors.text.alt,
     fontSize: 11,
     fontWeight: "600",
     marginBottom: 6,
@@ -127,8 +135,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   podiumRank: {
+    // Fixo: o texto do rank fica sempre sobre o gradiente colorido do pódio, não sobre a superfície do tema.
     color: "#fff",
     fontWeight: "900",
     fontSize: 16,
   },
-});
+  });
+}

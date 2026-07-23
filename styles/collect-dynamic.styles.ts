@@ -42,7 +42,7 @@ export function makeCollectDynamicStyles(colors: AppColorTokens) {
     borderRadius: 10,
     gap: 5,
   },
-  recordingText: { color: "red", fontWeight: "bold", fontSize: 12 },
+  recordingText: { color: colors.accent.error, fontWeight: "bold", fontSize: 12 },
   form: { gap: 15 },
   label: { color: colors.text.secondary, fontSize: 14, fontWeight: "bold" },
   input: {
@@ -79,7 +79,7 @@ export function makeCollectDynamicStyles(colors: AppColorTokens) {
   stats: { color: colors.text.secondary, textAlign: "center", marginTop: 10 },
   chipScroll: { marginBottom: 10 },
   chip: {
-    backgroundColor: "#262a31",
+    backgroundColor: colors.surfaceAlt,
     paddingHorizontal: 15,
     paddingVertical: AppSpacing.sm,
     borderRadius: 20,

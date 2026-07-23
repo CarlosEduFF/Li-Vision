@@ -37,8 +37,9 @@ import speechService, { getSpeechLanguageConfig, SpeechPreferences } from "@/ser
 import { useSpellingDetector } from "@/hooks/useSpellingDetector";
 import SpellingPanel from "@/components/voice/SpellingPanel";
 import VoiceSettingsModal from "@/components/voice/VoiceSettingsModal";
-import { camStyles as styles } from "@/styles/cam.styles";
+import { makeCamStyles } from "@/styles/cam.styles";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "@/context/ThemeContext";
 
 const DETECTION_MODES: { key: DetectionMode; label: string; desc: string; icon: string }[] = [
   { key: "hybrid",     label: "Híbrido",        desc: "Combina regras + ML estático + ML dinâmico",   icon: "merge-type" },
@@ -57,6 +58,8 @@ const SKELETON_CONNECTIONS: [number, number][] = [
 ];
 
 export default function CameraScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => makeCamStyles(colors), [colors]);
   const [gesture, setGesture] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number>(0);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("disconnected");
@@ -395,7 +398,7 @@ export default function CameraScreen() {
       {/* HEADER */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityLabel="Voltar">
-          <MaterialIcons name="arrow-back" size={24} color="#fff" />
+          <MaterialIcons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
 
         <TouchableOpacity

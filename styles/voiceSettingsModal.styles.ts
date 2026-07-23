@@ -1,0 +1,187 @@
+import { StyleSheet } from "react-native";
+import { AppColorTokens } from "@/constants/theme";
+
+export function makeVoiceSettingsStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
+  bg: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.85)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  card: {
+    width: "100%",
+    maxWidth: 420,
+    backgroundColor: colors.surface,
+    borderRadius: 24,
+    padding: 22,
+    borderWidth: 1,
+    borderColor: "rgba(179,136,255,0.4)",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 6,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: colors.text.primary,
+  },
+  subtitle: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    marginBottom: 16,
+    lineHeight: 17,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
+  },
+  rowTextBlock: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  rowTitle: {
+    color: colors.text.primary,
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  rowDesc: {
+    color: colors.text.secondary,
+    fontSize: 11,
+    marginTop: 2,
+  },
+  languageBlock: {
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
+  },
+  languageTitle: {
+    color: colors.text.primary,
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  languageDesc: {
+    color: colors.text.secondary,
+    fontSize: 11,
+    marginTop: 2,
+    marginBottom: 10,
+  },
+  languageGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  languageChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  languageChipActive: {
+    backgroundColor: colors.border.cyan,
+    borderColor: colors.border.cyanStrong,
+  },
+  languageChipMissing: {
+    borderColor: "rgba(255,183,77,0.5)",
+  },
+  languageMissingHint: {
+    color: colors.accent.warning,
+    fontSize: 10,
+    marginTop: 10,
+    lineHeight: 14,
+  },
+  languageChipText: {
+    color: colors.text.muted,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  languageChipTextActive: {
+    color: colors.primary,
+  },
+  stepperRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
+  },
+  stepperLabel: {
+    color: colors.text.primary,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  stepperHint: {
+    color: colors.text.secondary,
+    fontSize: 10,
+    marginTop: 2,
+  },
+  stepperControls: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  stepBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.surface,
+  },
+  stepperValue: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: "700",
+    minWidth: 60,
+    textAlign: "center",
+  },
+  testBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: colors.border.cyan,
+    borderWidth: 1,
+    borderColor: colors.border.cyanStrong,
+    marginTop: 4,
+    marginBottom: 10,
+  },
+  testBtnText: {
+    color: colors.primary,
+    fontWeight: "700",
+    fontSize: 13,
+  },
+  closeBtn: {
+    marginTop: 8,
+    alignItems: "center",
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  closeBtnText: {
+    color: colors.text.secondary,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  });
+}

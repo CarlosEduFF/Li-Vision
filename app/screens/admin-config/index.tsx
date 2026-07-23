@@ -177,7 +177,7 @@ export default function AdminConfigScreen() {
         >
           <View style={styles.cardLeft}>
             <View style={[styles.iconContainer, { backgroundColor: 'rgba(255, 107, 107, 0.1)' }]}>
-              <MaterialIcons name="rule" size={24} color="#ff6b6b" />
+              <MaterialIcons name="rule" size={24} color={colors.accent.danger} />
             </View>
             <View style={styles.cardInfo}>
               <Text style={styles.cardTitle}>{t('profile.admin.rules_toggle')}</Text>
@@ -202,7 +202,7 @@ export default function AdminConfigScreen() {
         >
           <View style={styles.cardLeft}>
             <View style={[styles.iconContainer, { backgroundColor: 'rgba(0, 229, 255, 0.1)' }]}>
-              <MaterialIcons name="cloud-download" size={24} color="#00e5ff" />
+              <MaterialIcons name="cloud-download" size={24} color={colors.primary} />
             </View>
             <View style={styles.cardInfo}>
               <Text style={styles.cardTitle}>{t('profile.admin.export_title')}</Text>
@@ -210,9 +210,9 @@ export default function AdminConfigScreen() {
             </View>
           </View>
           {loadingBackup ? (
-            <ActivityIndicator color="#00e5ff" />
+            <ActivityIndicator color={colors.primary} />
           ) : (
-            <MaterialIcons name="chevron-right" size={24} color="#555" />
+            <MaterialIcons name="chevron-right" size={24} color={colors.text.tertiary} />
           )}
         </TouchableOpacity>
 
@@ -225,7 +225,7 @@ export default function AdminConfigScreen() {
         >
           <View style={styles.cardLeft}>
             <View style={[styles.iconContainer, { backgroundColor: 'rgba(76, 175, 80, 0.1)' }]}>
-              <MaterialIcons name="cloud-upload" size={24} color="#4caf50" />
+              <MaterialIcons name="cloud-upload" size={24} color={colors.accent.green} />
             </View>
             <View style={styles.cardInfo}>
               <Text style={styles.cardTitle}>{t('profile.admin.import_title')}</Text>
@@ -233,14 +233,14 @@ export default function AdminConfigScreen() {
             </View>
           </View>
           {loadingImport ? (
-            <ActivityIndicator color="#4caf50" />
+            <ActivityIndicator color={colors.accent.green} />
           ) : (
-            <MaterialIcons name="chevron-right" size={24} color="#555" />
+            <MaterialIcons name="chevron-right" size={24} color={colors.text.tertiary} />
           )}
         </TouchableOpacity>
 
         <View style={styles.infoBox}>
-          <Ionicons name="shield-checkmark-outline" size={20} color="#4caf50" />
+          <Ionicons name="shield-checkmark-outline" size={20} color={colors.accent.green} />
           <Text style={styles.infoText}>
             {t('profile.admin.info_box')}
           </Text>

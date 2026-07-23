@@ -49,7 +49,7 @@ export function makeLevelsInfoStyles(colors: AppColorTokens) {
   levelTitle: { fontSize: AppSpacing.xl, fontWeight: "800" },
   levelRange: {
     fontSize: 12,
-    color: "#697688",
+    color: colors.text.secondary,
     fontWeight: "600",
     textTransform: "uppercase",
     marginTop: 2,
@@ -69,7 +69,7 @@ export function makeLevelsInfoStyles(colors: AppColorTokens) {
   },
   footerText: {
     fontSize: 12,
-    color: "#697688",
+    color: colors.text.secondary,
     textAlign: "center",
     flex: 1,
   },

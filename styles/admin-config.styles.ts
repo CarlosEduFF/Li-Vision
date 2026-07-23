@@ -21,7 +21,7 @@ export function makeAdminConfigStyles(colors: AppColorTokens) {
   sectionTitle: {
     fontSize: 13,
     fontWeight: "bold",
-    color: "#4a5568",
+    color: colors.text.secondary,
     textTransform: "uppercase",
     letterSpacing: 1,
     marginBottom: 15,
@@ -35,7 +35,7 @@ export function makeAdminConfigStyles(colors: AppColorTokens) {
     padding: AppSpacing.xl,
     borderRadius: AppRadius.xxl,
     borderWidth: 1,
-    borderColor: "#2a3548",
+    borderColor: colors.border.subtle,
     marginBottom: 12,
   },
   cardLeft: { flexDirection: "row", alignItems: "center", flex: 1 },
@@ -54,16 +54,16 @@ export function makeAdminConfigStyles(colors: AppColorTokens) {
     color: colors.text.primary,
     marginBottom: 4,
   },
-  cardDesc: { fontSize: 12, color: "#697688" },
+  cardDesc: { fontSize: 12, color: colors.text.secondary },
   toggleOuter: {
     width: 44,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#2a3548",
+    backgroundColor: colors.surfaceAlt,
     padding: 2,
     justifyContent: "center",
   },
-  toggleOuterActive: { backgroundColor: "#ff6b6b" },
+  toggleOuterActive: { backgroundColor: colors.accent.error },
   toggleInner: {
     width: 20,
     height: 20,
@@ -81,9 +81,9 @@ export function makeAdminConfigStyles(colors: AppColorTokens) {
     marginTop: 10,
     gap: 12,
   },
-  infoText: { flex: 1, fontSize: 13, color: "#81c784", lineHeight: 18 },
+  infoText: { flex: 1, fontSize: 13, color: colors.accent.green, lineHeight: 18 },
   footer: { marginTop: AppSpacing.xl, alignItems: "center", paddingBottom: 40 },
-  footerText: { fontSize: 12, color: "#2d3748" },
+  footerText: { fontSize: 12, color: colors.text.secondary },
 });
 }
 

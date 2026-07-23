@@ -68,7 +68,7 @@ export default function SelectModelScreen() {
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <MaterialIcons name="arrow-back" size={24} color="#fff" />
+          <MaterialIcons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
         <Text style={styles.title}>{t('select_model.title')}</Text>
       </View>
@@ -81,7 +81,7 @@ export default function SelectModelScreen() {
         <ActivityIndicator size="large" color="#b388ff" style={{ marginTop: 40 }} />
       ) : models.length === 0 ? (
         <View style={styles.emptyBox}>
-          <MaterialIcons name="language" size={48} color="#333" />
+          <MaterialIcons name="language" size={48} color={colors.text.tertiary} />
           <Text style={styles.emptyText}>{t('select_model.empty_text')}</Text>
         </View>
       ) : (
@@ -105,7 +105,7 @@ export default function SelectModelScreen() {
                    <MaterialIcons 
                       name={isActive ? "check-circle" : "radio-button-unchecked"} 
                       size={28} 
-                      color={isActive ? "#b388ff" : "#555"} 
+                      color={isActive ? colors.accent.purple : colors.text.tertiary}
                    />
                 </View>
 

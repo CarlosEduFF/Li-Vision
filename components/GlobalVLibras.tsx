@@ -13,10 +13,12 @@ import {
 import { WebView } from "react-native-webview";
 import { MaterialIcons } from "@expo/vector-icons";
 import { usePathname } from "expo-router";
+import { useAppTheme } from "@/context/ThemeContext";
+import { AppColorTokens } from "@/constants/theme";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
-const VLIBRAS_HTML = `
+const makeVlibrasHtml = (colors: AppColorTokens) => `
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -24,17 +26,17 @@ const VLIBRAS_HTML = `
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body, html { 
-      width: 100%; height: 100%; 
-      background: #10141a; 
+    body, html {
+      width: 100%; height: 100%;
+      background: ${colors.surface};
       overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
     }
-    #status { 
-      color: #8a92a3; font-family: sans-serif; text-align: center; 
-      position: absolute; width: 100%; top: 40%; z-index: 9999; 
+    #status {
+      color: ${colors.text.secondary}; font-family: sans-serif; text-align: center;
+      position: absolute; width: 100%; top: 40%; z-index: 9999;
     }
     
     /* Centraliza e escala o avatar para o tamanho da pequena janela */
@@ -147,11 +149,20 @@ export const VLibrasController = {
   show: () => {
     DeviceEventEmitter.emit("VLIBRAS_SHOW");
   },
+  // Oculta/reexibe o botão flutuante — usado quando um modal abre por cima,
+  // pois o botão (bottom/right, zIndex alto) capturava toques do modal.
+  setButtonHidden: (hidden: boolean) => {
+    DeviceEventEmitter.emit("VLIBRAS_HIDE_BUTTON", hidden);
+  },
 };
 
 export default function GlobalVLibras() {
+  const { colors } = useAppTheme();
+  const styles = React.useMemo(() => makeVLibrasStyles(colors), [colors]);
+  const vlibrasHtml = React.useMemo(() => makeVlibrasHtml(colors), [colors]);
   const [visible, setVisible] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [buttonHidden, setButtonHidden] = useState(false);
   const [pendingText, setPendingText] = useState<string | null>(null);
   const webViewRef = useRef<WebView>(null);
   const pathname = usePathname();
@@ -238,9 +249,13 @@ export default function GlobalVLibras() {
   useEffect(() => {
     const subTranslate = DeviceEventEmitter.addListener("VLIBRAS_TRANSLATE", handleTranslate);
     const subShow = DeviceEventEmitter.addListener("VLIBRAS_SHOW", showWidget);
+    const subHide = DeviceEventEmitter.addListener("VLIBRAS_HIDE_BUTTON", (hidden: boolean) =>
+      setButtonHidden(hidden)
+    );
     return () => {
       subTranslate.remove();
       subShow.remove();
+      subHide.remove();
     };
   }, [handleTranslate]);
 
@@ -260,10 +275,11 @@ export default function GlobalVLibras() {
   };
 
   if (!visible) {
-    if (isTranscriptionScreen) return null;
+    if (isTranscriptionScreen || buttonHidden) return null;
     return (
       <View style={styles.container} pointerEvents="box-none">
         <TouchableOpacity style={styles.floatingBtn} onPress={showWidget} activeOpacity={0.8}>
+          {/* Ícone escuro fixo por design: o fundo do botão é sempre ciano nos dois temas */}
           <MaterialIcons name="sign-language" size={28} color="#081018" />
         </TouchableOpacity>
       </View>
@@ -283,18 +299,18 @@ export default function GlobalVLibras() {
           ]}
         >
           <View style={styles.windowHeader} {...panResponder.panHandlers}>
-            <MaterialIcons name="drag-indicator" size={16} color="#8a92a3" />
-            <MaterialIcons name="accessibility" size={14} color="#00e5ff" />
+            <MaterialIcons name="drag-indicator" size={16} color={colors.text.secondary} />
+            <MaterialIcons name="accessibility" size={14} color={colors.primary} />
             <Text style={styles.windowTitle}>Acessibilidade</Text>
             <TouchableOpacity onPress={hideWidget} style={styles.closeBtn}>
-              <MaterialIcons name="close" size={18} color="#fff" />
+              <MaterialIcons name="close" size={18} color={colors.text.primary} />
             </TouchableOpacity>
           </View>
 
           <View style={styles.webviewContainer}>
             <WebView
               ref={webViewRef}
-              source={{ html: VLIBRAS_HTML }}
+              source={{ html: vlibrasHtml }}
               style={styles.webview}
               javaScriptEnabled={true}
               domStorageEnabled={true}
@@ -303,7 +319,7 @@ export default function GlobalVLibras() {
             />
             {!isReady && (
               <View style={styles.loadingOverlay}>
-                <ActivityIndicator size="small" color="#00e5ff" />
+                <ActivityIndicator size="small" color={colors.primary} />
               </View>
             )}
           </View>
@@ -313,7 +329,8 @@ export default function GlobalVLibras() {
   );
 }
 
-const styles = StyleSheet.create({
+function makeVLibrasStyles(colors: AppColorTokens) {
+  return StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 9999,
@@ -325,7 +342,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: "#00e5ff",
+    backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
     elevation: 8,
@@ -337,11 +354,11 @@ const styles = StyleSheet.create({
     right: 20,
     width: 220,
     height: 300,
-    backgroundColor: "#10141a",
+    backgroundColor: colors.surface,
     borderRadius: 20,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#00e5ff",
+    borderColor: colors.primary,
     elevation: 10,
   },
   windowHeader: {
@@ -349,11 +366,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 10,
     paddingVertical: 6,
-    backgroundColor: "#1c2026",
+    backgroundColor: colors.surfaceAlt,
     gap: 6,
   },
   windowTitle: {
-    color: "#fff",
+    color: colors.text.primary,
     fontSize: 10,
     fontWeight: "bold",
     flex: 1,
@@ -369,8 +386,9 @@ const styles = StyleSheet.create({
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#10141a",
+    backgroundColor: colors.surface,
     justifyContent: "center",
     alignItems: "center",
   },
-});
+  });
+}
