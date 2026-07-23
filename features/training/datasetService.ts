@@ -14,8 +14,9 @@ export const datasetService = {
     return apiRequest(`/collect/datasets/${datasetId}/stats`);
   },
 
-  async deleteDataset(datasetId: string): Promise<any> {
-    return apiRequest(`/collect/datasets/${datasetId}`, { method: "DELETE" });
+  async deleteDataset(datasetId: string, force: boolean = false): Promise<any> {
+    const query = force ? "?force=true" : "";
+    return apiRequest(`/collect/datasets/${datasetId}${query}`, { method: "DELETE" });
   },
 
   async renameDataset(datasetId: string, newName: string): Promise<any> {

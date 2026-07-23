@@ -60,21 +60,49 @@ export default function ManageDatasetsScreen() {
     }
   };
 
+  const deleteDatasetForced = async (dataset: any) => {
+    try {
+      const res = await trainingService.deleteDataset(dataset.id, true);
+      if (res.ok) {
+        if (expandedId === dataset.id) setExpandedId(null);
+        loadDatasets();
+      } else {
+        Alert.alert(t('manage_datasets.error'), res.error || res.detail || t('manage_datasets.error'));
+      }
+    } catch (e) {
+      Alert.alert(t('manage_datasets.network_error'), t('manage_datasets.network_error_msg', { error: String(e) }));
+    }
+  };
+
   const confirmDeleteDataset = (dataset: any) => {
     Alert.alert(
       t('manage_datasets.delete_dataset_title'),
       t('manage_datasets.delete_dataset_msg', { name: dataset.name }),
       [
         { text: t('manage_datasets.cancel'), style: "cancel" },
-        { 
-          text: t('manage_datasets.delete'), 
-          style: "destructive", 
+        {
+          text: t('manage_datasets.delete'),
+          style: "destructive",
           onPress: async () => {
             try {
               const res = await trainingService.deleteDataset(dataset.id);
               if (res.ok) {
                 if (expandedId === dataset.id) setExpandedId(null);
                 loadDatasets();
+              } else if (res.requires_force) {
+                // Dataset tem modelos treinados vinculados — confirma exclusão em cascata.
+                Alert.alert(
+                  t('manage_datasets.delete_dataset_title'),
+                  res.error,
+                  [
+                    { text: t('manage_datasets.cancel'), style: "cancel" },
+                    {
+                      text: t('manage_datasets.delete'),
+                      style: "destructive",
+                      onPress: () => deleteDatasetForced(dataset),
+                    },
+                  ]
+                );
               } else {
                 Alert.alert(t('manage_datasets.error'), res.error || res.detail || t('manage_datasets.error'));
               }
