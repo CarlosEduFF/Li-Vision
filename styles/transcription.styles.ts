@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import { AppColorTokens, AppRadius, AppSpacing } from "@/constants/theme";
 
-export function makeTranscriptionStyles(colors: AppColorTokens) {
+export function makeTranscriptionStyles(colors: AppColorTokens, scheme: "light" | "dark" = "dark") {
   return StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.backgroundAlt },
   header: {
@@ -15,10 +15,10 @@ export function makeTranscriptionStyles(colors: AppColorTokens) {
   title: { color: colors.text.primary, fontSize: 22, fontWeight: "800" },
   inputArea: { paddingHorizontal: AppSpacing.xl },
   inputContainer: {
-    backgroundColor: "#1a2230",
+    backgroundColor: colors.surfaceAlt,
     borderRadius: AppRadius.xl,
     borderWidth: 1,
-    borderColor: "#2a3548",
+    borderColor: colors.border.subtle,
     overflow: "hidden",
   },
   input: {
@@ -38,7 +38,7 @@ export function makeTranscriptionStyles(colors: AppColorTokens) {
     paddingHorizontal: 14,
     paddingBottom: 10,
   },
-  charCount: { color: "#697688", fontSize: 12 },
+  charCount: { color: colors.text.secondary, fontSize: 12 },
   translateBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -48,8 +48,10 @@ export function makeTranscriptionStyles(colors: AppColorTokens) {
     paddingVertical: AppSpacing.sm,
     borderRadius: 10,
   },
-  translateBtnDisabled: { backgroundColor: "#2a3548", opacity: 0.5 },
-  translateBtnText: { color: "#081018", fontWeight: "700", fontSize: 14 },
+  translateBtnDisabled: { backgroundColor: colors.surfaceAlt, opacity: 0.5 },
+  // O botão fica sobre colors.primary sólido: escuro no light mode (ciano claro/saturado
+  // precisa de texto escuro), branco no dark mode (ciano vibrante contrasta melhor com branco).
+  translateBtnText: { color: scheme === "dark" ? "#ffffff" : "#081018", fontWeight: "700", fontSize: 14 },
   webviewContainer: {
     flex: 1,
     margin: AppSpacing.xl,
@@ -71,7 +73,7 @@ export function makeTranscriptionStyles(colors: AppColorTokens) {
     alignItems: "center",
     gap: 12,
   },
-  loadingText: { color: "#8a92a3", fontSize: 14 },
+  loadingText: { color: colors.text.muted, fontSize: 14 },
   subtitleBar: {
     position: "absolute",
     bottom: 0,
@@ -84,6 +86,7 @@ export function makeTranscriptionStyles(colors: AppColorTokens) {
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
+  // Texto fixo: a barra de legenda fica sempre sobre um fundo escuro semitransparente, independente do tema.
   subtitleText: { color: "#dfe2eb", fontSize: 13, flex: 1 },
   footer: {
     flexDirection: "row",
@@ -93,7 +96,7 @@ export function makeTranscriptionStyles(colors: AppColorTokens) {
     paddingVertical: AppSpacing.sm,
     paddingHorizontal: AppSpacing.xl,
   },
-  footerText: { color: "#697688", fontSize: 11 },
+  footerText: { color: colors.text.secondary, fontSize: 11 },
 });
 }
 

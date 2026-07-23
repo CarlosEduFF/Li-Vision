@@ -164,8 +164,8 @@ const VLIBRAS_HTML = `
 `;
 
 export default function TranscriptionTabScreen() {
-    const { colors } = useAppTheme();
-    const styles = useMemo(() => makeStyles(colors), [colors]);
+    const { colors, scheme } = useAppTheme();
+    const styles = useMemo(() => makeStyles(colors, scheme), [colors, scheme]);
     const webViewRef = useRef<WebView>(null);
     const [text, setText] = useState("");
     const [isReady, setIsReady] = useState(false);
@@ -202,7 +202,7 @@ export default function TranscriptionTabScreen() {
         <SafeAreaView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <MaterialIcons name="translate" size={24} color="#00e5ff" />
+                <MaterialIcons name="translate" size={24} color={colors.primary} />
                 <Text style={styles.title}>{t('transcription.title')}</Text>
             </View>
 
@@ -217,7 +217,7 @@ export default function TranscriptionTabScreen() {
                         value={text}
                         onChangeText={setText}
                         placeholder={t('transcription.placeholder')}
-                        placeholderTextColor="#697688"
+                        placeholderTextColor={colors.text.secondary}
                         multiline
                         maxLength={500}
                     />
@@ -233,10 +233,10 @@ export default function TranscriptionTabScreen() {
                             activeOpacity={0.7}
                         >
                             {isTranslating ? (
-                                <ActivityIndicator size="small" color="#081018" />
+                                <ActivityIndicator size="small" color={scheme === "dark" ? "#ffffff" : "#081018"} />
                             ) : (
                                 <>
-                                    <MaterialIcons name="sign-language" size={18} color="#081018" />
+                                    <MaterialIcons name="sign-language" size={18} color={scheme === "dark" ? "#ffffff" : "#081018"} />
                                     <Text style={styles.translateBtnText}>{t('transcription.translate')}</Text>
                                 </>
                             )}
@@ -249,7 +249,7 @@ export default function TranscriptionTabScreen() {
             <View style={styles.webviewContainer}>
                 {!isReady && (
                     <View style={styles.loadingOverlay}>
-                        <ActivityIndicator size="large" color="#00e5ff" />
+                        <ActivityIndicator size="large" color={colors.primary} />
                         <Text style={styles.loadingText}>{t('transcription.loading')}</Text>
                     </View>
                 )}
@@ -280,7 +280,7 @@ export default function TranscriptionTabScreen() {
 
             {/* Info Footer */}
             <View style={styles.footer}>
-                <MaterialIcons name="info-outline" size={14} color="#697688" />
+                <MaterialIcons name="info-outline" size={14} color={colors.text.secondary} />
                 <Text style={styles.footerText}>
                     {t('transcription.footer')}
                 </Text>
