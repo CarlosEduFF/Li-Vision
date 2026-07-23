@@ -164,6 +164,16 @@ class CollectionService:
 
     def delete_dataset(self, dataset_id: str) -> dict:
         try:
+            # Bloqueia a exclusão se houver modelos treinados vinculados a este
+            # dataset — apagar o dataset quebraria a referência desses modelos.
+            models_res = supabase.table("models").select("name").eq("dataset_id", dataset_id).execute()
+            if models_res.data:
+                model_names = ", ".join(m["name"] for m in models_res.data)
+                return {
+                    "ok": False,
+                    "error": f"Não é possível excluir: existem modelos treinados vinculados a este dataset ({model_names}). Exclua ou retreine esses modelos antes.",
+                }
+
             # Deleta samples primeiro (redundante com CASCADE, mas garante limpeza)
             supabase.table("samples").delete().eq("dataset_id", dataset_id).execute()
             # Depois deleta o dataset
