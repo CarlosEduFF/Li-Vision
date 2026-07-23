@@ -63,8 +63,8 @@ def require_admin(user: dict = Depends(verify_token)):
     return user
 
 @router.delete("/datasets/{dataset_id}")
-async def delete_dataset(dataset_id: str, admin: dict = Depends(require_admin)):
-    return get_service().delete_dataset(dataset_id)
+async def delete_dataset(dataset_id: str, force: bool = False, admin: dict = Depends(require_admin)):
+    return get_service().delete_dataset(dataset_id, force=force)
 
 @router.put("/datasets/{dataset_id}")
 async def rename_dataset(dataset_id: str, payload: RenameDatasetPayload, admin: dict = Depends(require_admin)):

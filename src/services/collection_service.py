@@ -162,17 +162,31 @@ class CollectionService:
         
         return ds
 
-    def delete_dataset(self, dataset_id: str) -> dict:
+    def delete_dataset(self, dataset_id: str, force: bool = False) -> dict:
         try:
             # Bloqueia a exclusão se houver modelos treinados vinculados a este
             # dataset — apagar o dataset quebraria a referência desses modelos.
-            models_res = supabase.table("models").select("name").eq("dataset_id", dataset_id).execute()
-            if models_res.data:
+            models_res = supabase.table("models").select("id, name, storage_path").eq("dataset_id", dataset_id).execute()
+            if models_res.data and not force:
                 model_names = ", ".join(m["name"] for m in models_res.data)
                 return {
                     "ok": False,
-                    "error": f"Não é possível excluir: existem modelos treinados vinculados a este dataset ({model_names}). Exclua ou retreine esses modelos antes.",
+                    "error": f"Existem modelos treinados vinculados a este dataset ({model_names}). Excluí-los junto com o dataset?",
+                    "requires_force": True,
+                    "linked_models": [m["name"] for m in models_res.data],
                 }
+
+            if models_res.data:
+                # force=True: apaga os modelos vinculados (arquivo no storage + registro) antes do dataset.
+                for m in models_res.data:
+                    storage_path = m.get("storage_path")
+                    if storage_path:
+                        try:
+                            supabase.storage.from_("models").remove([storage_path])
+                        except Exception as storage_err:
+                            logger.warning("[delete_dataset] Falha ao remover arquivo do storage '%s': %s", storage_path, storage_err)
+                    supabase.table("models").delete().eq("id", m["id"]).execute()
+                logger.info("[delete_dataset] %d modelo(s) vinculado(s) removido(s) em cascata.", len(models_res.data))
 
             # Deleta samples primeiro (redundante com CASCADE, mas garante limpeza)
             supabase.table("samples").delete().eq("dataset_id", dataset_id).execute()
