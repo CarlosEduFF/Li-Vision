@@ -158,7 +158,7 @@ export default function ManageDatasetsScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <MaterialIcons name="arrow-back" size={28} color="#00e5ff" />
+          <MaterialIcons name="arrow-back" size={28} color={colors.primary} />
         </TouchableOpacity>
         <Text style={styles.title}>{t('manage_datasets.title')}</Text>
       </View>
@@ -182,7 +182,7 @@ export default function ManageDatasetsScreen() {
                        <Text style={styles.typeText}>{ds.type === 'static' ? t('manage_datasets.static_type') : t('manage_datasets.dynamic_type')}</Text>
                     </View>
                   </View>
-                  <MaterialIcons name={isExpanded ? "expand-less" : "expand-more"} size={28} color="#00e5ff" />
+                  <MaterialIcons name={isExpanded ? "expand-less" : "expand-more"} size={28} color={colors.primary} />
                 </TouchableOpacity>
 
                 {isExpanded && (
@@ -190,10 +190,11 @@ export default function ManageDatasetsScreen() {
                     {isAdmin && (
                       <View style={styles.datasetActions}>
                         <TouchableOpacity style={styles.actionBtn} onPress={() => openEditDataset(ds)}>
-                          <MaterialIcons name="edit" size={18} color="#fff" />
+                          <MaterialIcons name="edit" size={18} color={colors.text.primary} />
                           <Text style={styles.actionText}>{t('manage_datasets.rename_btn')}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.actionBtn, {backgroundColor: '#e53935'}]} onPress={() => confirmDeleteDataset(ds)}>
+                        <TouchableOpacity style={[styles.actionBtn, {backgroundColor: colors.accent.danger}]} onPress={() => confirmDeleteDataset(ds)}>
+                          {/* Ícone branco fixo: sempre sobre o botão vermelho sólido */}
                           <MaterialIcons name="delete" size={18} color="#fff" />
                           <Text style={styles.actionText}>{t('manage_datasets.delete_dataset_btn')}</Text>
                         </TouchableOpacity>
@@ -217,10 +218,10 @@ export default function ManageDatasetsScreen() {
                              {isAdmin && (
                                <>
                                  <TouchableOpacity onPress={() => openEditLabel(ds.id, label)} style={styles.iconBtn}>
-                                   <MaterialIcons name="edit" size={20} color="#00e5ff" />
+                                   <MaterialIcons name="edit" size={20} color={colors.primary} />
                                  </TouchableOpacity>
                                  <TouchableOpacity onPress={() => confirmDeleteLabel(ds.id, label)} style={styles.iconBtn}>
-                                   <MaterialIcons name="delete-outline" size={20} color="#e53935" />
+                                   <MaterialIcons name="delete-outline" size={20} color={colors.accent.danger} />
                                  </TouchableOpacity>
                                </>
                              )}
@@ -253,9 +254,10 @@ export default function ManageDatasetsScreen() {
               />
               <View style={styles.modalBtns}>
                 <TouchableOpacity style={styles.modalBtnCancel} onPress={() => setModalVisible(false)}>
-                   <Text style={{color: '#888', fontWeight: 'bold'}}>{t('manage_datasets.cancel')}</Text>
+                   <Text style={{color: colors.text.secondary, fontWeight: 'bold'}}>{t('manage_datasets.cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.modalBtnSave} onPress={saveEdit}>
+                   {/* Texto preto fixo: sempre sobre o botão ciano sólido */}
                    <Text style={{color: '#000', fontWeight: 'bold'}}>{t('manage_datasets.save')}</Text>
                 </TouchableOpacity>
               </View>
