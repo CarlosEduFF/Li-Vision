@@ -1,5 +1,5 @@
-﻿import React, { useMemo, useState, useCallback } from "react";
-import { View, TouchableOpacity, ActivityIndicator, Image } from "react-native";
+﻿import React, { useMemo, useState, useCallback, useEffect } from "react";
+import { View, TouchableOpacity, TouchableWithoutFeedback, ActivityIndicator, Image, InteractionManager } from "react-native";
 import Text from "@/components/TranslatableText";
 import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -9,32 +9,65 @@ import { trainingService } from "@/services/trainingService";
 import { useTranslation } from "react-i18next";
 import { makeProfileStyles as makeStyles } from "@/styles/profile.styles";
 import { changeLanguage } from "@/services/i18n";
+import { VLibrasController } from "@/components/GlobalVLibras";
 import { Modal, ScrollView as RNScrollView } from "react-native";
 import { useAppTheme } from "@/context/ThemeContext";
+
+const languages = [
+  { code: 'pt', name: 'Português', flag: '🇧🇷' },
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'ja', name: '日本語', flag: '🇯🇵' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
+];
 
 function ProfileScreen() {
   const { colors, scheme, setScheme, isSystemControlled } = useAppTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const [userName, setUserName] = useState("UsuÃ¡rio");
+  const [userName, setUserName] = useState("Usuário");
   const [userRole, setUserRole] = useState("member");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [myRank, setMyRank] = useState<any>(null);
   const [langModalVisible, setLangModalVisible] = useState(false);
+  const [changingLang, setChangingLang] = useState(false);
   const { t, i18n } = useTranslation();
+  // Trava síncrona: durante a troca, o re-render de i18n bloqueia o thread
+  // e toques extras eram descartados/enfileirados ("cliquei várias vezes").
+  // O ref ignora toques repetidos sem depender de re-render de estado.
+  const switchingLangRef = React.useRef(false);
 
-  const languages = [
-    { code: 'pt', name: 'PortuguÃªs', flag: 'ðŸ‡§ðŸ‡·' },
-    { code: 'en', name: 'English', flag: 'ðŸ‡ºðŸ‡¸' },
-    { code: 'de', name: 'Deutsch', flag: 'ðŸ‡©ðŸ‡ª' },
-    { code: 'fr', name: 'FranÃ§ais', flag: 'ðŸ‡«ðŸ‡·' },
-    { code: 'ja', name: 'æ—¥æœ¬èªž', flag: 'ðŸ‡¯ðŸ‡µ' },
-    { code: 'es', name: 'EspaÃ±ol', flag: 'ðŸ‡ªðŸ‡¸' },
-  ];
+  // O botão flutuante do VLibras (bottom/right, zIndex alto) fica por cima dos
+  // itens inferiores do modal (fr/ja/es) e capturava os toques. Esconde-o
+  // enquanto o modal de idioma estiver aberto.
+  useEffect(() => {
+    VLibrasController.setButtonHidden(langModalVisible);
+    return () => VLibrasController.setButtonHidden(false);
+  }, [langModalVisible]);
 
   const handleSelectLanguage = (code: string) => {
-    changeLanguage(code);
+    if (switchingLangRef.current) return;
+    // Fecha o modal imediatamente (feedback instantâneo).
     setLangModalVisible(false);
+    if (code === i18n.language) return;
+    switchingLangRef.current = true;
+    // Overlay de loading — gestão de expectativa para o usuário enquanto
+    // a troca de idioma aplica (idiomas com texto maior/CJK demoram mais).
+    // Mantido visível por um tempo mínimo para não parecer um flash.
+    const overlayShownAt = Date.now();
+    setChangingLang(true);
+    const MIN_OVERLAY_MS = 400;
+    // Só troca o idioma depois que a animação de fechamento termina — a troca
+    // re-renderiza o app inteiro; no mesmo frame do toque ela trava o gesto.
+    InteractionManager.runAfterInteractions(() => {
+      changeLanguage(code).finally(() => {
+        switchingLangRef.current = false;
+        const elapsed = Date.now() - overlayShownAt;
+        const remaining = Math.max(0, MIN_OVERLAY_MS - elapsed);
+        setTimeout(() => setChangingLang(false), remaining);
+      });
+    });
   };
 
   useFocusEffect(
@@ -102,6 +135,7 @@ function ProfileScreen() {
   const levelInfo = getLevel(myRank ? myRank.samples : 0);
 
   return (
+    <>
     <RNScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       {/* Header */}
       <View style={styles.header}>
@@ -114,18 +148,18 @@ function ProfileScreen() {
             <MaterialIcons
               name={scheme === "dark" ? "light-mode" : "dark-mode"}
               size={20}
-              color="#00e5ff"
+              color={colors.primary}
             />
           </TouchableOpacity>
           <TouchableOpacity style={styles.langBtn} onPress={() => setLangModalVisible(true)}>
-            <MaterialIcons name="language" size={20} color="#00e5ff" />
+            <MaterialIcons name="language" size={20} color={colors.primary} />
             <Text style={styles.langText}>{i18n.language.toUpperCase()}</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#00e5ff" style={{ marginTop: 50 }} />
+        <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 50 }} />
       ) : (
         <>
           <View style={styles.profileCard}>
@@ -137,7 +171,7 @@ function ProfileScreen() {
               {avatarUrl ? (
                 <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
               ) : (
-                <FontAwesome5 name="user-astronaut" size={40} color="#00e5ff" />
+                <FontAwesome5 name="user-astronaut" size={40} color={colors.primary} />
               )}
                {userRole === "admin" && (
                  <View style={styles.adminBadge}>
@@ -151,15 +185,15 @@ function ProfileScreen() {
             <Text style={styles.nameText}>{userName}</Text>
             <Text style={styles.roleText}>{userRole === "admin" ? t('profile.role_admin') : t('profile.role_member')}</Text>
             
-            {/* BotÃ£o Admin Config (apenas se for admin) */}
+            {/* Botão Admin Config (apenas se for admin) */}
             {userRole === "admin" && (
               <TouchableOpacity
                 style={styles.adminLinkBtn}
                 onPress={() => router.push("/screens/admin-config")}
               >
-                <MaterialIcons name="admin-panel-settings" size={20} color="#ff6b6b" />
+                <MaterialIcons name="admin-panel-settings" size={20} color={colors.accent.error} />
                 <Text style={styles.adminLinkText}>{t('profile.admin.title')}</Text>
-                <MaterialIcons name="chevron-right" size={20} color="#ff6b6b" />
+                <MaterialIcons name="chevron-right" size={20} color={colors.accent.error} />
               </TouchableOpacity>
             )}
 
@@ -167,7 +201,7 @@ function ProfileScreen() {
               style={styles.editProfileBtn}
               onPress={() => router.push("/screens/edit-profile")}
             >
-              <MaterialIcons name="edit" size={16} color="#00e5ff" />
+              <MaterialIcons name="edit" size={16} color={colors.primary} />
               <Text style={styles.editProfileBtnText}>{t('profile.edit_profile')}</Text>
             </TouchableOpacity>
           </View>
@@ -197,59 +231,74 @@ function ProfileScreen() {
             
             <TouchableOpacity style={styles.rankingBtn} onPress={() => router.push("/screens/ranking")}>
                <Text style={styles.rankingBtnText}>{t('profile.view_ranking')}</Text>
-               <MaterialIcons name="chevron-right" size={20} color="#00e5ff" />
+               <MaterialIcons name="chevron-right" size={20} color={colors.primary} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.aboutBtn} onPress={() => router.push("/screens/about")}>
                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                 <MaterialIcons name="info-outline" size={20} color="#888" />
+                 <MaterialIcons name="info-outline" size={20} color={colors.text.tertiary} />
                  <Text style={styles.aboutBtnText}>{t('profile.about_app')}</Text>
                </View>
-               <MaterialIcons name="chevron-right" size={20} color="#555" />
+               <MaterialIcons name="chevron-right" size={20} color={colors.text.tertiary} />
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-            <MaterialIcons name="logout" size={22} color="#ff4444" />
+            <MaterialIcons name="logout" size={22} color={colors.accent.danger} />
             <Text style={styles.logoutText}>{t('profile.logout')}</Text>
           </TouchableOpacity>
         </>
       )}
-
-      {/* Modal de Idioma */}
-      <Modal transparent visible={langModalVisible} animationType="fade">
-        <TouchableOpacity 
-          style={styles.modalBg} 
-          activeOpacity={1} 
-          onPress={() => setLangModalVisible(false)}
-        >
-          <View style={styles.langModal}>
-            <Text style={styles.modalTitleText}>{t('profile.language')}</Text>
-            {languages.map((lang) => (
-              <TouchableOpacity 
-                key={lang.code}
-                style={[
-                  styles.langItem, 
-                  i18n.language === lang.code && styles.langItemActive
-                ]}
-                onPress={() => handleSelectLanguage(lang.code)}
-              >
-                <Text style={lang.code === i18n.language ? styles.langFlagActive : styles.langFlag}>{lang.flag}</Text>
-                <Text style={[
-                  styles.langNameText,
-                  i18n.language === lang.code && styles.langNameActive
-                ]}>
-                  {lang.name}
-                </Text>
-                {i18n.language === lang.code && (
-                  <MaterialIcons name="check" size={20} color="#00e5ff" />
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
-        </TouchableOpacity>
-      </Modal>
     </RNScrollView>
+
+      {/* Modal de Idioma — fora da ScrollView para não disputar gestos */}
+      <Modal
+        transparent
+        visible={langModalVisible}
+        animationType="fade"
+        onRequestClose={() => setLangModalVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setLangModalVisible(false)}>
+          <View style={styles.modalBg}>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View style={styles.langModal}>
+                <Text style={styles.modalTitleText}>{t('profile.language')}</Text>
+                {languages.map((lang) => (
+                  <TouchableOpacity
+                    key={lang.code}
+                    activeOpacity={0.6}
+                    style={[
+                      styles.langItem,
+                      i18n.language === lang.code && styles.langItemActive,
+                    ]}
+                    onPress={() => handleSelectLanguage(lang.code)}
+                  >
+                    <Text style={lang.code === i18n.language ? styles.langFlagActive : styles.langFlag}>{lang.flag}</Text>
+                    <Text style={[
+                      styles.langNameText,
+                      i18n.language === lang.code && styles.langNameActive
+                    ]}>
+                      {lang.name}
+                    </Text>
+                    {i18n.language === lang.code && (
+                      <MaterialIcons name="check" size={20} color={colors.primary} />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Overlay durante a troca de idioma — cobre o congelamento do re-render */}
+      <Modal transparent visible={changingLang} animationType="fade">
+        <View style={styles.langLoadingOverlay}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={styles.langLoadingText}>{t('profile.language')}...</Text>
+        </View>
+      </Modal>
+    </>
   );
 }
 

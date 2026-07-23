@@ -186,7 +186,7 @@ export function makeProfileStyles(colors: AppColorTokens) {
     gap: 10,
     marginTop: AppSpacing.xl,
   },
-  logoutText: { color: "#ff4444", fontWeight: "bold", fontSize: 16 },
+  logoutText: { color: colors.accent.danger, fontWeight: "bold", fontSize: 16 },
   modalBg: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.85)",
@@ -212,13 +212,27 @@ export function makeProfileStyles(colors: AppColorTokens) {
   langItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
+    minHeight: 52,
+    paddingVertical: 14,
     paddingHorizontal: 15,
     borderRadius: AppRadius.sm,
     marginBottom: AppSpacing.sm,
     gap: 12,
   },
   langItemActive: { backgroundColor: "rgba(0, 229, 255, 0.1)" },
+  langItemPressed: { backgroundColor: "rgba(0, 229, 255, 0.18)" },
+  langLoadingOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+  },
+  langLoadingText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
   langFlag: { fontSize: AppSpacing.xl },
   langFlagActive: { fontSize: AppSpacing.xl },
   langNameText: {
