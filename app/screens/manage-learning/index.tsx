@@ -209,7 +209,7 @@ export default function ManageLearningScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <MaterialIcons name="arrow-back" size={24} color="#00e5ff" />
+          <MaterialIcons name="arrow-back" size={24} color={colors.primary} />
         </TouchableOpacity>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>{t('manage_learning.title')}</Text>
@@ -237,10 +237,10 @@ export default function ManageLearningScreen() {
               </View>
               <View style={styles.cardActions}>
                 <TouchableOpacity style={styles.iconBtn} onPress={() => openEdit(item)}>
-                  <MaterialIcons name="edit" size={20} color="#c7d0de" />
+                  <MaterialIcons name="edit" size={20} color={colors.text.alt} />
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.iconBtn, styles.deleteBtn]} onPress={() => removeGesture(item)}>
-                  <MaterialIcons name="delete" size={20} color="#ff8686" />
+                  <MaterialIcons name="delete" size={20} color={colors.accent.error} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -254,82 +254,84 @@ export default function ManageLearningScreen() {
           style={styles.modalBg}
         >
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{form.id ? t('manage_learning.edit_gesture') : t('manage_learning.new_gesture_modal')}</Text>
+            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+              <Text style={styles.modalTitle}>{form.id ? t('manage_learning.edit_gesture') : t('manage_learning.new_gesture_modal')}</Text>
 
-            <Text style={styles.inputLabel}>{t('manage_learning.gesture_name')}</Text>
-            <TextInput
-              value={form.name}
-              onChangeText={(v) => setForm((f) => ({ ...f, name: v }))}
-              style={styles.input}
-              placeholder={t('manage_learning.name_placeholder')}
-              placeholderTextColor="#697688"
-            />
+              <Text style={styles.inputLabel}>{t('manage_learning.gesture_name')}</Text>
+              <TextInput
+                value={form.name}
+                onChangeText={(v) => setForm((f) => ({ ...f, name: v }))}
+                style={styles.input}
+                placeholder={t('manage_learning.name_placeholder')}
+                placeholderTextColor={colors.text.secondary}
+              />
 
-            <Text style={styles.inputLabel}>{t('manage_learning.category')}</Text>
-            <TextInput
-              value={form.category}
-              onChangeText={(v) => setForm((f) => ({ ...f, category: v }))}
-              style={styles.input}
-              placeholder={t('manage_learning.category_placeholder')}
-              placeholderTextColor="#697688"
-            />
+              <Text style={styles.inputLabel}>{t('manage_learning.category')}</Text>
+              <TextInput
+                value={form.category}
+                onChangeText={(v) => setForm((f) => ({ ...f, category: v }))}
+                style={styles.input}
+                placeholder={t('manage_learning.category_placeholder')}
+                placeholderTextColor={colors.text.secondary}
+              />
 
-            <Text style={styles.inputLabel}>{t('manage_learning.module') || "MÃ³dulo / Idioma"}</Text>
-            <TextInput
-              value={form.module}
-              onChangeText={(v) => setForm((f) => ({ ...f, module: v }))}
-              style={styles.input}
-              placeholder="Ex: Libras, ASL, Cozinha..."
-              placeholderTextColor="#697688"
-            />
+              <Text style={styles.inputLabel}>{t('manage_learning.module') || "MÃ³dulo / Idioma"}</Text>
+              <TextInput
+                value={form.module}
+                onChangeText={(v) => setForm((f) => ({ ...f, module: v }))}
+                style={styles.input}
+                placeholder="Ex: Libras, ASL, Cozinha..."
+                placeholderTextColor={colors.text.secondary}
+              />
 
-            <Text style={styles.inputLabel}>{t('manage_learning.description')}</Text>
-            <TextInput
-              value={form.description}
-              onChangeText={(v) => setForm((f) => ({ ...f, description: v }))}
-              style={[styles.input, { height: 76 }]}
-              multiline
-              placeholder={t('manage_learning.description_placeholder')}
-              placeholderTextColor="#697688"
-            />
+              <Text style={styles.inputLabel}>{t('manage_learning.description')}</Text>
+              <TextInput
+                value={form.description}
+                onChangeText={(v) => setForm((f) => ({ ...f, description: v }))}
+                style={[styles.input, { height: 76 }]}
+                multiline
+                placeholder={t('manage_learning.description_placeholder')}
+                placeholderTextColor={colors.text.secondary}
+              />
 
-            <Text style={styles.inputLabel}>{t('manage_learning.difficulty_level')}</Text>
-            <TouchableOpacity
-              style={styles.levelPicker}
-              onPress={() => setForm((f) => ({ ...f, level: nextLevel() }))}>
-              <Text style={styles.levelPickerText}>{t(`levels_simple.${form.level}`).toUpperCase()}</Text>
-              <MaterialIcons name="swap-horiz" size={20} color="#00e5ff" />
-            </TouchableOpacity>
-
-            <Text style={styles.inputLabel}>{t('manage_learning.images_label')}</Text>
-            <View style={styles.imagesRow}>
-              <TouchableOpacity style={styles.imageBox} onPress={() => pickImageFor("svg_initial")}>
-                {form.svg_initial ? (
-                  <Image source={{ uri: form.svg_initial }} style={styles.previewImage} />
-                ) : (
-                  <MaterialIcons name="pan-tool" size={24} color="#697688" />
-                )}
-                <Text style={styles.imageBoxText}>{t('manage_learning.initial')}</Text>
+              <Text style={styles.inputLabel}>{t('manage_learning.difficulty_level')}</Text>
+              <TouchableOpacity
+                style={styles.levelPicker}
+                onPress={() => setForm((f) => ({ ...f, level: nextLevel() }))}>
+                <Text style={styles.levelPickerText}>{t(`levels_simple.${form.level}`).toUpperCase()}</Text>
+                <MaterialIcons name="swap-horiz" size={20} color={colors.primary} />
               </TouchableOpacity>
-              
-              <TouchableOpacity style={styles.imageBox} onPress={() => pickImageFor("svg_movement")}>
-                {form.svg_movement ? (
-                  <Image source={{ uri: form.svg_movement }} style={styles.previewImage} />
-                ) : (
-                  <MaterialIcons name="gesture" size={24} color="#697688" />
-                )}
-                <Text style={styles.imageBoxText}>{t('manage_learning.movement')}</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity style={styles.imageBox} onPress={() => pickImageFor("svg_final")}>
-                {form.svg_final ? (
-                  <Image source={{ uri: form.svg_final }} style={styles.previewImage} />
-                ) : (
-                  <MaterialIcons name="front-hand" size={24} color="#697688" />
-                )}
-                <Text style={styles.imageBoxText}>{t('manage_learning.final')}</Text>
-              </TouchableOpacity>
-            </View>
+
+              <Text style={styles.inputLabel}>{t('manage_learning.images_label')}</Text>
+              <View style={styles.imagesRow}>
+                <TouchableOpacity style={styles.imageBox} onPress={() => pickImageFor("svg_initial")}>
+                  {form.svg_initial ? (
+                    <Image source={{ uri: form.svg_initial }} style={styles.previewImage} />
+                  ) : (
+                    <MaterialIcons name="pan-tool" size={24} color={colors.text.secondary} />
+                  )}
+                  <Text style={styles.imageBoxText}>{t('manage_learning.initial')}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.imageBox} onPress={() => pickImageFor("svg_movement")}>
+                  {form.svg_movement ? (
+                    <Image source={{ uri: form.svg_movement }} style={styles.previewImage} />
+                  ) : (
+                    <MaterialIcons name="gesture" size={24} color={colors.text.secondary} />
+                  )}
+                  <Text style={styles.imageBoxText}>{t('manage_learning.movement')}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.imageBox} onPress={() => pickImageFor("svg_final")}>
+                  {form.svg_final ? (
+                    <Image source={{ uri: form.svg_final }} style={styles.previewImage} />
+                  ) : (
+                    <MaterialIcons name="front-hand" size={24} color={colors.text.secondary} />
+                  )}
+                  <Text style={styles.imageBoxText}>{t('manage_learning.final')}</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
 
             <View style={styles.modalActions}>
               <TouchableOpacity
