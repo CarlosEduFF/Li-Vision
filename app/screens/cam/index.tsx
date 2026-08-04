@@ -61,17 +61,16 @@ const SKELETON_CONNECTIONS: [number, number][] = [
   [5, 9], [9, 13], [13, 17],
 ];
 
-// Esqueleto de pose (MediaPipe Pose, 33 pontos) — só a parte superior do
-// corpo relevante para Libras: ombros, cotovelos, pulsos e quadris.
+// Esqueleto de pose (MediaPipe Pose, 33 pontos) — só ombros, cotovelos e
+// pulsos. Quadris ficam de fora: numa câmera frontal de celular em uso normal
+// de Libras (tronco superior próximo à câmera) eles quase nunca entram no
+// enquadramento, então exigi-los deixava a pose inteira sem desenhar.
 const POSE_CONNECTIONS: [number, number][] = [
   [PoseLandmarkIndex.LEFT_SHOULDER, PoseLandmarkIndex.RIGHT_SHOULDER],
   [PoseLandmarkIndex.LEFT_SHOULDER, PoseLandmarkIndex.LEFT_ELBOW],
   [PoseLandmarkIndex.LEFT_ELBOW, PoseLandmarkIndex.LEFT_WRIST],
   [PoseLandmarkIndex.RIGHT_SHOULDER, PoseLandmarkIndex.RIGHT_ELBOW],
   [PoseLandmarkIndex.RIGHT_ELBOW, PoseLandmarkIndex.RIGHT_WRIST],
-  [PoseLandmarkIndex.LEFT_SHOULDER, PoseLandmarkIndex.LEFT_HIP],
-  [PoseLandmarkIndex.RIGHT_SHOULDER, PoseLandmarkIndex.RIGHT_HIP],
-  [PoseLandmarkIndex.LEFT_HIP, PoseLandmarkIndex.RIGHT_HIP],
 ];
 
 // Subconjunto leve de pontos do rosto (contorno + olhos + boca) — desenhar
@@ -337,28 +336,22 @@ export default function CameraScreen() {
 
   const onLandmarksDetected = Worklets.createRunOnJS((result: HolisticDetectionResult) => {
     const hands = result?.hands ?? [];
-    if (hands.length > 0) {
-      // Overlay desenha mãos sempre; pose/rosto só quando o modo Holístico
-      // está ativo (são os únicos canais efetivamente usados nesse modo).
-      setLandmarks(hands.map((handLms: LandmarkPoint[]) => handLms.map(transformPoint)));
+    // Mãos, pose e rosto são canais independentes no plugin nativo — a
+    // ausência de uma mão no frame não deve zerar pose/rosto já detectados.
+    setLandmarks(hands.map((handLms: LandmarkPoint[]) => handLms.map(transformPoint)));
 
-      if (holisticEnabledRef.current) {
-        setPoseLandmarks(result.pose && result.pose.length > 0 ? result.pose.map(transformPoint) as PoseLandmark[] : []);
-        setFaceLandmarks(result.face && result.face.length > 0 ? result.face.map(transformPoint) as FaceLandmark[] : []);
-      } else {
-        setPoseLandmarks([]);
-        setFaceLandmarks([]);
-      }
-
-      if (gestureWS.isConnected()) {
-        const schema = holisticEnabledRef.current ? "holistic_v1" : "hands_v1";
-        const payload = buildPayload(result, schema);
-        if (payload) gestureWS.sendHolistic(payload);
-      }
+    if (holisticEnabledRef.current) {
+      setPoseLandmarks(result?.pose && result.pose.length > 0 ? result.pose.map(transformPoint) as PoseLandmark[] : []);
+      setFaceLandmarks(result?.face && result.face.length > 0 ? result.face.map(transformPoint) as FaceLandmark[] : []);
     } else {
-      setLandmarks([]);
       setPoseLandmarks([]);
       setFaceLandmarks([]);
+    }
+
+    if (gestureWS.isConnected()) {
+      const schema = holisticEnabledRef.current ? "holistic_v1" : "hands_v1";
+      const payload = buildPayload(result, schema);
+      if (payload) gestureWS.sendHolistic(payload);
     }
   });
 
@@ -377,21 +370,24 @@ export default function CameraScreen() {
     const shouldLog = frameCount.value % 30 === 1;
 
     try {
+      // width/height lidos antes do detect: acessar props do frame dentro dos
+      // argumentos de um runOnJS as avalia fora do ciclo de vida do frame.
+      const frameWidth = frame.width;
+      const frameHeight = frame.height;
       const result = detectHandLandmarks(frame);
       if (shouldLog) {
         if (result) {
           const handsLen = result.hands ? result.hands.length : 0;
           const errorMsg = (result as any).error;
           sendLogToJS(
-            `Frame #${frameCount.value}: ${frame.width}x${frame.height} → ${handsLen} mão(s)` +
+            `Frame #${frameCount.value}: ${frameWidth}x${frameHeight} → ${handsLen} mão(s)` +
             (errorMsg ? ` | ERRO: ${errorMsg}` : "")
           );
         } else {
           sendLogToJS(`Frame #${frameCount.value}: plugin retornou null`);
         }
       }
-      if (result && result.hands && result.hands.length > 0) onLandmarksDetected(result);
-      else onLandmarksDetected({ hands: [] } as any);
+      onLandmarksDetected(result ?? ({ hands: [] } as any));
     } catch (e: any) {
       if (shouldLog) onPluginError(`Frame: ${e?.message || String(e)}`);
       onLandmarksDetected({ hands: [] } as any);
@@ -496,6 +492,7 @@ export default function CameraScreen() {
             style={StyleSheet.absoluteFill}
             device={device}
             isActive={true}
+            pixelFormat="rgb"
             frameProcessor={modelStatus === "ready" ? frameProcessor : undefined}
           />
         ) : (
@@ -606,7 +603,6 @@ export default function CameraScreen() {
                 PoseLandmarkIndex.LEFT_SHOULDER, PoseLandmarkIndex.RIGHT_SHOULDER,
                 PoseLandmarkIndex.LEFT_ELBOW, PoseLandmarkIndex.RIGHT_ELBOW,
                 PoseLandmarkIndex.LEFT_WRIST, PoseLandmarkIndex.RIGHT_WRIST,
-                PoseLandmarkIndex.LEFT_HIP, PoseLandmarkIndex.RIGHT_HIP,
               ].map((idx) => {
                 const lm = poseLandmarks[idx];
                 if (!lm || (lm.visibility ?? 0) < 0.3) return null;

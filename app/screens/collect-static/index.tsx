@@ -64,8 +64,9 @@ export default function CollectStaticScreen() {
   const device = useCameraDevice("front");
   const { width: screenWidth } = Dimensions.get("window");
 
-  // same transformation mode as cam.tsx
-  const transformPoint = (lm: any) => ({ x: 1.0 - lm.y, y: 1.0 - lm.x, z: lm.z });
+  // Espelhamento horizontal (câmera frontal) — plugin nativo já corrige a
+  // rotação via ImageProcessingOptions, ver holisticFeatures.ts transformPoint.
+  const transformPoint = (lm: any) => ({ x: 1.0 - lm.x, y: lm.y, z: lm.z });
 
   const onLandmarksDetected = Worklets.createRunOnJS((hands: LandmarkPoint[][]) => {
     if (hands.length > 0) {
@@ -153,6 +154,7 @@ export default function CollectStaticScreen() {
             style={StyleSheet.absoluteFill}
             device={device}
             isActive={true}
+            pixelFormat="rgb"
             frameProcessor={frameProcessor}
           />
         ) : (

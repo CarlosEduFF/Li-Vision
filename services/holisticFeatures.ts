@@ -45,16 +45,20 @@ export type HolisticPayload =
     };
 
 /**
- * Rotação/espelhamento para a câmera frontal.
+ * Espelhamento horizontal para a câmera frontal.
  *
- * Mesma transformação que estava inline nas telas: `x = 1 - y`, `y = 1 - x`.
+ * O plugin nativo (expo-vision-camera-v4-mediapipe >= 1.2.1) já corrige a
+ * rotação do frame via ImageProcessingOptions antes de detectar, então os
+ * landmarks chegam aqui já "em pé". Só falta o espelho horizontal típico de
+ * câmera frontal (efeito selfie). Aplicar a antiga troca de eixos X⇄Y por
+ * cima re-rotacionaria os pontos incorretamente — ver CHANGELOG do plugin.
  * Preserva z. Aplicada a TODOS os canais para mantê-los no mesmo referencial.
  *
  * Nota: é um worklet-safe puro (sem captura), então pode ser chamado tanto no
  * thread JS quanto repassado a partir de resultados já trazidos pelo runOnJS.
  */
 export function transformPoint(lm: { x: number; y: number; z?: number }): TPoint {
-  return { x: 1.0 - lm.y, y: 1.0 - lm.x, z: lm.z ?? 0 };
+  return { x: 1.0 - lm.x, y: lm.y, z: lm.z ?? 0 };
 }
 
 function transformHands(hands: LandmarkPoint[][]): TPoint[][] {
