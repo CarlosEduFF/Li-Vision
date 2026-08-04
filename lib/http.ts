@@ -82,6 +82,15 @@ function extractDetail(data: unknown): string {
   return "Erro desconhecido";
 }
 
+// Rotas públicas de autenticação: um 401 aqui significa credencial inválida,
+// não sessão expirada. Tentar renovar o token nesses casos mascara o erro real
+// (e falha com "Sessão expirada" quando ainda não há refreshToken salvo).
+const PUBLIC_AUTH_PATHS = ["/auth/login", "/auth/register", "/auth/refresh"];
+
+function isPublicAuthPath(path: string): boolean {
+  return PUBLIC_AUTH_PATHS.some((p) => path.startsWith(p));
+}
+
 export async function apiRequest<T = unknown>(
   path: string,
   options: RequestInit = {}
@@ -90,7 +99,7 @@ export async function apiRequest<T = unknown>(
   const headers = buildHeaders(token, options.headers);
   let response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
 
-  if (response.status === 401 && !path.startsWith("/auth/refresh")) {
+  if (response.status === 401 && !isPublicAuthPath(path)) {
     if (isRefreshing) {
       const newToken = await new Promise<string>((resolve, reject) => {
         failedQueue.push({ resolve, reject });
