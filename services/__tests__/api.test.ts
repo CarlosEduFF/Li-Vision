@@ -20,11 +20,12 @@ describe('API Service', () => {
     const uri = 'file://test.jpg';
     const result = await detectGesture(uri);
 
+    // Sem Content-Type explícito: com FormData quem define o header é o próprio
+    // fetch, que precisa gerar o boundary das partes do corpo.
     expect(global.fetch).toHaveBeenCalledWith(
       apiUrl('/detect/'),
       expect.objectContaining({
         method: 'POST',
-        headers: { 'Content-Type': 'multipart/form-data' },
         body: expect.any(FormData),
       })
     );
