@@ -57,8 +57,14 @@ export type HolisticPayload =
  * Nota: é um worklet-safe puro (sem captura), então pode ser chamado tanto no
  * thread JS quanto repassado a partir de resultados já trazidos pelo runOnJS.
  */
-export function transformPoint(lm: { x: number; y: number; z?: number }): TPoint {
-  return { x: 1.0 - lm.x, y: lm.y, z: lm.z ?? 0 };
+export function transformPoint<T extends { x: number; y: number; z?: number; visibility?: number }>(
+  lm: T,
+): TPoint & { visibility?: number } {
+  const out: TPoint & { visibility?: number } = { x: 1.0 - lm.x, y: lm.y, z: lm.z ?? 0 };
+  // visibility é invariante ao espelhamento e o overlay filtra por ela: se for
+  // descartada aqui, todo ponto de pose vira visibility=0 e some da tela.
+  if (typeof lm.visibility === "number") out.visibility = lm.visibility;
+  return out;
 }
 
 function transformHands(hands: LandmarkPoint[][]): TPoint[][] {

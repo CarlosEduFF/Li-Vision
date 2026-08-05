@@ -502,7 +502,7 @@ export default function CameraScreen() {
           </View>
         )}
 
-        {showLandmarks && landmarks.length > 0 && (
+        {showLandmarks && (landmarks.length > 0 || poseLandmarks.length > 0 || faceLandmarks.length > 0) && (
           <View style={StyleSheet.absoluteFill} pointerEvents="none">
             {landmarks.map((hand, handIdx) => {
               if (!hand || hand.length !== 21) return null;
