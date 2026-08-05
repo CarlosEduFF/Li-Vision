@@ -94,9 +94,21 @@ class TrainingService:
                 raise ValueError(f"Amostras insuficientes para treinar modelo {model_type} (minimo 2).")
 
             df = pd.DataFrame(data)
+
+            # Amostras hands_v1 (42) e holistic_v1 convivendo no mesmo treino
+            # virariam NaN no DataFrame e o erro só apareceria no fit, sem
+            # explicar a causa. Falhar aqui deixa a mistura evidente.
+            tamanhos = {len(f) for f in df['features']}
+            if len(tamanhos) > 1:
+                raise ValueError(
+                    "Datasets com formatos de features incompatíveis: "
+                    f"{sorted(tamanhos)} features por amostra. Treine separadamente "
+                    "os datasets 'só mãos' e os holísticos."
+                )
+
             X = pd.DataFrame(df['features'].to_list())
             y = df['label']
-            
+
             total_samples = len(df)
             n_classes = y.nunique()
 
