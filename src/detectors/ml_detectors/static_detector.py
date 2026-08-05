@@ -176,13 +176,39 @@ class MLDetector(BaseDetector):
         self.model = MLGestureDetector(model_path)
         self.threshold = threshold
 
+    @property
+    def expects_holistic_frame(self) -> bool:
+        """
+        True quando o modelo foi treinado com o vetor holístico.
+
+        A dimensão de entrada distingue os formatos: 42 features é o vetor
+        legado só-mãos; o holístico soma mãos + pose + face. O DetectorManager
+        usa isso para entregar o frame inteiro em vez de uma mão por vez.
+        """
+        from src.data_collection import holistic_features as hf
+
+        n_in = getattr(self.model.model, "n_features_in_", None)
+        return n_in == hf.HANDS_FEATURES + hf.POSE_FEATURES + hf.FACE_FEATURES
+
     def detect(self, landmarks):
         """
         Implementa método detect() da interface BaseDetector.
+
+        Recebe uma mão (modelo legado) ou um HolisticFrame (modelo holístico),
+        conforme `expects_holistic_frame`.
         """
 
         if not landmarks:
             return None, 0.0
+
+        if self.expects_holistic_frame:
+            from src.data_collection import holistic_features as hf
+
+            features = hf.build_frame_vector(landmarks, hf.SCHEMA_HOLISTIC_V1)
+            probs = self.model.model.predict_proba([features])[0]
+            idx = int(np.argmax(probs))
+            label, confidence = self.model.model.classes_[idx], float(probs[idx])
+            return (None, 0.0) if confidence < self.threshold else (label, confidence)
 
         label, confidence = self.model.predict_with_confidence(landmarks)
 

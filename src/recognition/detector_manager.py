@@ -85,10 +85,10 @@ class DetectorManager:
         # -------------------------------------------
         for det in self.detectors:
             try:
-                if self._is_sequence_detector(det):
-                    # Detectores de sequência processam o frame holístico inteiro
-                    # (mãos + pose + face). Detectores que só entendem mãos
-                    # ignoram os canais extras.
+                if self._is_sequence_detector(det) or getattr(det, "expects_holistic_frame", False):
+                    # Detectores de sequência e estáticos holísticos processam o
+                    # frame inteiro (mãos + pose + face). Detectores que só
+                    # entendem mãos ignoram os canais extras.
                     label, score = det.detect(frame)
                 else:
                     # Detectores estáticos: roda para cada mão, pega o melhor
