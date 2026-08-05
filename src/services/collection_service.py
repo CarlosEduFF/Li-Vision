@@ -27,13 +27,49 @@ class CollectionService:
         }).execute()
         return ins_res.data[0]["id"]
 
+    def _get_dataset_schema(self, dataset_id: str) -> Optional[str]:
+        """Schema de um dataset existente, ou None se for anterior à coluna."""
+        try:
+            res = supabase.table("datasets").select("feature_schema").eq("id", dataset_id).execute()
+            if res.data:
+                return res.data[0].get("feature_schema")
+        except Exception as exc:  # coluna pode não existir (migração pendente)
+            logger.warning("[collect] leitura de feature_schema falhou: %s", exc)
+        return None
+
     def collect_static(self, label: str, hand, dataset_name: str, user_id: str = None) -> dict:
+        """
+        Coleta uma amostra estática.
+
+        `hand` pode ser a mão isolada (formato legado, 42 features) ou um
+        HolisticFrame com pose/face. O schema é decidido na criação do dataset
+        e, para datasets já existentes, o formato gravado antes é respeitado —
+        assim amostras novas nunca entram com dimensão diferente das antigas.
+        """
         try:
             dataset_name = dataset_name.upper()
             label = label.upper()
-            dataset_id = self._get_or_create_dataset(dataset_name, "static")
-            features = self.static_collector.landmarks_to_features(hand)
-            
+
+            frame = hand if isinstance(hand, HolisticFrame) else None
+            wants_holistic = bool(frame and frame.is_holistic)
+
+            dataset_id = self._get_or_create_dataset(
+                dataset_name,
+                "static",
+                hf.SCHEMA_HOLISTIC_V1 if wants_holistic else hf.DEFAULT_SCHEMA,
+            )
+
+            # Dataset preexistente manda no formato: misturar dimensões dentro
+            # do mesmo dataset inviabiliza o treino.
+            existing_schema = self._get_dataset_schema(dataset_id)
+            use_holistic = wants_holistic and existing_schema != hf.SCHEMA_HANDS_V1
+
+            if use_holistic:
+                features = hf.build_frame_vector(frame, hf.SCHEMA_HOLISTIC_V1)
+            else:
+                hand_landmarks = frame.hands[0] if frame and frame.hands else hand
+                features = self.static_collector.landmarks_to_features(hand_landmarks)
+
             insert_data = {
                 "dataset_id": dataset_id,
                 "label": label,

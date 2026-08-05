@@ -14,7 +14,10 @@ class HandModel(BaseModel):
 class StaticPayload(BaseModel):
     label: str
     dataset_name: str
-    landmarks: HandModel
+    # Formato legado: {"landmark": [...21 pontos]} — só a mão.
+    # Formato holístico: {"hands": [[...]], "pose": [...], "face": [...]}.
+    # A forma do objeto decide o schema; ver parse_input.
+    landmarks: Dict[str, Any]
 
 class DynamicStartPayload(BaseModel):
     label: str
@@ -28,8 +31,20 @@ def get_service():
 
 @router.post("/static")
 async def collect_static(payload: StaticPayload, user: dict = Depends(verify_token)):
-    # Here we can pass user_id into the collection step later
-    return get_service().collect_static(payload.label, payload.landmarks, payload.dataset_name, user.get("user_id"))
+    from src.api.holistic import parse_input
+
+    raw = payload.landmarks
+    try:
+        # Legado ({"landmark": [...]}) vira uma lista de uma mão só; o formato
+        # holístico ({"hands", "pose", "face"}) passa direto para o parser.
+        if "landmark" in raw:
+            frame = parse_input([raw["landmark"]])
+        else:
+            frame = parse_input(raw)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+    return get_service().collect_static(payload.label, frame, payload.dataset_name, user.get("user_id"))
 
 @router.post("/dynamic/start")
 async def collect_dynamic_start(payload: DynamicStartPayload, user: dict = Depends(verify_token)):
