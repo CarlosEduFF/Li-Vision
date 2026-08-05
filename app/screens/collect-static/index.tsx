@@ -1,12 +1,13 @@
-﻿import { detectHandLandmarks, LandmarkPoint } from "@/services/handLandmarkerPlugin";
+﻿import { detectHandLandmarks, LandmarkPoint, HolisticDetectionResult } from "@/services/handLandmarkerPlugin";
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
 import { Alert, Dimensions, ScrollView, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { Camera, useCameraDevice, useFrameProcessor } from "react-native-vision-camera";
 import { Worklets } from "react-native-worklets-core";
 import { trainingService } from "@/services/trainingService";
+import { transformPoint, buildPayload } from "@/services/holisticFeatures";
 import { useTranslation } from "react-i18next";
 import { makeCollectStaticStyles as makeStyles } from "@/styles/collect-static.styles";
 import { useAppTheme } from "@/context/ThemeContext";
@@ -22,11 +23,15 @@ export default function CollectStaticScreen() {
   const [gestureLabels, setGestureLabels] = useState<string[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [labelHint, setLabelHint] = useState<string | null>(null);
+  // Holístico: coleta mãos + corpo + rosto. Compartilha a preferência com a cam.
+  const [holisticEnabled, setHolisticEnabled] = useState(false);
+  const lastFrameRef = useRef<HolisticDetectionResult | null>(null);
   const { t } = useTranslation();
 
   useEffect(() => {
     loadDatasets();
     AsyncStorage.getItem("userRole").then(r => setIsAdmin(r === "admin"));
+    AsyncStorage.getItem("config_holistic_enabled").then(v => setHolisticEnabled(v === "true"));
   }, []);
 
   useEffect(() => {
@@ -64,16 +69,16 @@ export default function CollectStaticScreen() {
   const device = useCameraDevice("front");
   const { width: screenWidth } = Dimensions.get("window");
 
-  // Espelhamento horizontal (câmera frontal) — plugin nativo já corrige a
-  // rotação via ImageProcessingOptions, ver holisticFeatures.ts transformPoint.
-  const transformPoint = (lm: any) => ({ x: 1.0 - lm.x, y: lm.y, z: lm.z });
-
-  const onLandmarksDetected = Worklets.createRunOnJS((hands: LandmarkPoint[][]) => {
+  const onLandmarksDetected = Worklets.createRunOnJS((result: HolisticDetectionResult) => {
+    const hands = result?.hands ?? [];
     if (hands.length > 0) {
-      const transformedHands = hands.map(handLms => handLms.map(transformPoint));
-      setLandmarks(transformedHands[0]);
+      setLandmarks(hands[0].map(transformPoint));
+      // Guarda o frame cru: o payload holístico é montado na captura, para
+      // que pose/rosto sigam o mesmo referencial das mãos.
+      lastFrameRef.current = result;
     } else {
       setLandmarks([]);
+      lastFrameRef.current = null;
     }
   });
 
@@ -87,13 +92,9 @@ export default function CollectStaticScreen() {
 
     try {
       const result = detectHandLandmarks(frame);
-      if (result && result.hands && result.hands.length > 0) {
-        onLandmarksDetected(result.hands);
-      } else {
-        onLandmarksDetected([]);
-      }
+      onLandmarksDetected(result ?? ({ hands: [] } as any));
     } catch {
-      onLandmarksDetected([]);
+      onLandmarksDetected({ hands: [] } as any);
     }
   }, [lastSync]);
 
@@ -108,7 +109,15 @@ export default function CollectStaticScreen() {
     }
 
     try {
-      const payloadLandmarks = { landmark: landmarks };
+      // Holístico envia {hands, pose, face}; caso contrário mantém o formato
+      // legado {landmark} de 42 features, aceito pelos datasets antigos.
+      const frame = lastFrameRef.current;
+      const holisticPayload = holisticEnabled && frame ? buildPayload(frame, "holistic_v1") : null;
+      const payloadLandmarks =
+        holisticPayload && !Array.isArray(holisticPayload)
+          ? holisticPayload
+          : { landmark: landmarks };
+
       const res = await trainingService.startStaticCollection(label, datasetName, payloadLandmarks);
 
       console.log("RESPOSTA DA API: ", res);
@@ -146,6 +155,22 @@ export default function CollectStaticScreen() {
           <MaterialIcons name="arrow-back" size={28} color="#00e5ff" />
         </TouchableOpacity>
         <Text style={styles.title}>{t('collect_static.title')}</Text>
+        <TouchableOpacity
+          onPress={() => {
+            setHolisticEnabled((v) => {
+              const next = !v;
+              AsyncStorage.setItem("config_holistic_enabled", String(next));
+              return next;
+            });
+          }}
+          style={{ marginLeft: "auto", flexDirection: "row", alignItems: "center", gap: 4 }}
+          accessibilityLabel="Alternar holístico (mãos + corpo + rosto)"
+        >
+          <MaterialIcons name="accessibility-new" size={20} color={holisticEnabled ? "#00e5ff" : "#888"} />
+          <Text style={{ color: holisticEnabled ? "#00e5ff" : "#888", fontSize: 12, fontWeight: "600" }}>
+            {holisticEnabled ? "Holístico" : "Só mãos"}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={[styles.cameraContainer, { width: CAM_WIDTH, height: CAM_HEIGHT }]}>
