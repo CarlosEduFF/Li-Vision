@@ -115,7 +115,16 @@ def _pose_vector(pose: Optional[list]) -> List[float]:
         vec.append(lm.x - ref_x)
         vec.append(lm.y - ref_y)
         vec.append(getattr(lm, "z", 0.0))
-        vec.append(vis if vis is not None else 0.0)
+        # Ausente => 1.0 ("presente"), NUNCA 0.0.
+        #
+        # O MediaPipe Tasks devolve visibility como Optional vazio em varias
+        # builds, e o app ja' converte esse caso para 1 antes de enviar
+        # (ver Li-Vision-app/services/holisticFeatures.ts::transformPose).
+        # Usar 0.0 aqui invertia a convencao no meio do caminho: o ponto
+        # chegava como None e virava "invisivel", entao 1 de cada 4 features
+        # de pose oscilava entre 0 e 1 conforme o aparelho reportasse ou nao
+        # visibility — ruido sistematico que inutilizava o canal de pose.
+        vec.append(vis if vis is not None else 1.0)
     return vec
 
 
