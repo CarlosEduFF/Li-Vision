@@ -19,6 +19,31 @@ import joblib            # Para carregar modelos scikit-learn serializados
 from src.detectors.base_detector import BaseDetector  # Classe base para todos detectores
 
 
+def _n_features_in(estimator) -> "int | None":
+    """
+    Numero de features que o modelo espera na entrada.
+
+    Trata as duas formas que convivem no storage:
+
+    - Modelos NOVOS sao um `Pipeline` (StandardScaler + MLPClassifier). O
+      Pipeline expoe `n_features_in_` delegando ao primeiro passo, mas isso
+      nao e' garantido para todo transformador; ler o passo inicial
+      explicitamente evita depender desse detalhe.
+    - Modelos ANTIGOS sao o estimador nu, com o atributo direto.
+
+    Sem este tratamento, `expects_holistic_frame` daria False para todo modelo
+    holistico novo e a inferencia cairia no caminho legado de 42 features.
+    """
+    n_in = getattr(estimator, "n_features_in_", None)
+    if n_in is not None:
+        return n_in
+
+    steps = getattr(estimator, "steps", None)
+    if steps:
+        return getattr(steps[0][1], "n_features_in_", None)
+    return None
+
+
 # ======================================================
 # DETECTOR DE GESTOS USANDO ML
 # ======================================================
@@ -187,7 +212,7 @@ class MLDetector(BaseDetector):
         """
         from src.data_collection import holistic_features as hf
 
-        n_in = getattr(self.model.model, "n_features_in_", None)
+        n_in = _n_features_in(self.model.model)
         return n_in == hf.HANDS_FEATURES + hf.POSE_FEATURES + hf.FACE_FEATURES
 
     def detect(self, landmarks):
