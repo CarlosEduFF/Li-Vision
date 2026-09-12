@@ -22,6 +22,9 @@ class ProfileUpdatePayload(BaseModel):
 class RefreshPayload(BaseModel):
     refresh_token: str
 
+class ForgotPasswordPayload(BaseModel):
+    email: str
+
 
 # ── Auth Helpers ──────────────────────────────────────
 
@@ -111,6 +114,31 @@ async def login(payload: AuthPayload):
         }
     except Exception as e:
         raise HTTPException(status_code=401, detail="Credenciais inválidas ou erro no Supabase: " + str(e))
+
+@router.post("/forgot-password")
+async def forgot_password(payload: ForgotPasswordPayload):
+    """Dispara o e-mail de redefinição de senha do Supabase.
+
+    O Supabase Auth já cuida do envio, do token de uso único e da página onde a
+    nova senha é digitada — por isso não há SMTP nem tabela de tokens aqui.
+
+    A resposta é SEMPRE `ok: True`, mesmo quando o e-mail não existe ou o
+    Supabase falha. Diferenciar os casos transformaria esta rota num oráculo de
+    contas cadastradas: bastaria enviar uma lista de e-mails e ler as respostas
+    para descobrir quem tem conta no Li-Vision. O erro é registrado no log do
+    servidor, onde é útil para depuração sem chegar a quem chamou.
+    """
+    email = (payload.email or "").strip()
+    if not email:
+        raise HTTPException(status_code=400, detail="E-mail é obrigatório")
+
+    try:
+        supabase.auth.reset_password_for_email(email)
+    except Exception as e:
+        # Não propaga: ver a docstring. Rate limit do Supabase também cai aqui.
+        print(f"[forgot-password] falha ao enviar para {email!r}: {e}")
+
+    return {"ok": True}
 
 @router.post("/refresh")
 async def refresh_token(payload: RefreshPayload):
