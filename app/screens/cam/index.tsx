@@ -39,6 +39,16 @@ import { makeCamStyles } from "@/styles/cam.styles";
 import { useAppTheme } from "@/context/ThemeContext";
 import { useTranslation } from "react-i18next";
 
+// Orientação do frame (VisionCamera). O frame da câmera chega em paisagem
+// (ex.: 640x480, orient="landscape-left") mesmo com o preview em retrato,
+// então mapeamos as coordenadas normalizadas do espaço do frame para o
+// espaço da tela (retrato) conforme a orientação. Ver mapFramePoint.
+type FrameOrientation =
+  | "portrait"
+  | "portrait-upside-down"
+  | "landscape-left"
+  | "landscape-right";
+
 const DETECTION_MODES: { key: DetectionMode; label: string; desc: string; icon: string }[] = [
   { key: "hybrid",     label: "Híbrido",        desc: "Combina regras + ML estático + ML dinâmico",   icon: "merge-type" },
   { key: "rules",      label: "Regras Lógicas", desc: "Apenas detectores baseados em lógica (A–E)",   icon: "calculate" },
@@ -147,10 +157,24 @@ export default function CameraScreen() {
   }, []);
 
   const { status: modelStatus, errorMessage: modelError } = useModelStatus();
-  // O plugin nativo já entrega as coordenadas em pé (retrato), pois agora informa
-  // a rotação do frame ao MediaPipe. Resta apenas espelhar o eixo X para a câmera
-  // frontal (selfie); o eixo Y vai direto.
-  const transformPoint = (lm: any) => ({ x: 1.0 - lm.x, y: lm.y, z: lm.z });
+  // O plugin entrega as coordenadas no espaço do frame (paisagem). Mapeamos
+  // para o espaço da tela (retrato) conforme a orientação do frame e espelhamos
+  // o eixo X para a câmera frontal (selfie). Para "landscape-left" (caso comum
+  // deste device): telaX = y_frame, telaY = 1 - x_frame; o espelho selfie
+  // inverte telaX → 1 - y_frame.
+  const mapFramePoint = (lm: any, orientation: FrameOrientation) => {
+    switch (orientation) {
+      case "landscape-left":
+        return { x: 1.0 - lm.y, y: 1.0 - lm.x, z: lm.z };
+      case "landscape-right":
+        return { x: lm.y, y: lm.x, z: lm.z };
+      case "portrait-upside-down":
+        return { x: lm.x, y: 1.0 - lm.y, z: lm.z };
+      case "portrait":
+      default:
+        return { x: 1.0 - lm.x, y: lm.y, z: lm.z };
+    }
+  };
   const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
   const device = useCameraDevice("front");
   const { hasPermission, requestPermission } = useCameraPermission();
@@ -297,9 +321,10 @@ export default function CameraScreen() {
     gestureWS.sendAction({ action: "set_mode", mode });
   };
 
-  const onLandmarksDetected = Worklets.createRunOnJS((hands: LandmarkPoint[][]) => {
+  const onLandmarksDetected = Worklets.createRunOnJS((hands: LandmarkPoint[][], orientation: string) => {
     if (hands.length > 0) {
-      const transformedHands = hands.map(handLms => handLms.map(transformPoint));
+      const orient = orientation as FrameOrientation;
+      const transformedHands = hands.map(handLms => handLms.map(lm => mapFramePoint(lm, orient)));
       setLandmarks(transformedHands);
       if (gestureWS.isConnected()) gestureWS.sendLandmarks(transformedHands);
     } else {
@@ -341,11 +366,11 @@ export default function CameraScreen() {
           sendLogToJS(`Frame #${frameCount.value}: plugin retornou null`);
         }
       }
-      if (result && result.hands && result.hands.length > 0) onLandmarksDetected(result.hands);
-      else onLandmarksDetected([]);
+      if (result && result.hands && result.hands.length > 0) onLandmarksDetected(result.hands, frameOrientation);
+      else onLandmarksDetected([], frameOrientation);
     } catch (e: any) {
       if (shouldLog) onPluginError(`Frame: ${e?.message || String(e)}`);
-      onLandmarksDetected([]);
+      onLandmarksDetected([], frameOrientation);
     }
   }, [lastSync, frameCount]);
 
