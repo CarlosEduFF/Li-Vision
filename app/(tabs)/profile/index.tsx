@@ -15,7 +15,7 @@ import { useAppTheme } from "@/context/ThemeContext";
 function ProfileScreen() {
   const { colors, scheme, setScheme, isSystemControlled } = useAppTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const [userName, setUserName] = useState("UsuÃ¡rio");
+  const [userName, setUserName] = useState("Usuário");
   const [userRole, setUserRole] = useState("member");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -24,12 +24,12 @@ function ProfileScreen() {
   const { t, i18n } = useTranslation();
 
   const languages = [
-    { code: 'pt', name: 'PortuguÃªs', flag: 'ðŸ‡§ðŸ‡·' },
-    { code: 'en', name: 'English', flag: 'ðŸ‡ºðŸ‡¸' },
-    { code: 'de', name: 'Deutsch', flag: 'ðŸ‡©ðŸ‡ª' },
-    { code: 'fr', name: 'FranÃ§ais', flag: 'ðŸ‡«ðŸ‡·' },
-    { code: 'ja', name: 'æ—¥æœ¬èªž', flag: 'ðŸ‡¯ðŸ‡µ' },
-    { code: 'es', name: 'EspaÃ±ol', flag: 'ðŸ‡ªðŸ‡¸' },
+    { code: 'pt', name: 'Português', flag: '🇧🇷' },
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+    { code: 'fr', name: 'Français', flag: '🇫🇷' },
+    { code: 'ja', name: '日本語', flag: '🇯🇵' },
+    { code: 'es', name: 'Español', flag: '🇪🇸' },
   ];
 
   const handleSelectLanguage = (code: string) => {
@@ -151,7 +151,7 @@ function ProfileScreen() {
             <Text style={styles.nameText}>{userName}</Text>
             <Text style={styles.roleText}>{userRole === "admin" ? t('profile.role_admin') : t('profile.role_member')}</Text>
             
-            {/* BotÃ£o Admin Config (apenas se for admin) */}
+            {/* Botão Admin Config (apenas se for admin) */}
             {userRole === "admin" && (
               <TouchableOpacity
                 style={styles.adminLinkBtn}
