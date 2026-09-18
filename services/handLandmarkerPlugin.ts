@@ -54,7 +54,10 @@ export function getPluginStatus(): { ready: boolean; error: string | null } {
  * @param frame - Frame da câmera do VisionCamera
  * @returns Resultado com os landmarks, handedness, ou null se o plugin não carregou
  */
-export function detectHandLandmarks(frame: Frame): import("expo-vision-camera-v4-mediapipe").HandDetectionResult | null {
+export function detectHandLandmarks(
+  frame: Frame,
+  params?: Record<string, number>,
+): import("expo-vision-camera-v4-mediapipe").HandDetectionResult | null {
   "worklet";
 
   if (plugin == null) {
@@ -63,6 +66,6 @@ export function detectHandLandmarks(frame: Frame): import("expo-vision-camera-v4
     return null;
   }
 
-  const result = plugin.call(frame) as unknown as import("expo-vision-camera-v4-mediapipe").HandDetectionResult | null;
+  const result = plugin.call(frame, params) as unknown as import("expo-vision-camera-v4-mediapipe").HandDetectionResult | null;
   return result;
 }
